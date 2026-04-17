@@ -4,8 +4,10 @@ import { Suspense, useState, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/ui/form-field';
+import { Separator } from '@/components/ui/separator';
 
 function LoginForm() {
   const router = useRouter();
@@ -38,52 +40,59 @@ function LoginForm() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900">Entrar</h1>
-        <p className="text-sm text-zinc-600 mt-1">Acesse sua conta Zendoc</p>
+        <h1 className="text-2xl font-semibold">Entrar</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Acesse sua conta Zendoc
+        </p>
       </div>
 
       <Button
         type="button"
-        variant="secondary"
+        variant="outline"
+        size="lg"
         onClick={() => signIn('google', { callbackUrl })}
       >
         Continuar com Google
       </Button>
 
-      <div className="flex items-center gap-3 text-xs text-zinc-500">
-        <div className="flex-1 h-px bg-zinc-200" />
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <Separator className="flex-1" />
         ou
-        <div className="flex-1 h-px bg-zinc-200" />
+        <Separator className="flex-1" />
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <Input
-          name="email"
-          type="email"
-          label="Email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Input
-          name="password"
-          type="password"
-          label="Senha"
-          required
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && <span className="text-sm text-red-600">{error}</span>}
-        <Button type="submit" loading={loading}>
-          Entrar
+        <FormField label="Email" htmlFor="email">
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Senha" htmlFor="password">
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </FormField>
+        {error && <span className="text-sm text-destructive">{error}</span>}
+        <Button type="submit" size="lg" disabled={loading}>
+          {loading ? 'Entrando…' : 'Entrar'}
         </Button>
       </form>
 
-      <p className="text-sm text-zinc-600 text-center">
+      <p className="text-sm text-muted-foreground text-center">
         Não tem conta?{' '}
-        <Link href="/register" className="text-emerald-700 font-medium">
+        <Link href="/register" className="text-foreground font-medium underline">
           Criar conta grátis
         </Link>
       </p>
