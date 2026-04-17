@@ -2,8 +2,9 @@
 
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/ui/form-field';
 import { StepHeader } from '@/components/onboarding/StepHeader';
 
 const STORAGE_KEY = 'zendoc:onboarding:step1';
@@ -52,24 +53,30 @@ export default function OnboardingStep1() {
       />
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <Input
-          name="name"
-          label="Nome completo"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ex.: Dra. Ana Silva"
-        />
-        <Input
-          name="phone"
-          label="WhatsApp"
-          required
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="(11) 99999-9999"
-        />
-        {error && <span className="text-sm text-red-600">{error}</span>}
-        <Button type="submit">Continuar</Button>
+        <FormField label="Nome completo" htmlFor="name">
+          <Input
+            id="name"
+            name="name"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ex.: Dra. Ana Silva"
+          />
+        </FormField>
+        <FormField label="WhatsApp" htmlFor="phone">
+          <Input
+            id="phone"
+            name="phone"
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="(11) 99999-9999"
+          />
+        </FormField>
+        {error && <span className="text-sm text-destructive">{error}</span>}
+        <Button type="submit" size="lg">
+          Continuar
+        </Button>
       </form>
     </div>
   );

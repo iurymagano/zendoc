@@ -2,9 +2,18 @@
 
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { FormField } from '@/components/ui/form-field';
 import { StepHeader } from '@/components/onboarding/StepHeader';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const STEP1_KEY = 'zendoc:onboarding:step1';
 
@@ -70,7 +79,7 @@ export default function OnboardingStep2() {
       return;
     }
     sessionStorage.removeItem(STEP1_KEY);
-    router.push('/dashboard');
+    router.push('/configuracoes/disponibilidade?onboarding=1');
     router.refresh();
   }
 
@@ -83,85 +92,81 @@ export default function OnboardingStep2() {
       />
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-700">
-            Especialidade
-          </label>
-          <select
+        <FormField label="Especialidade" htmlFor="specialty">
+          <Select
             value={specialty}
-            onChange={(e) => setSpecialty(e.target.value)}
-            required
-            className="h-11 px-3 rounded-lg border border-zinc-300 bg-white text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+            onValueChange={(v) => setSpecialty(v ?? '')}
           >
-            <option value="">Selecione…</option>
-            {SPECIALTIES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
+            <SelectTrigger id="specialty">
+              <SelectValue placeholder="Selecione…" />
+            </SelectTrigger>
+            <SelectContent>
+              {SPECIALTIES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
 
-        <Input
-          name="address"
+        <FormField
           label="Endereço do consultório (opcional)"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Rua, número, bairro, cidade"
-        />
+          htmlFor="address"
+        >
+          <Input
+            id="address"
+            name="address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Rua, número, bairro, cidade"
+          />
+        </FormField>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-700">
-            Tom das respostas da secretária virtual
-          </label>
+        <FormField label="Tom das respostas da secretária virtual">
           <div className="grid grid-cols-2 gap-2">
             {(['amigável', 'formal'] as const).map((t) => (
-              <button
+              <Button
                 key={t}
                 type="button"
+                variant={tone === t ? 'default' : 'outline'}
+                size="lg"
                 onClick={() => setTone(t)}
-                className={`h-11 rounded-lg border text-sm font-medium capitalize transition-colors ${
-                  tone === t
-                    ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
-                    : 'border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50'
-                }`}
+                className="capitalize"
               >
                 {t}
-              </button>
+              </Button>
             ))}
           </div>
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="custom_instructions"
-            className="text-sm font-medium text-zinc-700"
-          >
-            Instruções especiais para a IA (opcional)
-          </label>
-          <textarea
+        <FormField
+          label="Instruções especiais para a IA (opcional)"
+          htmlFor="custom_instructions"
+        >
+          <Textarea
             id="custom_instructions"
             value={customInstructions}
             onChange={(e) => setCustomInstructions(e.target.value)}
             rows={4}
             placeholder="Ex.: primeira consulta dura 60min; peço para pacientes chegarem 10min antes."
-            className="px-3 py-2 rounded-lg border border-zinc-300 bg-white text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
           />
-        </div>
+        </FormField>
 
-        {error && <span className="text-sm text-red-600">{error}</span>}
+        {error && <span className="text-sm text-destructive">{error}</span>}
 
         <div className="flex gap-3">
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
+            size="lg"
             onClick={() => router.push('/onboarding/step-1')}
             className="flex-1"
           >
             Voltar
           </Button>
-          <Button type="submit" loading={loading} className="flex-1">
-            Finalizar
+          <Button type="submit" size="lg" disabled={loading} className="flex-1">
+            {loading ? 'Salvando…' : 'Continuar'}
           </Button>
         </div>
       </form>

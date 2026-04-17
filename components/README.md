@@ -1,7 +1,10 @@
 # components/
 
-Componentes React reutilizáveis. Organizado por domínio:
+Componentes React. Organizado por domínio:
 
-- [ui/](./ui/) — componentes genéricos (Button, Input, etc.)
+- [ui/](./ui/) — primitivas shadcn/ui (botão, input, select, etc.)
 - [onboarding/](./onboarding/) — componentes do fluxo de onboarding
-- (Sprints seguintes: `agenda/`, `dashboard/`, etc.)
+- [availability/](./availability/) — componentes da tela de disponibilidade
+
+**Regra:** para qualquer componente de UI, use shadcn/ui (via `ui/`) antes de
+escrever markup próprio. Ver [ui/README.md](./ui/README.md).

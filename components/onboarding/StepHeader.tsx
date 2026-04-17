@@ -12,16 +12,16 @@ export function StepHeader({ current, title, subtitle }: Props) {
           <div
             key={n}
             className={`h-1.5 flex-1 rounded-full ${
-              n <= current ? 'bg-emerald-600' : 'bg-zinc-200'
+              n <= current ? 'bg-primary' : 'bg-muted'
             }`}
           />
         ))}
       </div>
-      <div className="text-xs text-zinc-500">Passo {current} de 2</div>
+      <div className="text-xs text-muted-foreground">Passo {current} de 2</div>
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900">{title}</h1>
+        <h1 className="text-2xl font-semibold">{title}</h1>
         {subtitle && (
-          <p className="text-sm text-zinc-600 mt-1">{subtitle}</p>
+          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
         )}
       </div>
     </div>

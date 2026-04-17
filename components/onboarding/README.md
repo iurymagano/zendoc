@@ -4,11 +4,12 @@ Componentes específicos do fluxo de onboarding.
 
 ## StepHeader.tsx
 
-**O que faz:** exibe a barra de progresso (2 passos), o contador "Passo X de 2"
-e um título + subtítulo.
+**O que faz:** barra de progresso (2 passos), contador "Passo X de 2" e título +
+subtítulo.
 
 **Exporta:**
 
 - `StepHeader({ current: 1 | 2, title, subtitle? })` — componente
 
-**Notas:** não é server-aware — recebe o passo atual como prop.
+**Notas:** não tem `'use client'` — é server-friendly. Estilização via tokens
+shadcn (`bg-primary`, `bg-muted`).

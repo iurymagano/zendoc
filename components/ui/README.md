@@ -1,25 +1,39 @@
 # components/ui/
 
-Componentes genéricos de UI, reutilizados em todo o app.
+Componentes de UI gerados pelo CLI do **shadcn/ui** (`npx shadcn@latest add <name>`).
+Editáveis — o padrão do shadcn é "copy-paste ownership", ou seja, o código vive
+aqui e é nosso para customizar.
 
-## Button.tsx
+Tokens de cor vêm de `app/globals.css` (`--primary`, `--muted`, etc.). Preset:
+`base-nova` (base-ui + lucide icons).
 
-**O que faz:** botão com três variantes (`primary`, `secondary`, `ghost`) e
-estado de loading.
+## Componentes instalados
+
+| Arquivo           | Comando de instalação                          |
+| ----------------- | ---------------------------------------------- |
+| `button.tsx`      | `npx shadcn@latest add button`                 |
+| `input.tsx`       | `npx shadcn@latest add input`                  |
+| `label.tsx`       | `npx shadcn@latest add label`                  |
+| `select.tsx`      | `npx shadcn@latest add select`                 |
+| `textarea.tsx`    | `npx shadcn@latest add textarea`               |
+| `card.tsx`        | `npx shadcn@latest add card`                   |
+| `switch.tsx`      | `npx shadcn@latest add switch`                 |
+| `separator.tsx`   | `npx shadcn@latest add separator`              |
+
+## form-field.tsx
+
+**O que faz:** wrapper fino que combina `Label` + conteúdo + mensagem de erro em
+uma única célula de formulário. Não é componente shadcn — é composição interna
+para padronizar os formulários do Zendoc.
 
 **Exporta:**
 
-- `Button({ variant?, loading?, ...ButtonHTMLAttributes })` — componente
+- `FormField({ label?, error?, htmlFor?, className?, children })` — componente
 
-**Notas:** quando `loading=true`, exibe "Carregando…" e fica desabilitado.
+**Notas:** não injeta `id` no `children`; o consumidor define `id` no input e
+`htmlFor` no `FormField` para ligar o label.
 
-## Input.tsx
+## Convenção
 
-**O que faz:** input com label opcional e mensagem de erro, estilizado com foco
-em esmeralda.
-
-**Exporta:**
-
-- `Input` — componente, `forwardRef` para `HTMLInputElement`
-
-**Notas:** se `id` não for passado, usa `name` como fallback para ligar `<label>` e `<input>`.
+**Sempre use componentes shadcn antes de escrever HTML puro.** Para novas
+necessidades, rode `npx shadcn@latest add <name>` e use o componente gerado.

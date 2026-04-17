@@ -4,8 +4,10 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/ui/form-field';
+import { Separator } from '@/components/ui/separator';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -61,64 +63,71 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900">Criar conta</h1>
-        <p className="text-sm text-zinc-600 mt-1">
+        <h1 className="text-2xl font-semibold">Criar conta</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Trial de 7 dias. Sem cartão de crédito.
         </p>
       </div>
 
       <Button
         type="button"
-        variant="secondary"
+        variant="outline"
+        size="lg"
         onClick={() => signIn('google', { callbackUrl: '/onboarding/step-1' })}
       >
         Continuar com Google
       </Button>
 
-      <div className="flex items-center gap-3 text-xs text-zinc-500">
-        <div className="flex-1 h-px bg-zinc-200" />
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <Separator className="flex-1" />
         ou
-        <div className="flex-1 h-px bg-zinc-200" />
+        <Separator className="flex-1" />
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <Input
-          name="email"
-          type="email"
-          label="Email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Input
-          name="password"
-          type="password"
-          label="Senha (mínimo 8 caracteres)"
-          required
-          autoComplete="new-password"
-          minLength={8}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Input
-          name="confirm"
-          type="password"
-          label="Confirmar senha"
-          required
-          autoComplete="new-password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-        />
-        {error && <span className="text-sm text-red-600">{error}</span>}
-        <Button type="submit" loading={loading}>
-          Criar conta
+        <FormField label="Email" htmlFor="email">
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Senha (mínimo 8 caracteres)" htmlFor="password">
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="new-password"
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Confirmar senha" htmlFor="confirm">
+          <Input
+            id="confirm"
+            name="confirm"
+            type="password"
+            required
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+        </FormField>
+        {error && <span className="text-sm text-destructive">{error}</span>}
+        <Button type="submit" size="lg" disabled={loading}>
+          {loading ? 'Criando conta…' : 'Criar conta'}
         </Button>
       </form>
 
-      <p className="text-sm text-zinc-600 text-center">
+      <p className="text-sm text-muted-foreground text-center">
         Já tem conta?{' '}
-        <Link href="/login" className="text-emerald-700 font-medium">
+        <Link href="/login" className="text-foreground font-medium underline">
           Entrar
         </Link>
       </p>

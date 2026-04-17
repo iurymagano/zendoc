@@ -13,8 +13,20 @@ Módulos de domínio reutilizáveis — não expõem rotas.
 - `createBrowserClient()` — client com `NEXT_PUBLIC_SUPABASE_ANON_KEY`, usado em
   componentes client. Respeita RLS.
 
-**Notas:** nunca importar `createServerClient` em componentes com `'use client'`
+**Notas:** nunca importar `createServerClient` em componentes `'use client'`
 nem expor `SUPABASE_SERVICE_KEY` ao browser.
+
+## utils.ts
+
+**O que faz:** utilitário `cn()` gerado pelo shadcn CLI — combina `clsx` +
+`tailwind-merge` para resolver classes conflitantes do Tailwind.
+
+**Exporta:**
+
+- `cn(...inputs: ClassValue[]): string`
+
+**Notas:** usado internamente por todos os componentes em `components/ui/`.
+Não remover.
 
 ## Subpastas
 
