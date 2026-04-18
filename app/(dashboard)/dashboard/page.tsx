@@ -62,6 +62,64 @@ export default async function DashboardPage() {
           </Card>
         )}
 
+        <Card>
+          <CardHeader>
+            <CardTitle>Agenda</CardTitle>
+            <CardDescription>
+              Ajuste sua rotina semanal e bloqueie feriados ou dias atípicos.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-3">
+            <Link
+              href="/configuracoes/disponibilidade"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Disponibilidade semanal
+            </Link>
+            <Link
+              href="/configuracoes/excecoes"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Exceções de agenda
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Agenda da semana</CardTitle>
+            <CardDescription>
+              Visualize os agendamentos semanais, incluindo os criados pela IA.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/agenda"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Abrir agenda
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Pacientes</CardTitle>
+            <CardDescription>
+              Cadastro central de pacientes usado nos agendamentos manuais e
+              no fluxo da IA.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/pacientes"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Ver pacientes
+            </Link>
+          </CardContent>
+        </Card>
+
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>

@@ -14,10 +14,20 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 | `/onboarding/step-2`                    | página | `onboarding/step-2/page.tsx`                               |
 | `/dashboard`                            | página | `(dashboard)/dashboard/page.tsx`                           |
 | `/configuracoes/disponibilidade`        | página | `(dashboard)/configuracoes/disponibilidade/page.tsx`       |
+| `/configuracoes/excecoes`               | página | `(dashboard)/configuracoes/excecoes/page.tsx`              |
+| `/pacientes`                            | página | `(dashboard)/pacientes/page.tsx`                           |
+| `/agenda`                               | página | `(dashboard)/agenda/page.tsx`                              |
 | `/api/auth/*`                           | API    | `api/auth/[...nextauth]/route.ts`                          |
 | `/api/auth/register`                    | API    | `api/auth/register/route.ts`                               |
 | `/api/onboarding/profile`               | API    | `api/onboarding/profile/route.ts`                          |
 | `/api/availability/weekly`              | API    | `api/availability/weekly/route.ts`                         |
+| `/api/availability/exceptions`          | API    | `api/availability/exceptions/route.ts`                     |
+| `/api/availability/exceptions/[id]`     | API    | `api/availability/exceptions/[id]/route.ts`                |
+| `/api/ai/test`                          | API    | `api/ai/test/route.ts`                                     |
+| `/api/reminders/dispatch`               | API    | `api/reminders/dispatch/route.ts`                          |
+| `/api/patients`                         | API    | `api/patients/route.ts`                                    |
+| `/api/patients/[id]`                    | API    | `api/patients/[id]/route.ts`                               |
+| `/api/appointments`                     | API    | `api/appointments/route.ts`                                |
 
 ## layout.tsx
 

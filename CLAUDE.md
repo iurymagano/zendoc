@@ -1120,29 +1120,42 @@ export async function POST(req: NextRequest) {
 | 4 — Pagamentos           | 9-10    | Pendente         |
 | 5 — Crescimento          | 11-12   | Pendente         |
 
-### Sprint 1 — checklist
+O checklist detalhado de cada sprint fica em [TASKS.md](TASKS.md) — veja a
+regra abaixo.
 
-- [ ] Setup Next.js 14 + Tailwind + TypeScript
-- [ ] Rodar schema SQL no Supabase
-- [ ] auth.ts (NextAuth — email + Google)
-- [ ] middleware.ts de proteção de rotas
-- [ ] Tela de login
-- [ ] Tela de cadastro
-- [ ] Onboarding passo 1 — dados pessoais
-- [ ] Onboarding passo 2 — perfil do consultório
-- [ ] POST /api/onboarding/profile
-- [ ] Deploy na Vercel
+---
 
-### Sprint 2 — checklist
+⚠️ REGRA OBRIGATÓRIA — TASKS.md como fonte da verdade do backlog
+Esta regra tem prioridade igual à do README. Não existe exceção.
 
-- [ ] Tela de disponibilidade semanal (blocos morning/afternoon)
-- [ ] Tela de exceções por data
-- [ ] Deploy Evolution API no Railway
-- [ ] Tela de conexão WhatsApp com QR Code (polling 30s)
-- [ ] POST /api/whatsapp/webhook
-- [ ] lib/ai/ completo (processor, executor, prompt-builder)
-- [ ] lib/availability/slots.ts
-- [ ] Cron de lembretes (Vercel Cron Jobs)
+A regra
+O arquivo `TASKS.md` na raiz do projeto é o backlog vivo do Zendoc. Ele lista
+todas as tarefas de cada sprint em formato de checklist (`- [ ]` / `- [x]`) e é
+a ÚNICA fonte da verdade do que está feito e do que falta.
+
+Toda vez que você (Claude Code):
+
+1. Terminar uma tarefa → marque a linha correspondente em `TASKS.md` como `- [x]`
+   antes de encerrar a resposta.
+2. Descobrir uma nova tarefa ou subtarefa necessária → adicione em `TASKS.md` no
+   sprint correto como `- [ ]`.
+3. Remover/cancelar uma tarefa → delete a linha (não deixe `[ ]` de tarefa morta).
+4. Ao abrir uma sessão nova → leia `TASKS.md` antes de decidir por onde
+   continuar, para retomar exatamente de onde pararam.
+
+Isso não é opcional. Se você codou algo listado em `TASKS.md`, marque o checkbox
+no mesmo commit. Nunca termine uma sessão com `TASKS.md` desatualizado.
+
+Formato
+```markdown
+## Sprint N — nome do sprint
+- [x] tarefa concluída
+- [ ] tarefa pendente
+  - [ ] subtarefa
+```
+
+Ao marcar uma tarefa, não remova nem reescreva o texto — só troque `[ ]` por
+`[x]`. Isso preserva o histórico legível via `git log`.
 
 ---
 

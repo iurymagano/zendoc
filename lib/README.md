@@ -30,6 +30,7 @@ Não remover.
 
 ## Subpastas
 
-- [ai/](./ai/) — integração com Claude API (Sprint 2)
-- [zapi/](./zapi/) — cliente Evolution API (Sprint 2)
-- [availability/](./availability/) — cálculo de slots (Sprint 2)
+- [ai/](./ai/) — integração com Claude API (prompt, processor, executor).
+- [availability/](./availability/) — cálculo de slots (`slots.ts`).
+- [zapi/](./zapi/) — cliente Evolution API (`sendWhatsAppMessage`; demais
+  funções entram quando a conexão WhatsApp for implementada).

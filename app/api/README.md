@@ -39,6 +39,45 @@ Arquivo: [availability/weekly/route.ts](./availability/weekly/route.ts)
 CRUD da rotina semanal. `POST` faz "replace all" — substitui todos os blocos
 do profissional pelo payload. Detalhes em [availability/README.md](./availability/README.md).
 
+### `GET/POST /api/availability/exceptions` e `DELETE /api/availability/exceptions/:id`
+
+Arquivos: [availability/exceptions/route.ts](./availability/exceptions/route.ts),
+[availability/exceptions/[id]/route.ts](./availability/exceptions/[id]/route.ts)
+
+Exceções pontuais (folgas, horários diferentes, dias extras). Detalhes em
+[availability/README.md](./availability/README.md).
+
+### `POST /api/ai/test`
+
+Arquivo: [ai/test/route.ts](./ai/test/route.ts)
+
+Endpoint de teste manual para o fluxo da IA sem passar pelo WhatsApp real.
+Simula uma mensagem recebida de `phone` e retorna o texto que seria enviado de
+volta. Detalhes em [ai/README.md](./ai/README.md).
+
+### `GET|POST /api/reminders/dispatch`
+
+Arquivo: [reminders/dispatch/route.ts](./reminders/dispatch/route.ts)
+
+Endpoint chamado pelo Vercel Cron (a cada 15 min) para disparar os lembretes
+pendentes. Autenticado via `Authorization: Bearer ${CRON_SECRET}`. Detalhes em
+[reminders/README.md](./reminders/README.md).
+
+### `GET|POST /api/patients` e `GET|PATCH|DELETE /api/patients/:id`
+
+Arquivos: [patients/route.ts](./patients/route.ts),
+[patients/[id]/route.ts](./patients/[id]/route.ts)
+
+CRUD de pacientes do profissional logado. `GET` aceita `?q=` para busca por
+nome/telefone. Detalhes em [patients/README.md](./patients/README.md).
+
+### `GET /api/appointments`
+
+Arquivo: [appointments/route.ts](./appointments/route.ts)
+
+Lista agendamentos do profissional em uma janela de datas (`?from&to` em
+`YYYY-MM-DD`). Detalhes em [appointments/README.md](./appointments/README.md).
+
 ## Autenticação
 
 Todas as rotas (exceto o catch-all do NextAuth) começam com

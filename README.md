@@ -37,7 +37,8 @@ zendoc/
 ```
 
 Cada pasta tem um `README.md` próprio descrevendo seus arquivos. Ver [CLAUDE.md](./CLAUDE.md)
-para o contexto completo do projeto.
+para o contexto completo do projeto e [TASKS.md](./TASKS.md) para o backlog vivo
+(o que está feito e o que falta em cada sprint).
 
 ## Deploy
 
