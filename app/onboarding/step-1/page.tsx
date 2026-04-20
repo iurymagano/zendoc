@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
 import { StepHeader } from '@/components/onboarding/StepHeader';
 
-const STORAGE_KEY = 'zendoc:onboarding:step1';
+const STORAGE_KEY = 'iazen:onboarding:step1';
 
 export default function OnboardingStep1() {
   const router = useRouter();

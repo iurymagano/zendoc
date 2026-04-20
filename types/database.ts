@@ -32,6 +32,9 @@ export interface Professional {
   requires_approval: boolean;
   whatsapp_connected: boolean;
   zapi_instance_id: string | null;
+  zapi_token: string | null;
+  pending_qrcode: string | null;
+  pending_qrcode_at: string | null;
   plan_status: PlanStatus;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;

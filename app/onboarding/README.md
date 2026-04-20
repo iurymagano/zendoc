@@ -2,13 +2,17 @@
 
 Fluxo de onboarding em 2 passos, executado após o cadastro.
 
-Os dados do passo 1 ficam em `sessionStorage` sob a chave `zendoc:onboarding:step1`
+Os dados do passo 1 ficam em `sessionStorage` sob a chave `iazen:onboarding:step1`
 até serem enviados junto com o passo 2 para `POST /api/onboarding/profile`.
 
 ## layout.tsx
 
-**O que faz:** layout centralizado (card sobre fundo zinc-50) com o branding
-Zendoc, usado pelos dois passos.
+**O que faz:** layout centralizado com `<Logo size="lg">` no topo e um card
+`rounded-2xl` com o conteúdo. Fundo `bg-muted/30` + um gradiente radial azul
+sutil atrás do card para dar profundidade. Ao pé, mensagem "Leva menos de 2
+minutos" em fonte mono.
+
+**Depende de:** `@/components/brand/Logo`.
 
 ## page.tsx
 

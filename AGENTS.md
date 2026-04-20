@@ -1,6 +1,6 @@
 # Agents
 
-Este arquivo lista os agentes e convenções de trabalho automatizado no projeto Zendoc.
+Este arquivo lista os agentes e convenções de trabalho automatizado no projeto IAzen.
 
 Por ora, o único agente ativo é o **Claude Code**, que opera seguindo integralmente as
 regras descritas em `CLAUDE.md` — especialmente:

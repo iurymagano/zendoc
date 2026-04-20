@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const STEP1_KEY = 'zendoc:onboarding:step1';
+const STEP1_KEY = 'iazen:onboarding:step1';
 
 const SPECIALTIES = [
   'Psicólogo(a)',

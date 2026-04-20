@@ -32,5 +32,7 @@ Não remover.
 
 - [ai/](./ai/) — integração com Claude API (prompt, processor, executor).
 - [availability/](./availability/) — cálculo de slots (`slots.ts`).
+- [appointments/](./appointments/) — utilitários de domínio (checagem de
+  conflito de horário).
 - [zapi/](./zapi/) — cliente Evolution API (`sendWhatsAppMessage`; demais
   funções entram quando a conexão WhatsApp for implementada).

@@ -1,29 +1,41 @@
 # lib/zapi/
 
-Cliente HTTP da Evolution API (WhatsApp self-hosted, ~R$50/mês no Railway).
+Cliente HTTP da **Z-API** (SaaS gerenciado em `api.z-api.io`). Cada
+profissional tem sua própria instância Z-API, com `instanceId` e `token`
+persistidos na tabela `professionals` (`zapi_instance_id` e `zapi_token`).
+
+Provisionamento das instâncias é **manual** pelo painel da Z-API — o IAzen
+não cria nem apaga instâncias.
 
 ## client.ts
 
-**O que faz:** funções de envio/conexão da Evolution API. Hoje só expõe
-`sendWhatsAppMessage` — as funções de criação de instância e leitura de QR
-code entram quando a tela de conexão do WhatsApp for implementada.
+**O que faz:** cliente tipado das rotas da Z-API que o IAzen usa (QR, status,
+envio de mensagem, desconectar).
+
+**Base URL:** `https://api.z-api.io/instances/{instanceId}/token/{token}/...`
 
 **Exporta:**
 
-- `sendWhatsAppMessage(instanceId, to, text): Promise<void>` — envia uma
-  mensagem de texto. Lança se `EVOLUTION_API_URL`/`EVOLUTION_API_KEY` não
-  estiverem configuradas ou se a API responder não-2xx.
+- `sendWhatsAppMessage(instanceId, token, phone, message): Promise<void>` —
+  `POST /send-text`. Lança em resposta não-2xx.
+- `getQRCode(instanceId, token): Promise<string | null>` — `GET /qr-code/image`.
+  Retorna o `value` (base64, sem prefixo `data:image/png;base64,`). Retorna
+  `null` se a Z-API responder não-2xx (já conectado, por exemplo).
+- `getConnectionStatus(instanceId, token): Promise<{ connected: boolean }>` —
+  `GET /status`. Retorna `{ connected: false }` em erro.
+- `disconnectInstance(instanceId, token): Promise<void>` — `POST /disconnect`.
+  Tolera 404.
 
-**Envs obrigatórias:**
-
-- `EVOLUTION_API_URL` — base da instância Railway (ex.:
-  `https://zendoc-evo.railway.app`).
-- `EVOLUTION_API_KEY` — api key global configurada na Evolution API.
+**Envs usadas:** nenhuma diretamente no client (instanceId/token vêm do
+banco por profissional). O `ZAPI_CLIENT_TOKEN` é usado apenas na rota de
+webhook para validar chamadas de entrada da Z-API.
 
 **Notas:**
 
-- Quem chama é responsável por tratar exceções e decidir o que fazer (reenviar,
-  marcar lembrete como `failed`, etc.). O cron de lembretes já faz isso.
-- Números devem ser enviados no formato `5511999999999` (sem `+`, sem traços) —
-  a Evolution aceita com `@s.whatsapp.net` também, mas o formato puro é o
-  padrão do resto do projeto.
+- Quando `zapi_instance_id` ou `zapi_token` estiverem `null` no banco, a UI
+  direciona o profissional ao suporte — não existe fluxo self-service de
+  criação de instância.
+- Telefones enviados no formato `5511999999999` (sem `+`, sem traços).
+- Diferente da Evolution, a Z-API não tem webhook de `qrcode.updated` nem
+  `connection.update` — QR e status são sempre consultados sob demanda via
+  HTTP.

@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 import {
   WeekdayRow,
   type DayState,
@@ -232,19 +233,15 @@ function AvailabilityForm() {
 
 export default function AvailabilityPage() {
   return (
-    <div className="min-h-screen bg-muted/30 p-6">
-      <div className="mx-auto max-w-3xl flex flex-col gap-6">
-        <header>
-          <h1 className="text-2xl font-semibold">Disponibilidade semanal</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Defina os horários em que você atende em cada dia. A IA só oferece
-            esses horários aos seus pacientes.
-          </p>
-        </header>
-        <Suspense fallback={<div className="h-32" />}>
-          <AvailabilityForm />
-        </Suspense>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow="Configurações"
+        title="Disponibilidade semanal"
+        description="Defina os horários em que você atende em cada dia. A IA só oferece esses horários aos seus pacientes."
+      />
+      <Suspense fallback={<div className="h-32" />}>
+        <AvailabilityForm />
+      </Suspense>
     </div>
   );
 }

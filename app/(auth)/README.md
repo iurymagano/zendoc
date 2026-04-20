@@ -1,12 +1,19 @@
 # app/(auth)/
 
 Route group com as páginas de autenticação (login e registro). Usa um layout
-próprio centralizado com o branding do Zendoc.
+próprio centralizado com o branding do IAzen.
 
 ## layout.tsx
 
-**O que faz:** layout centralizado (card sobre fundo zinc-50) para as páginas de
-login e cadastro. Inclui link para home.
+**O que faz:** layout split-screen (desktop) para login e cadastro.
+
+- Lado esquerdo (`.dark`, só em `lg:`): fundo preto IAzen com gradientes
+  radiais azul+violeta, [`<Logo size="lg">`](../../components/brand/README.md),
+  tagline gradiente e lista de bullets de proposta de valor
+- Lado direito: card com o formulário, centralizado, fundo `bg-muted/30`;
+  em mobile o `<Logo>` aparece no topo como fallback
+
+**Depende de:** `@/components/brand/Logo`.
 
 ## login/page.tsx
 

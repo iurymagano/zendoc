@@ -40,9 +40,17 @@ function LoginForm() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Entrar</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Acesse sua conta Zendoc
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          Bem-vindo de volta
+        </span>
+        <h1
+          className="mt-2 font-display text-3xl font-semibold tracking-tight"
+          style={{ letterSpacing: '-0.03em' }}
+        >
+          Entrar no IAzen
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Acesse sua secretária virtual.
         </p>
       </div>
 
@@ -55,7 +63,7 @@ function LoginForm() {
         Continuar com Google
       </Button>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      <div className="flex items-center gap-3 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
         <Separator className="flex-1" />
         ou
         <Separator className="flex-1" />

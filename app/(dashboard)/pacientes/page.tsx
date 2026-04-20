@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 import type { Patient } from '@/types/database';
 
 type FormState = {
@@ -150,28 +151,15 @@ export default function PatientsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 p-6">
-      <div className="mx-auto max-w-4xl flex flex-col gap-6">
-        <header className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold">Pacientes</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Cadastro central de pacientes — usado em agendamentos manuais e
-              no fluxo da IA pelo WhatsApp.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Link
-              href="/dashboard"
-              className={buttonVariants({ variant: 'outline' })}
-            >
-              Voltar
-            </Link>
-            {!formOpen && (
-              <Button onClick={openCreate}>Novo paciente</Button>
-            )}
-          </div>
-        </header>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow="Pacientes"
+        title="Seu cadastro"
+        description="Base central usada em agendamentos manuais e no fluxo da IA pelo WhatsApp."
+        actions={
+          !formOpen ? <Button onClick={openCreate}>Novo paciente</Button> : null
+        }
+      />
 
         {formOpen && (
           <Card>
@@ -292,6 +280,15 @@ export default function PatientsPage() {
                       </span>
                     </div>
                     <div className="flex gap-2 shrink-0">
+                      <Link
+                        href={`/pacientes/${p.id}`}
+                        className={buttonVariants({
+                          variant: 'outline',
+                          size: 'sm',
+                        })}
+                      >
+                        Histórico
+                      </Link>
                       <Button
                         variant="outline"
                         size="sm"
@@ -313,7 +310,6 @@ export default function PatientsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

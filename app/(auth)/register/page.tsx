@@ -63,9 +63,17 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Criar conta</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Trial de 7 dias. Sem cartão de crédito.
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">
+          7 dias grátis · sem cartão
+        </span>
+        <h1
+          className="mt-2 font-display text-3xl font-semibold tracking-tight"
+          style={{ letterSpacing: '-0.03em' }}
+        >
+          Criar sua conta
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Leva menos de 2 minutos. Cancele quando quiser.
         </p>
       </div>
 
@@ -78,7 +86,7 @@ export default function RegisterPage() {
         Continuar com Google
       </Button>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      <div className="flex items-center gap-3 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
         <Separator className="flex-1" />
         ou
         <Separator className="flex-1" />

@@ -19,6 +19,7 @@ type ReminderRow = {
   } | null;
   professional: {
     zapi_instance_id: string | null;
+    zapi_token: string | null;
     name: string;
     whatsapp_connected: boolean;
     plan_status: string;
@@ -67,7 +68,7 @@ async function handle(req: NextRequest) {
       `
       id, type, scheduled_for, professional_id, appointment_id,
       appointment:appointments ( patient_phone, patient_name, starts_at, status ),
-      professional:professionals ( zapi_instance_id, name, whatsapp_connected, plan_status )
+      professional:professionals ( zapi_instance_id, zapi_token, name, whatsapp_connected, plan_status )
     `,
     )
     .eq('status', 'pending')
@@ -128,7 +129,11 @@ async function handle(req: NextRequest) {
       continue;
     }
 
-    if (!prof.zapi_instance_id || !prof.whatsapp_connected) {
+    if (
+      !prof.zapi_instance_id ||
+      !prof.zapi_token ||
+      !prof.whatsapp_connected
+    ) {
       await supabase
         .from('reminders')
         .update({
@@ -143,7 +148,12 @@ async function handle(req: NextRequest) {
     const text = buildMessage(reminder.type, prof.name, appt.starts_at);
 
     try {
-      await sendWhatsAppMessage(prof.zapi_instance_id, appt.patient_phone, text);
+      await sendWhatsAppMessage(
+        prof.zapi_instance_id,
+        prof.zapi_token,
+        appt.patient_phone,
+        text,
+      );
       await supabase
         .from('reminders')
         .update({ status: 'sent', sent_at: new Date().toISOString() })

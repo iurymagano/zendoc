@@ -37,3 +37,9 @@ criar/editar pacientes.
 - A exclusão é hard delete. A FK `appointments.patient_id ON DELETE SET NULL`
   mantém o histórico de atendimentos — o appointment ainda guarda
   `patient_name`/`patient_phone` desnormalizados.
+- Cada linha tem botão "Histórico" que navega para `/pacientes/[id]` com a
+  visão de próximas consultas + histórico completo.
+
+## Subpastas
+
+- [\[id\]/](./[id]/) — página de detalhe + histórico do paciente.

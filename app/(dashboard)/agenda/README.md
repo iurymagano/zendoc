@@ -31,8 +31,36 @@ daquela data.
 - `GET /api/appointments`
 - `date-fns`, `date-fns/locale`
 
+**Criação e edição manual:**
+
+- Botão "Novo agendamento" abre um formulário inline no topo da página
+  (nome + telefone + `datetime-local` início/fim + notas).
+- O input de nome do paciente tem autocomplete: ao focar ou digitar, mostra
+  sugestões de pacientes já cadastrados (filtra por nome OU telefone).
+  Clicar em uma sugestão preenche nome + telefone de uma vez. A lista de
+  pacientes é carregada via `GET /api/patients` no mount da página e
+  atualizada após cada criação de agendamento (cobre o caso de criar
+  paciente novo pelo próprio form da agenda).
+- Ao preencher o início, o fim é auto-preenchido para `+50min` (apenas se
+  estava vazio ou inválido).
+- Botão "Editar" em cada item abre o mesmo formulário pré-preenchido e
+  manda `PATCH /api/appointments/:id`.
+
+**Ações por status:**
+
+- `pending_approval` → Aprovar (`PATCH status=scheduled`) · Rejeitar
+  (`POST /cancel`).
+- `scheduled` → Confirmar (`PATCH status=confirmed`) · Editar · Cancelar.
+- `confirmed` → Não compareceu (`PATCH status=no_show`) · Editar · Cancelar.
+- `cancelled` / `no_show` → Editar (para corrigir notas).
+
+**Cancelamento:** usa `window.confirm` + `window.prompt` para capturar motivo
+e chama `POST /api/appointments/:id/cancel`. Fica registrado em
+`cancellation_note` e `cancelled_by = 'professional'`.
+
 **Notas:**
 
-- A criação/edição manual de appointments entra na próxima iteração.
+- Horários enviados em ISO com offset `-03:00`. O input `datetime-local` dá
+  `YYYY-MM-DDTHH:mm`; o cliente appenda `:00-03:00` antes de enviar.
 - Status badges usam cores do tema (primary/emerald/amber/muted/destructive)
   — quando o shadcn `badge` for instalado, migrar para componente dedicado.

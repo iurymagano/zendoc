@@ -30,4 +30,37 @@ logado. Appointments também são criados pelo fluxo da IA em
 
 - O endpoint filtra por `professional_id` derivado da sessão — isolamento
   garantido mesmo usando `SUPABASE_SERVICE_KEY`.
-- POST/PATCH/DELETE entram no próximo PR (criação/cancelamento manual).
+
+## POST /api/appointments
+
+Cria um appointment manual (`booked_via = 'manual'`, `status = 'scheduled'`).
+
+**Payload:**
+
+```json
+{
+  "patient_name": "Maria Silva",
+  "patient_phone": "5511999998888",
+  "starts_at": "2026-05-10T10:00:00-03:00",
+  "ends_at":   "2026-05-10T10:50:00-03:00",
+  "notes": "primeira consulta (opcional)"
+}
+```
+
+- Paciente é **reaproveitado por telefone** (upsert em
+  `patients(professional_id, phone)`) — mesmo comportamento que o fluxo da IA.
+- Timestamps precisam ter offset (`-03:00`). O cliente
+  [`/agenda`](../../(dashboard)/agenda/README.md) converte `datetime-local` +
+  `:00-03:00` antes de enviar.
+
+**Retorno:** `{ ok: true, appointment }`.
+
+**Erros:**
+
+- `400` — validação Zod falhou (inclui `ends_at <= starts_at`).
+- `409` — conflito com outro appointment ativo no mesmo horário (checagem
+  em [lib/appointments/conflicts.ts](../../../lib/appointments/conflicts.ts)).
+
+## Subpastas
+
+- [\[id\]/](./[id]/) — `GET`, `PATCH`, e subpasta `cancel/` com o cancelamento.

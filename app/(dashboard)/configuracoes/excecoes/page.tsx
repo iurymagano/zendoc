@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, FormEvent } from 'react';
-import Link from 'next/link';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 import type { AvailabilityException, ExceptionType } from '@/types/database';
 
 const TYPE_LABELS: Record<ExceptionType, string> = {
@@ -115,16 +115,12 @@ export default function ExceptionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 p-6">
-      <div className="mx-auto max-w-3xl flex flex-col gap-6">
-        <header>
-          <h1 className="text-2xl font-semibold">Exceções de agenda</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Bloqueie feriados, configure horários diferentes em dias pontuais
-            ou abra a agenda em dias que normalmente não atende. Exceções têm
-            prioridade sobre a rotina semanal.
-          </p>
-        </header>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow="Configurações"
+        title="Exceções de agenda"
+        description="Bloqueie feriados, configure horários diferentes em dias pontuais ou abra a agenda em dias que normalmente não atende. Exceções têm prioridade sobre a rotina semanal."
+      />
 
         <Card>
           <CardHeader>
@@ -219,15 +215,6 @@ export default function ExceptionsPage() {
               )}
 
               <div className="flex items-center justify-end gap-3">
-                <Link
-                  href="/dashboard"
-                  className={buttonVariants({
-                    variant: 'outline',
-                    size: 'lg',
-                  })}
-                >
-                  Voltar
-                </Link>
                 <Button type="submit" size="lg" disabled={saving}>
                   {saving ? 'Salvando…' : 'Adicionar exceção'}
                 </Button>
@@ -292,7 +279,6 @@ export default function ExceptionsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

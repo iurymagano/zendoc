@@ -71,12 +71,28 @@ Arquivos: [patients/route.ts](./patients/route.ts),
 CRUD de pacientes do profissional logado. `GET` aceita `?q=` para busca por
 nome/telefone. Detalhes em [patients/README.md](./patients/README.md).
 
-### `GET /api/appointments`
+### WhatsApp — `/api/whatsapp/*`
 
-Arquivo: [appointments/route.ts](./appointments/route.ts)
+Arquivos: [whatsapp/connect/route.ts](./whatsapp/connect/route.ts),
+[whatsapp/status/route.ts](./whatsapp/status/route.ts),
+[whatsapp/disconnect/route.ts](./whatsapp/disconnect/route.ts),
+[whatsapp/webhook/route.ts](./whatsapp/webhook/route.ts)
 
-Lista agendamentos do profissional em uma janela de datas (`?from&to` em
-`YYYY-MM-DD`). Detalhes em [appointments/README.md](./appointments/README.md).
+Pareamento Evolution API: `POST /connect` cria/reseta instância e retorna
+QR, `GET /status` devolve o estado da conexão, `POST /disconnect` remove a
+instância. O `POST /webhook` é público (chamado pela Evolution) e roteia
+mensagens para a IA. Detalhes em [whatsapp/README.md](./whatsapp/README.md).
+
+### `GET|POST /api/appointments`, `GET|PATCH /api/appointments/:id`, `POST /api/appointments/:id/cancel`
+
+Arquivos: [appointments/route.ts](./appointments/route.ts),
+[appointments/[id]/route.ts](./appointments/[id]/route.ts),
+[appointments/[id]/cancel/route.ts](./appointments/[id]/cancel/route.ts)
+
+CRUD manual de agendamentos + endpoint dedicado de cancelamento com motivo
+(grava `cancelled_by = 'professional'`). Checagem de sobreposição via
+[lib/appointments/conflicts.ts](../../lib/appointments/conflicts.ts). Detalhes
+em [appointments/README.md](./appointments/README.md).
 
 ## Autenticação
 

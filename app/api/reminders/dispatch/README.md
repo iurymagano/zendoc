@@ -17,8 +17,8 @@ retorna 401. O Vercel Cron injeta esse header automaticamente quando
 { "ok": true, "total": 12, "sent": 10, "failed": 1, "skipped": 1 }
 ```
 
-- `sent` — enviados com sucesso pela Evolution API.
-- `failed` — tentativa falhou (Evolution fora do ar, número inválido, etc.).
+- `sent` — enviados com sucesso pela Z-API.
+- `failed` — tentativa falhou (Z-API fora do ar, número inválido, etc.).
   `reminders.error_message` guarda o detalhe.
 - `skipped` — lembrete foi finalizado sem envio por motivo aceitável
   (appointment cancelado, plano inativo, WhatsApp não conectado).
@@ -48,7 +48,8 @@ independentemente do fuso da runtime (Vercel gru1 é UTC por padrão).
 **Depende de:**
 
 - `@/lib/supabase`, `@/lib/zapi/client`
-- env vars: `CRON_SECRET`, `EVOLUTION_API_URL`, `EVOLUTION_API_KEY`.
+- env vars: `CRON_SECRET`. Credenciais Z-API (`zapi_instance_id` e
+  `zapi_token`) vêm da tabela `professionals` por cliente — não são env.
 
 **Notas:**
 

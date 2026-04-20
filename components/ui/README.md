@@ -24,7 +24,7 @@ Tokens de cor vêm de `app/globals.css` (`--primary`, `--muted`, etc.). Preset:
 
 **O que faz:** wrapper fino que combina `Label` + conteúdo + mensagem de erro em
 uma única célula de formulário. Não é componente shadcn — é composição interna
-para padronizar os formulários do Zendoc.
+para padronizar os formulários do IAzen.
 
 **Exporta:**
 

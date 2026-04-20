@@ -1,32 +1,60 @@
-const BASE = process.env.EVOLUTION_API_URL;
-const KEY = process.env.EVOLUTION_API_KEY;
+const BASE = 'https://api.z-api.io';
 
-function headers() {
-  if (!KEY) throw new Error('EVOLUTION_API_KEY não configurada');
-  return { 'Content-Type': 'application/json', apikey: KEY };
+function url(instanceId: string, token: string, path: string): string {
+  return `${BASE}/instances/${instanceId}/token/${token}${path}`;
 }
 
-function assertBase(): string {
-  if (!BASE) throw new Error('EVOLUTION_API_URL não configurada');
-  return BASE;
+async function ensureOk(res: Response): Promise<unknown> {
+  if (res.ok) return res.json().catch(() => ({}));
+  const body = await res.text().catch(() => '');
+  throw new Error(`Z-API ${res.status}: ${body.slice(0, 200) || 'sem corpo'}`);
 }
 
 export async function sendWhatsAppMessage(
   instanceId: string,
-  to: string,
-  text: string,
+  token: string,
+  phone: string,
+  message: string,
 ): Promise<void> {
-  const base = assertBase();
-  const res = await fetch(`${base}/message/sendText/${instanceId}`, {
+  const res = await fetch(url(instanceId, token, '/send-text'), {
     method: 'POST',
-    headers: headers(),
-    body: JSON.stringify({ number: to, text }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, message }),
   });
+  await ensureOk(res);
+}
 
-  if (!res.ok) {
+export async function getQRCode(
+  instanceId: string,
+  token: string,
+): Promise<string | null> {
+  const res = await fetch(url(instanceId, token, '/qr-code/image'));
+  if (!res.ok) return null;
+  const data = (await res.json().catch(() => ({}))) as { value?: string };
+  return data.value ?? null;
+}
+
+export async function getConnectionStatus(
+  instanceId: string,
+  token: string,
+): Promise<{ connected: boolean }> {
+  const res = await fetch(url(instanceId, token, '/status'));
+  if (!res.ok) return { connected: false };
+  const data = (await res.json().catch(() => ({}))) as { connected?: boolean };
+  return { connected: !!data.connected };
+}
+
+export async function disconnectInstance(
+  instanceId: string,
+  token: string,
+): Promise<void> {
+  const res = await fetch(url(instanceId, token, '/disconnect'), {
+    method: 'POST',
+  });
+  if (!res.ok && res.status !== 404) {
     const body = await res.text().catch(() => '');
     throw new Error(
-      `Evolution API ${res.status}: ${body.slice(0, 200) || 'sem corpo'}`,
+      `Z-API ${res.status}: ${body.slice(0, 200) || 'sem corpo'}`,
     );
   }
 }

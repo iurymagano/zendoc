@@ -11,17 +11,26 @@ export function StepHeader({ current, title, subtitle }: Props) {
         {[1, 2].map((n) => (
           <div
             key={n}
-            className={`h-1.5 flex-1 rounded-full ${
-              n <= current ? 'bg-primary' : 'bg-muted'
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              n <= current
+                ? 'bg-gradient-to-r from-[var(--ia-accent)] to-[var(--ia-accent2)]'
+                : 'bg-muted'
             }`}
           />
         ))}
       </div>
-      <div className="text-xs text-muted-foreground">Passo {current} de 2</div>
+      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        Passo {current} de 2
+      </span>
       <div>
-        <h1 className="text-2xl font-semibold">{title}</h1>
+        <h1
+          className="font-display text-3xl font-semibold tracking-tight"
+          style={{ letterSpacing: '-0.03em' }}
+        >
+          {title}
+        </h1>
         {subtitle && (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
         )}
       </div>
     </div>

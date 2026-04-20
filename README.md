@@ -1,4 +1,4 @@
-# Zendoc
+# IAzen
 
 SaaS de gestão de consultórios para profissionais de saúde autônomos (psicólogos,
 nutricionistas, fisioterapeutas). Oferece uma secretária virtual no WhatsApp que
@@ -26,13 +26,13 @@ npm run dev                   # http://localhost:3000
 ## Estrutura
 
 ```
-zendoc/
+iazen/
 ├── app/                 Rotas do App Router (páginas e API)
 ├── components/          Componentes React
 ├── lib/                 Módulos de domínio (supabase, ai, zapi, availability)
 ├── types/               Tipos TypeScript compartilhados
 ├── auth.ts              Configuração NextAuth
-├── middleware.ts        Proteção de rotas
+├── proxy.ts             Proteção de rotas (Next 16: era middleware.ts)
 └── vercel.json          Configuração de deploy
 ```
 
@@ -48,7 +48,7 @@ para o contexto completo do projeto e [TASKS.md](./TASKS.md) para o backlog vivo
    framework **Next.js** (detectado automaticamente).
 2. Em *Settings → Environment Variables*, preencha todas as chaves de
    `.env.example` para os ambientes **Production**, **Preview** e **Development**.
-3. Em *Settings → Domains*, configure o domínio (ex.: `app.zendoc.com.br`).
+3. Em *Settings → Domains*, configure o domínio (ex.: `app.iazen.com.br`).
 4. Push na branch `master` → deploy automático de produção. Outras branches geram
    deploys de preview.
 

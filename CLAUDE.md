@@ -1,10 +1,8 @@
-@AGENTS.md
-
-# Zendoc — Contexto Completo do Projeto
+# IAzen — Contexto Completo do Projeto
 
 ## O que é este projeto
 
-Zendoc é uma plataforma SaaS de gestão de consultórios para profissionais de saúde autônomos
+IAzen é uma plataforma SaaS de gestão de consultórios para profissionais de saúde autônomos
 (psicólogos, nutricionistas, fisioterapeutas). O produto oferece uma secretária virtual
 inteligente via WhatsApp que agenda, confirma e gerencia consultas automaticamente.
 
@@ -12,40 +10,96 @@ inteligente via WhatsApp que agenda, confirma e gerencia consultas automaticamen
 
 **Público-alvo:** Profissionais de saúde autônomos sem secretária, com 10 a 40 atendimentos/semana.
 
-**Preço:** R$197/mês com trial gratuito de 7 dias (sem cartão).
+**Preço:** R$297/mês com trial gratuito de 7 dias (sem cartão).
+
+---
+
+## Identidade visual
+
+O design do IAzen segue uma estética **premium e técnica**, inspirada em Stripe e Vercel —
+moderna, bold, confiável.
+
+### Tokens de design
+
+```css
+/* Cores */
+--iazen-black: #0a0a0f; /* fundo escuro, texto principal */
+--iazen-white: #ffffff;
+--iazen-accent: #4f6ef7; /* azul primário — CTAs, links, marca */
+--iazen-accent2: #7c3aed; /* violeta — acento de IA, ícone */
+--iazen-muted: #6b7280; /* texto secundário */
+--iazen-surface: #f4f4f6; /* fundos, cards claros */
+--iazen-border: #e5e7eb; /* bordas */
+
+/* Tipografia */
+--font-display:
+  'Space Grotesk', sans-serif; /* headings, logo, CTAs — peso 600/700 */
+--font-body: 'Inter', sans-serif; /* corpo de texto — peso 400/500 */
+--font-mono: 'Fira Code', monospace; /* código, labels técnicos */
+```
+
+### Regras de uso
+
+- **Headings e logo:** Space Grotesk 700, `letter-spacing: -0.03em`
+- **Corpo de texto:** Inter 400, `line-height: 1.6`
+- **Botão primário:** fundo `#4F6EF7`, texto branco, `border-radius: 8px`
+- **Dark sections:** fundo `#0A0A0F`, texto branco, acento azul
+- **Nunca** usar gradientes decorativos, sombras pesadas ou cores fora da paleta acima
+- **shadcn/ui** é a base de todos os componentes — customizar via `className` com as cores acima
+
+### Fontes no projeto
+
+Adicionar no `app/layout.tsx`:
+
+```tsx
+import { Space_Grotesk, Inter } from 'next/font/google';
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+});
+const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
+```
 
 ---
 
 ## Stack tecnológica
 
-| Camada             | Tecnologia                                    | Detalhe                          |
-| ------------------ | --------------------------------------------- | -------------------------------- |
-| Frontend + Backend | Next.js 14 App Router + TypeScript + Tailwind | Sem servidor separado            |
+| Camada             | Tecnologia                                    | Detalhe                            |
+| ------------------ | --------------------------------------------- | ---------------------------------- |
+| Frontend + Backend | Next.js 14 App Router + TypeScript + Tailwind | Sem servidor separado              |
 | UI library         | shadcn/ui (Radix + Tailwind)                  | Instalado via CLI — não reinventar |
-| Banco de dados     | Supabase (Postgres + Auth + Realtime)         | RLS em todas as tabelas          |
-| Autenticação       | NextAuth.js v5                                | Email/senha + Google OAuth       |
-| WhatsApp           | Evolution API (self-hosted no Railway)        | Multi-instância, ~R$50/mês       |
-| IA                 | Anthropic Claude API                          | Modelo: claude-sonnet-4-20250514 |
-| Pagamentos         | Stripe                                        | Assinaturas + trial + webhooks   |
-| Deploy frontend    | Vercel                                        | Deploy automático via GitHub     |
-| Deploy WhatsApp    | Railway                                       | Container Docker                 |
+| Banco de dados     | Supabase (Postgres + Auth + Realtime)         | RLS em todas as tabelas            |
+| Autenticação       | NextAuth.js v5                                | Email/senha + Google OAuth         |
+| WhatsApp           | Z-API (SaaS gerenciado)                       | Uma instância por cliente, ~R$69/mês |
+| IA                 | Anthropic Claude API                          | Modelo: claude-sonnet-4-20250514   |
+| Pagamentos         | Stripe                                        | Assinaturas + trial + webhooks     |
+| Deploy frontend    | Vercel                                        | Deploy automático via GitHub       |
 
 ---
 
-⚠️ REGRA OBRIGATÓRIA — README.md em toda pasta
+## ⚠️ REGRA OBRIGATÓRIA — README.md em toda pasta
+
 Esta regra tem prioridade sobre qualquer outra instrução. Não existe exceção.
-A regra
-Cada pasta do projeto deve ter um README.md. Esse arquivo é a documentação viva daquela pasta — descreve o propósito da pasta e documenta cada arquivo dentro dela.
+
+### A regra
+
+Cada pasta do projeto deve ter um `README.md`. Esse arquivo é a documentação viva daquela
+pasta — descreve o propósito da pasta e documenta cada arquivo dentro dela.
+
 Toda vez que você (Claude Code) criar, alterar ou deletar qualquer arquivo:
 
-Antes de terminar, abra o README.md da pasta onde o arquivo está
-Se o README.md não existir, crie-o
-Atualize a seção correspondente ao arquivo modificado
-Se criou uma pasta nova, crie o README.md dela e adicione uma referência no README.md da pasta pai
+1. **Antes de terminar**, abra o `README.md` da pasta onde o arquivo está
+2. Se o `README.md` não existir, crie-o
+3. Atualize a seção correspondente ao arquivo modificado
+4. Se criou uma pasta nova, crie o `README.md` dela e adicione uma referência no `README.md` da pasta pai
 
 Isso não é opcional. Não termina uma tarefa sem atualizar o README da pasta afetada.
-O que cada README deve ter
-markdown# nome-da-pasta/
+
+### O que cada README deve ter
+
+```markdown
+# nome-da-pasta/
 
 Uma frase descrevendo o propósito desta pasta.
 
@@ -62,44 +116,87 @@ Uma frase descrevendo o propósito desta pasta.
 **Depende de:** outros arquivos do projeto que usa
 
 **Notas:** edge cases, decisões de design, comportamentos não óbvios
-Regras do README
+```
 
-Se uma função mudou de assinatura → atualiza no README
-Se um arquivo foi deletado → remove a seção do README
-Se um comportamento mudou → atualiza a descrição
-Nunca documentar algo que o código não faz mais
-Nunca deixar uma função pública sem entrada no README
+### Regras do README
 
-Pastas que já devem ter README.md
-zendoc/
-├── README.md ← visão geral e navegação do projeto
-├── CLAUDE.md ← este arquivo (contexto para Claude Code)
+- Se uma função mudou de assinatura → atualiza no README
+- Se um arquivo foi deletado → remove a seção do README
+- Se um comportamento mudou → atualiza a descrição
+- Nunca documentar algo que o código não faz mais
+- Nunca deixar uma função pública sem entrada no README
+
+### Pastas que já devem ter README.md
+
+```
+iazen/
+├── README.md                  ← visão geral e navegação do projeto
+├── CLAUDE.md                  ← este arquivo (contexto para Claude Code)
+├── TASKS.md                   ← backlog vivo por sprint (ver regra abaixo)
 ├── app/
-│ ├── README.md ← mapa de rotas e páginas
-│ ├── api/
-│ │ └── README.md ← cada API Route: método, payload, resposta
-│ ├── (auth)/
-│ │ └── README.md ← páginas de auth e onboarding
-│ └── (dashboard)/
-│ └── README.md ← páginas do dashboard
+│   ├── README.md              ← mapa de rotas e páginas
+│   ├── api/
+│   │   └── README.md          ← cada API Route: método, payload, resposta
+│   ├── (auth)/
+│   │   └── README.md          ← páginas de auth e onboarding
+│   └── (dashboard)/
+│       └── README.md          ← páginas do dashboard
 ├── components/
-│ ├── README.md ← índice de todos os componentes
-│ ├── ui/
-│ │ └── README.md ← componentes genéricos
-│ ├── agenda/
-│ │ └── README.md ← componentes de calendário
-│ └── onboarding/
-│ └── README.md ← steps do onboarding
+│   ├── README.md              ← índice de todos os componentes
+│   ├── ui/
+│   │   └── README.md          ← componentes shadcn instalados
+│   ├── agenda/
+│   │   └── README.md          ← componentes de calendário
+│   └── onboarding/
+│       └── README.md          ← steps do onboarding
 ├── lib/
-│ ├── README.md ← índice dos módulos
-│ ├── ai/
-│ │ └── README.md ← fluxo completo da IA
-│ ├── zapi/
-│ │ └── README.md ← integração Evolution API
-│ └── availability/
-│ └── README.md ← lógica de slots
+│   ├── README.md              ← índice dos módulos
+│   ├── ai/
+│   │   └── README.md          ← fluxo completo da IA
+│   ├── zapi/
+│   │   └── README.md          ← integração Evolution API
+│   └── availability/
+│       └── README.md          ← lógica de slots
 └── types/
-└── README.md ← todas as interfaces e tipos
+    └── README.md              ← todas as interfaces e tipos
+```
+
+---
+
+## ⚠️ REGRA OBRIGATÓRIA — TASKS.md como fonte da verdade do backlog
+
+Esta regra tem prioridade igual à do README. Não existe exceção.
+
+### A regra
+
+O arquivo `TASKS.md` na raiz do projeto é o backlog vivo do IAzen. Ele lista todas as
+tarefas de cada sprint em formato de checklist (`- [ ]` / `- [x]`) e é a ÚNICA fonte da
+verdade do que está feito e do que falta.
+
+Toda vez que você (Claude Code):
+
+1. **Terminar uma tarefa** → marque a linha correspondente em `TASKS.md` como `- [x]` antes de encerrar a resposta
+2. **Descobrir uma nova tarefa ou subtarefa necessária** → adicione em `TASKS.md` no sprint correto como `- [ ]`
+3. **Remover/cancelar uma tarefa** → delete a linha (não deixe `[ ]` de tarefa morta)
+4. **Ao abrir uma sessão nova** → leia `TASKS.md` antes de decidir por onde continuar, para retomar exatamente de onde pararam
+
+Isso não é opcional. Se você codou algo listado em `TASKS.md`, marque o checkbox no mesmo
+commit. Nunca termine uma sessão com `TASKS.md` desatualizado.
+
+### Formato
+
+```markdown
+## Sprint N — nome do sprint
+
+- [x] tarefa concluída
+- [ ] tarefa pendente
+  - [ ] subtarefa
+```
+
+Ao marcar uma tarefa, não remova nem reescreva o texto — só troque `[ ]` por `[x]`.
+Isso preserva o histórico legível via `git log`.
+
+---
 
 ## Variáveis de ambiente
 
@@ -123,11 +220,10 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Stripe
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_ID=price_...           # ID do produto R$197/mês
+STRIPE_PRICE_ID=price_...           # ID do produto R$297/mês
 
-# Evolution API (WhatsApp)
-EVOLUTION_API_URL=https://sua-instancia.railway.app
-EVOLUTION_API_KEY=sua-chave-aqui
+# Z-API (WhatsApp)
+ZAPI_CLIENT_TOKEN=                  # token fixo do cliente Z-API, enviado no header `client-token` do webhook
 
 # App
 NEXT_PUBLIC_URL=http://localhost:3000
@@ -152,6 +248,9 @@ create table professionals (
   requires_approval      boolean not null default false,
   whatsapp_connected     boolean not null default false,
   zapi_instance_id       text unique,
+  zapi_token             text,
+  pending_qrcode         text,
+  pending_qrcode_at      timestamptz,
   plan_status            text not null default 'trialing',
   stripe_customer_id     text unique,
   stripe_subscription_id text unique,
@@ -367,6 +466,7 @@ export interface Professional {
   requires_approval: boolean;
   whatsapp_connected: boolean;
   zapi_instance_id: string | null;
+  zapi_token: string | null;
   plan_status: PlanStatus;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
@@ -678,7 +778,61 @@ export async function executeAction(
 
 ---
 
-## WhatsApp — webhook e cliente
+## Integração WhatsApp — Z-API
+
+O IAzen usa a **Z-API** (SaaS em `api.z-api.io`) como provedor de WhatsApp.
+Cada profissional tem sua própria instância Z-API, gerenciada por nós
+(admins), não pelo profissional.
+
+**Modelo operacional:**
+
+- Instâncias criadas manualmente no painel `z-api.io` pela equipe IAzen.
+- `instanceId` e `token` salvos na tabela `professionals` (campos
+  `zapi_instance_id` e `zapi_token`).
+- O profissional nunca acessa a Z-API — tudo acontece dentro do IAzen.
+- O QR Code é exibido diretamente na tela `/configuracoes/whatsapp`.
+
+**Credenciais por profissional (tabela `professionals`):**
+
+- `zapi_instance_id` → Instance ID da Z-API (ex.: `3F1F16CF3A3011713AE6BA4D31290A14`)
+- `zapi_token` → Token daquela instância (ex.: `CB90B72324299A97CB94BA0A`)
+
+**Base URL:** `https://api.z-api.io`
+
+**Endpoints Z-API usados:**
+
+| Ação               | Método | URL                                                          |
+| ------------------ | ------ | ------------------------------------------------------------ |
+| Buscar QR Code     | GET    | `/instances/{instanceId}/token/{token}/qr-code/image`        |
+| Status da conexão  | GET    | `/instances/{instanceId}/token/{token}/status`               |
+| Enviar mensagem    | POST   | `/instances/{instanceId}/token/{token}/send-text`            |
+| Desconectar        | POST   | `/instances/{instanceId}/token/{token}/disconnect`           |
+
+**Formato de envio de mensagem:**
+
+```json
+{ "phone": "5511999999999", "message": "texto da mensagem" }
+```
+
+**Formato do webhook recebido (mensagem do paciente):**
+
+```json
+{
+  "phone": "5511999999999",
+  "text": { "message": "texto da mensagem" },
+  "fromMe": false,
+  "isGroup": false
+}
+```
+
+**Segurança do webhook:**
+
+- Z-API envia o header `client-token` em todo webhook.
+- Validar esse header contra `process.env.ZAPI_CLIENT_TOKEN` antes de
+  processar qualquer evento. Sem match → 401.
+- Valor configurado no painel Z-API e armazenado em `ZAPI_CLIENT_TOKEN`.
+- O `instanceId` alvo vem pela URL configurada por instância no painel
+  (ex.: `https://app.iazen.com.br/api/whatsapp/webhook?instance={INSTANCE_ID}`).
 
 ### app/api/whatsapp/webhook/route.ts
 
@@ -687,35 +841,42 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { processWhatsAppMessage } from '@/lib/ai/processor';
 import { sendWhatsAppMessage } from '@/lib/zapi/client';
+import type { Professional } from '@/types/database';
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  // 1. Valida o token fixo enviado pela Z-API em todo webhook
+  const clientToken = req.headers.get('client-token');
+  if (clientToken !== process.env.ZAPI_CLIENT_TOKEN) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+  }
 
-  if (body.fromMe) return NextResponse.json({ ok: true });
-
-  const instanceId: string = body.instance;
-  const patientPhone: string = body.data?.key?.remoteJid?.replace(
-    '@s.whatsapp.net',
-    '',
-  );
-  const message: string =
-    body.data?.message?.conversation ??
-    body.data?.message?.extendedTextMessage?.text;
-
-  if (!instanceId || !patientPhone || !message)
+  const body = await req.json().catch(() => null);
+  if (!body || body.fromMe || body.isGroup) {
     return NextResponse.json({ ok: true });
+  }
+
+  // 2. instanceId vem na URL configurada no painel Z-API (uma por instância)
+  const instanceId = req.nextUrl.searchParams.get('instance');
+  const patientPhone: string | undefined = body.phone;
+  const message: string | undefined = body.text?.message;
+
+  if (!instanceId || !patientPhone || !message) {
+    return NextResponse.json({ ok: true });
+  }
 
   const supabase = createServerClient();
   const { data: professional } = await supabase
     .from('professionals')
     .select('*')
     .eq('zapi_instance_id', instanceId)
-    .single();
+    .maybeSingle<Professional>();
 
-  if (!professional || !professional.ai_enabled)
+  if (!professional || !professional.ai_enabled) {
     return NextResponse.json({ ok: true });
-  if (!['trialing', 'active'].includes(professional.plan_status))
+  }
+  if (!['trialing', 'active'].includes(professional.plan_status)) {
     return NextResponse.json({ ok: true });
+  }
 
   try {
     const reply = await processWhatsAppMessage(
@@ -723,7 +884,12 @@ export async function POST(req: NextRequest) {
       patientPhone,
       message,
     );
-    await sendWhatsAppMessage(instanceId, patientPhone, reply);
+    await sendWhatsAppMessage(
+      professional.zapi_instance_id!,
+      professional.zapi_token!,
+      patientPhone,
+      reply,
+    );
   } catch (err) {
     console.error('Erro ao processar mensagem WhatsApp:', err);
   }
@@ -735,59 +901,57 @@ export async function POST(req: NextRequest) {
 ### lib/zapi/client.ts
 
 ```typescript
-const BASE = process.env.EVOLUTION_API_URL!;
-const KEY = process.env.EVOLUTION_API_KEY!;
-const H = { 'Content-Type': 'application/json', apikey: KEY };
+const BASE = 'https://api.z-api.io';
+
+function url(instanceId: string, token: string, path: string): string {
+  return `${BASE}/instances/${instanceId}/token/${token}${path}`;
+}
+
+async function ensureOk(res: Response): Promise<unknown> {
+  if (res.ok) return res.json().catch(() => ({}));
+  const body = await res.text().catch(() => '');
+  throw new Error(`Z-API ${res.status}: ${body.slice(0, 200) || 'sem corpo'}`);
+}
 
 export async function sendWhatsAppMessage(
   instanceId: string,
-  to: string,
-  text: string,
-) {
-  await fetch(`${BASE}/message/sendText/${instanceId}`, {
+  token: string,
+  phone: string,
+  message: string,
+): Promise<void> {
+  const res = await fetch(url(instanceId, token, '/send-text'), {
     method: 'POST',
-    headers: H,
-    body: JSON.stringify({ number: to, text }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, message }),
   });
+  await ensureOk(res);
 }
 
-export async function createInstance(
+export async function getQRCode(
   instanceId: string,
-): Promise<{ qrcode: string }> {
-  const res = await fetch(`${BASE}/instance/create`, {
-    method: 'POST',
-    headers: H,
-    body: JSON.stringify({
-      instanceName: instanceId,
-      qrcode: true,
-      integration: 'WHATSAPP-BAILEYS',
-      webhook: {
-        url: `${process.env.NEXT_PUBLIC_URL}/api/whatsapp/webhook`,
-        byEvents: false,
-        base64: false,
-        events: ['MESSAGES_UPSERT'],
-      },
-    }),
-  });
-  return res.json();
+  token: string,
+): Promise<string | null> {
+  const res = await fetch(url(instanceId, token, '/qr-code/image'));
+  if (!res.ok) return null;
+  const data = (await res.json()) as { value?: string };
+  return data.value ?? null; // base64 puro (sem prefixo data:)
 }
 
 export async function getConnectionStatus(
   instanceId: string,
-): Promise<'open' | 'close' | 'connecting'> {
-  const res = await fetch(`${BASE}/instance/connectionState/${instanceId}`, {
-    headers: H,
-  });
-  const data = await res.json();
-  return data.instance?.state ?? 'close';
+  token: string,
+): Promise<{ connected: boolean }> {
+  const res = await fetch(url(instanceId, token, '/status'));
+  if (!res.ok) return { connected: false };
+  const data = (await res.json()) as { connected?: boolean };
+  return { connected: !!data.connected };
 }
 
-export async function getQRCode(instanceId: string): Promise<string> {
-  const res = await fetch(`${BASE}/instance/connect/${instanceId}`, {
-    headers: H,
-  });
-  const data = await res.json();
-  return data.base64 ?? '';
+export async function disconnectInstance(
+  instanceId: string,
+  token: string,
+): Promise<void> {
+  await fetch(url(instanceId, token, '/disconnect'), { method: 'POST' });
 }
 ```
 
@@ -936,7 +1100,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 ```
 
-### middleware.ts
+### proxy.ts
+
+> **Nota (Next 16):** a convenção `middleware.ts` foi renomeada para
+> `proxy.ts` — o arquivo fica na raiz do projeto e o comportamento é
+> idêntico. Ver [migração oficial](https://nextjs.org/docs/messages/middleware-to-proxy).
 
 ```typescript
 import { auth } from '@/auth';
@@ -948,7 +1116,9 @@ export default auth((req) => {
   const isDashboard =
     path.startsWith('/dashboard') ||
     path.startsWith('/agenda') ||
-    path.startsWith('/configuracoes');
+    path.startsWith('/pacientes') ||
+    path.startsWith('/configuracoes') ||
+    path.startsWith('/onboarding');
   const isAuth = path.startsWith('/login') || path.startsWith('/register');
 
   if (isDashboard && !isLoggedIn)
@@ -1101,11 +1271,25 @@ export async function POST(req: NextRequest) {
 - `past_due` → IA pausada, dados preservados, banner no dashboard
 - `cancelled` → IA desativada, dados mantidos por 30 dias
 
-**WhatsApp:**
+**WhatsApp (Z-API):**
 
-- Telefone sempre no formato `5511999999999` (sem +, sem espaços, com DDI)
-- Ignorar mensagens com `fromMe: true` no webhook
-- Se `ai_enabled = false` ou plano inativo → ignorar silenciosamente
+- Telefone sempre no formato `5511999999999` (sem +, sem espaços, com DDI).
+- Ignorar mensagens com `fromMe: true` ou `isGroup: true` no webhook.
+- Validar header `client-token == ZAPI_CLIENT_TOKEN` em toda chamada ao webhook.
+- `instanceId` no webhook vem pela URL (`?instance=…`), configurada por
+  instância no painel Z-API.
+- Se `ai_enabled = false` ou plano inativo → ignorar silenciosamente.
+- Instância é criada manualmente no painel Z-API; `zapi_instance_id` e
+  `zapi_token` são salvos no banco depois que o profissional é ativado.
+- Se `zapi_instance_id` for `null` → UI orienta contatar suporte (não há
+  fluxo self-service de criação de instância).
+
+**Precificação e margem:**
+
+- Preço ao profissional: **R$297/mês** (inclui a instância Z-API embutida).
+- Custo Z-API: ~R$69/mês por cliente.
+- Outros custos (Supabase, Vercel, Anthropic): ~R$12/mês por cliente.
+- Margem bruta aproximada: **~72%**.
 
 ---
 
@@ -1120,42 +1304,7 @@ export async function POST(req: NextRequest) {
 | 4 — Pagamentos           | 9-10    | Pendente         |
 | 5 — Crescimento          | 11-12   | Pendente         |
 
-O checklist detalhado de cada sprint fica em [TASKS.md](TASKS.md) — veja a
-regra abaixo.
-
----
-
-⚠️ REGRA OBRIGATÓRIA — TASKS.md como fonte da verdade do backlog
-Esta regra tem prioridade igual à do README. Não existe exceção.
-
-A regra
-O arquivo `TASKS.md` na raiz do projeto é o backlog vivo do Zendoc. Ele lista
-todas as tarefas de cada sprint em formato de checklist (`- [ ]` / `- [x]`) e é
-a ÚNICA fonte da verdade do que está feito e do que falta.
-
-Toda vez que você (Claude Code):
-
-1. Terminar uma tarefa → marque a linha correspondente em `TASKS.md` como `- [x]`
-   antes de encerrar a resposta.
-2. Descobrir uma nova tarefa ou subtarefa necessária → adicione em `TASKS.md` no
-   sprint correto como `- [ ]`.
-3. Remover/cancelar uma tarefa → delete a linha (não deixe `[ ]` de tarefa morta).
-4. Ao abrir uma sessão nova → leia `TASKS.md` antes de decidir por onde
-   continuar, para retomar exatamente de onde pararam.
-
-Isso não é opcional. Se você codou algo listado em `TASKS.md`, marque o checkbox
-no mesmo commit. Nunca termine uma sessão com `TASKS.md` desatualizado.
-
-Formato
-```markdown
-## Sprint N — nome do sprint
-- [x] tarefa concluída
-- [ ] tarefa pendente
-  - [ ] subtarefa
-```
-
-Ao marcar uma tarefa, não remova nem reescreva o texto — só troque `[ ]` por
-`[x]`. Isso preserva o histórico legível via `git log`.
+O checklist detalhado de cada sprint fica em [TASKS.md](TASKS.md).
 
 ---
 
@@ -1164,9 +1313,12 @@ Ao marcar uma tarefa, não remova nem reescreva o texto — só troque `[ ]` por
 - TypeScript strict em todos os arquivos
 - **UI: sempre shadcn/ui.** Para qualquer componente visual (botão, input, select,
   dialog, card, switch, etc.) use os componentes de `components/ui/` instalados
-  via `npx shadcn@latest add <name>`. Nunca criar do zero `<button>`/`<input>`
+  via `npx shadcn@latest add <nome>`. Nunca criar do zero `<button>`/`<input>`
   estilizados manualmente quando existir equivalente shadcn. Wrappers por domínio
   (ex.: `components/onboarding/`) podem compor shadcn, mas não duplicá-lo.
+- **Design system IAzen:** ao estilizar componentes shadcn, usar os tokens de cor e
+  tipografia definidos na seção "Identidade visual" deste arquivo. Fundo escuro `#0A0A0F`,
+  acento `#4F6EF7`, display font Space Grotesk, body font Inter.
 - Toda API Route começa com: `const session = await auth()` → retorna 401 se não autenticado
 - Retornos sempre com `NextResponse.json()`
 - `SUPABASE_SERVICE_KEY` apenas em API Routes (server-side)
