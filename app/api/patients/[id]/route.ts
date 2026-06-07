@@ -2,14 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
+import { isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
 
 const phoneRegex = /^\d{11,13}$/;
 
 const patchSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   phone: z.string().regex(phoneRegex).optional(),
+  cpf: z.string().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
+
+/** Mensagem de conflito conforme o índice violado (cpf x telefone). */
+function uniqueConflictMessage(message?: string): string {
+  return message?.includes('cpf')
+    ? 'Já existe um paciente com este CPF.'
+    : 'Já existe um paciente com este telefone.';
+}
 
 async function getProfessionalId(userId: string) {
   const supabase = createServerClient();
@@ -83,6 +92,18 @@ export async function PATCH(
   const patch: Record<string, unknown> = {};
   if (parsed.data.name !== undefined) patch.name = parsed.data.name;
   if (parsed.data.phone !== undefined) patch.phone = parsed.data.phone;
+  if (parsed.data.cpf !== undefined) {
+    const raw = parsed.data.cpf;
+    if (raw == null || raw.trim() === '') {
+      patch.cpf = null;
+    } else {
+      const norm = normalizeCpf(raw);
+      if (!isValidCpf(norm)) {
+        return NextResponse.json({ error: 'CPF inválido.' }, { status: 400 });
+      }
+      patch.cpf = norm;
+    }
+  }
   if (parsed.data.notes !== undefined) patch.notes = parsed.data.notes?.trim() || null;
 
   if (Object.keys(patch).length === 0) {
@@ -101,7 +122,7 @@ export async function PATCH(
   if (error) {
     if (error.code === '23505') {
       return NextResponse.json(
-        { error: 'Já existe um paciente com este telefone.' },
+        { error: uniqueConflictMessage(error.message) },
         { status: 409 },
       );
     }

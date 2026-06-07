@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# rascunho de env com segredos — nunca commitar
+mock-env.md
+
 # vercel
 .vercel
 

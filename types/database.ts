@@ -89,6 +89,7 @@ export interface Patient {
   professional_id: string;
   name: string;
   phone: string;
+  cpf: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

@@ -20,20 +20,29 @@ export async function POST() {
     return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 404 });
   }
 
-  if (professional.zapi_instance_id && professional.zapi_token) {
+  if (professional.zapi_instance_id) {
     try {
       await disconnectInstance(
         professional.zapi_instance_id,
-        professional.zapi_token,
+        professional.zapi_token ?? '',
       );
     } catch (err) {
-      console.error('Erro ao desconectar Z-API (continuando com limpeza local):', err);
+      console.error(
+        'Erro ao desconectar Evolution (continuando com limpeza local):',
+        err,
+      );
     }
   }
 
+  // Instância foi removida no servidor — zera as credenciais para que o
+  // próximo "Conectar" provisione uma nova.
   await supabase
     .from('professionals')
-    .update({ whatsapp_connected: false })
+    .update({
+      whatsapp_connected: false,
+      zapi_instance_id: null,
+      zapi_token: null,
+    })
     .eq('id', professional.id);
 
   return NextResponse.json({ ok: true });

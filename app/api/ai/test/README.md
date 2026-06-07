@@ -3,6 +3,9 @@
 Endpoint de teste manual do fluxo de IA — útil para validar prompts, execução
 de ações e persistência de histórico enquanto o WhatsApp ainda não está plugado.
 
+Consumido pela UI de chat de teste em
+[/configuracoes/testar-ia](../../../(dashboard)/configuracoes/testar-ia/README.md).
+
 ## route.ts
 
 **Endpoint:** `POST /api/ai/test`
@@ -19,9 +22,30 @@ de ações e persistência de histórico enquanto o WhatsApp ainda não está pl
 - `phone` — somente dígitos, 11 a 13 caracteres (com DDI e DDD, sem `+`).
 - `message` — 1 a 2000 caracteres.
 
-**Resposta 200:** `{ "reply": "texto que seria enviado ao paciente" }`
+**Resposta 200:**
 
-**Erros:** 401 (sem sessão), 404 (sem perfil em `professionals`), 400
+```json
+{
+  "reply": "texto que seria enviado ao paciente",
+  "action": "book | cancel | reschedule | offer_slots | reply | approval_needed",
+  "booking": { "starts_at": "...", "ends_at": "..." },
+  "cancel": { "appointment_id": "..." },
+  "slots": ["..."]
+}
+```
+
+(`booking`/`cancel`/`slots` vêm `null` quando não se aplicam. A UI de teste usa
+`action` para mostrar o que a IA fez em cada resposta.)
+
+## DELETE /api/ai/test?phone=...
+
+Limpa o `conversation_history` de um telefone (o contexto que a IA enxerga) para
+o profissional logado. Não mexe em `appointments` — agendamentos feitos no teste
+continuam na agenda. Usado pelo botão "Limpar histórico" do chat de teste.
+
+**Resposta 200:** `{ "ok": true }`. **Erros:** 401, 404, 400 (telefone inválido), 500.
+
+**Erros (POST):** 401 (sem sessão), 404 (sem perfil em `professionals`), 400
 (validação), 500 (erro na IA ou no banco).
 
 **Comportamento:**

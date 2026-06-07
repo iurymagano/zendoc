@@ -15,6 +15,9 @@ import type {
 
 type BlockSource = { start: string; end: string; duration: number };
 
+/** Um horário disponível, com início e fim (para o agendamento copiar verbatim). */
+export type Slot = { start: Date; end: Date };
+
 function buildBlocks(
   date: Date,
   weekly: AvailabilityWeekly[] | null,
@@ -44,10 +47,10 @@ function buildBlocks(
 export async function getAvailableSlots(
   professionalId: string,
   days = 14,
-): Promise<Date[]> {
+): Promise<Slot[]> {
   const supabase = createServerClient();
   const now = new Date();
-  const slots: Date[] = [];
+  const slots: Slot[] = [];
 
   const { data: weekly } = await supabase
     .from('availability_weekly')
@@ -99,7 +102,9 @@ export async function getAvailableSlots(
           return slot < e && slotEnd > s;
         });
 
-        if (!hasConflict && slot > now) slots.push(new Date(slot));
+        if (!hasConflict && slot > now) {
+          slots.push({ start: new Date(slot), end: new Date(slotEnd) });
+        }
         slot = addMinutes(slot, block.duration);
       }
     }

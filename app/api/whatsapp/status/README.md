@@ -16,18 +16,19 @@
 }
 ```
 
-- `provisioned` — `true` se `zapi_instance_id` e `zapi_token` existirem no
-  banco. Se `false`, a UI orienta o profissional a contactar o suporte.
-- `connected` — resultado de `GET /status` na Z-API. Também sincroniza
-  `professionals.whatsapp_connected` no banco a cada chamada.
+- `provisioned` — `true` se `zapi_instance_id` existir no banco. Se `false`, a
+  UI mostra o botão "Conectar WhatsApp" (que provisiona via `/connect`).
+- `connected` — resultado de `GET /instance/connectionState` na Evolution
+  (`state === 'open'`). Sincroniza `professionals.whatsapp_connected` a cada
+  chamada.
 - `qrcode` — quando `connected = false`, traz o QR atual via
-  `GET /qr-code/image` na Z-API. Quando `connected = true`, vem `null`.
+  `GET /instance/connect`. Quando `connected = true`, vem `null`.
 
-**Erros:** `401`, `404` (perfil), `500` (erro da Z-API).
+**Erros:** `401`, `404` (perfil), `500` (erro da Evolution).
 
 **Notas:**
 
-- A UI de `/configuracoes/whatsapp` faz polling desse endpoint a cada 3s
-  enquanto aguarda scan. Quando `connected = true`, o polling é encerrado.
-- Como a Z-API não envia `connection.update` via webhook, é esta rota que
-  detecta a conexão (no próximo poll após o scan).
+- A UI faz polling deste endpoint a cada 3s enquanto aguarda scan; ao
+  `connected = true`, encerra.
+- `zapi_token` pode ser `null` (as chamadas caem para a `EVOLUTION_API_KEY`
+  global) — não bloqueia a consulta.

@@ -8,10 +8,11 @@
 
 **Efeito:**
 
-1. Se `zapi_instance_id` e `zapi_token` existirem, chama `disconnectInstance()`
-   na Z-API (`POST /disconnect`). Erros são logados mas não bloqueiam a
-   limpeza local.
-2. Marca `professionals.whatsapp_connected = false` no banco.
+1. Se `zapi_instance_id` existir, chama `disconnectInstance()` —
+   `DELETE /instance/logout` + `DELETE /instance/delete` na Evolution. Erros
+   são logados mas não bloqueiam a limpeza local.
+2. Zera no banco: `whatsapp_connected = false`, `zapi_instance_id = null`,
+   `zapi_token = null`.
 
 **Resposta 200:** `{ ok: true }`.
 
@@ -19,9 +20,10 @@
 
 **Notas:**
 
-- Diferente da versão Evolution, **não apaga** a instância — Z-API mantém a
-  instância provisionada. O profissional pode reconectar depois escaneando
-  um novo QR sem precisar do suporte.
-- Após desconectar, a IA imediatamente para de responder e o cron de
-  lembretes marca lembretes pendentes como `failed` com motivo "WhatsApp não
-  conectado".
+- **Remove a instância** no servidor (libera o slot). Por isso as colunas são
+  zeradas — o próximo "Conectar" cria uma instância nova do zero.
+- Após desconectar, a IA para de responder e o cron de lembretes marca
+  pendentes como `failed` com motivo "WhatsApp não conectado".
+
+**Depende de:** `@/auth`, `@/lib/supabase`, `@/lib/zapi/client`
+(`disconnectInstance`).

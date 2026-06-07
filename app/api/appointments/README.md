@@ -41,6 +41,7 @@ Cria um appointment manual (`booked_via = 'manual'`, `status = 'scheduled'`).
 {
   "patient_name": "Maria Silva",
   "patient_phone": "5511999998888",
+  "cpf": "390.533.447-05",
   "starts_at": "2026-05-10T10:00:00-03:00",
   "ends_at":   "2026-05-10T10:50:00-03:00",
   "notes": "primeira consulta (opcional)"
@@ -49,6 +50,9 @@ Cria um appointment manual (`booked_via = 'manual'`, `status = 'scheduled'`).
 
 - Paciente é **reaproveitado por telefone** (upsert em
   `patients(professional_id, phone)`) — mesmo comportamento que o fluxo da IA.
+- `cpf` opcional (validado por checksum). Quando informado, é gravado no
+  paciente durante o upsert; quando ausente, **não** sobrescreve um CPF já
+  cadastrado.
 - Timestamps precisam ter offset (`-03:00`). O cliente
   [`/agenda`](../../(dashboard)/agenda/README.md) converte `datetime-local` +
   `:00-03:00` antes de enviar.
@@ -57,7 +61,7 @@ Cria um appointment manual (`booked_via = 'manual'`, `status = 'scheduled'`).
 
 **Erros:**
 
-- `400` — validação Zod falhou (inclui `ends_at <= starts_at`).
+- `400` — validação Zod falhou (inclui `ends_at <= starts_at`) ou CPF inválido.
 - `409` — conflito com outro appointment ativo no mesmo horário (checagem
   em [lib/appointments/conflicts.ts](../../../lib/appointments/conflicts.ts)).
 

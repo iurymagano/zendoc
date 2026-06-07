@@ -14,15 +14,17 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
 import type { Patient } from '@/types/database';
 
 type FormState = {
   name: string;
   phone: string;
+  cpf: string;
   notes: string;
 };
 
-const EMPTY_FORM: FormState = { name: '', phone: '', notes: '' };
+const EMPTY_FORM: FormState = { name: '', phone: '', cpf: '', notes: '' };
 
 function formatPhone(raw: string): string {
   const d = raw.replace(/\D/g, '');
@@ -62,10 +64,12 @@ export default function PatientsPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return patients;
+    const digits = q.replace(/\D/g, '');
     return patients.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
-        p.phone.toLowerCase().includes(q),
+        p.phone.toLowerCase().includes(q) ||
+        (!!digits && !!p.cpf && p.cpf.includes(digits)),
     );
   }, [patients, search]);
 
@@ -89,6 +93,7 @@ export default function PatientsPage() {
     setForm({
       name: patient.name,
       phone: patient.phone,
+      cpf: patient.cpf ? formatCpf(patient.cpf) : '',
       notes: patient.notes ?? '',
     });
     setError(null);
@@ -115,6 +120,11 @@ export default function PatientsPage() {
       setError('Nome é obrigatório.');
       return;
     }
+    const cpf = normalizeCpf(form.cpf);
+    if (cpf && !isValidCpf(cpf)) {
+      setError('CPF inválido.');
+      return;
+    }
 
     setSaving(true);
     const url = editingId ? `/api/patients/${editingId}` : '/api/patients';
@@ -125,6 +135,7 @@ export default function PatientsPage() {
       body: JSON.stringify({
         name: form.name.trim(),
         phone,
+        cpf: cpf || null,
         notes: form.notes.trim() || null,
       }),
     });
@@ -197,6 +208,17 @@ export default function PatientsPage() {
                       required
                     />
                   </FormField>
+                  <FormField label="CPF (opcional)" htmlFor="pat_cpf">
+                    <Input
+                      id="pat_cpf"
+                      value={form.cpf}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, cpf: maskCpfInput(e.target.value) }))
+                      }
+                      placeholder="000.000.000-00"
+                      inputMode="numeric"
+                    />
+                  </FormField>
                 </div>
 
                 <FormField label="Anotações (opcional)" htmlFor="pat_notes">
@@ -248,7 +270,7 @@ export default function PatientsPage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <Input
-              placeholder="Buscar por nome ou telefone…"
+              placeholder="Buscar por nome, telefone ou CPF…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -276,6 +298,7 @@ export default function PatientsPage() {
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatPhone(p.phone)}
+                        {p.cpf ? ` · CPF ${formatCpf(p.cpf)}` : ''}
                         {p.notes ? ` · ${p.notes}` : ''}
                       </span>
                     </div>

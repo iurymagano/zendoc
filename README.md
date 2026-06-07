@@ -22,6 +22,9 @@ npm run dev                   # http://localhost:3000
 - `npm run build` — build de produção
 - `npm start` — servidor de produção
 - `npm run lint` — ESLint
+- `npm run tunnel` — expõe `localhost:3000` numa URL pública (via cloudflared,
+  baixado on-demand pelo `untun`) para a Evolution alcançar o webhook em dev.
+  Use a URL impressa como `NEXT_PUBLIC_URL` no `.env.local`.
 
 ## Estrutura
 
@@ -31,6 +34,8 @@ iazen/
 ├── components/          Componentes React
 ├── lib/                 Módulos de domínio (supabase, ai, zapi, availability)
 ├── types/               Tipos TypeScript compartilhados
+├── supabase/            SQL: schema.sql + migrations/
+├── infra/               Infra self-hosted (Evolution API via Docker)
 ├── auth.ts              Configuração NextAuth
 ├── proxy.ts             Proteção de rotas (Next 16: era middleware.ts)
 └── vercel.json          Configuração de deploy
@@ -60,6 +65,12 @@ Arquivos relevantes:
 
 ### Supabase
 
-Rode o SQL completo descrito em [CLAUDE.md](./CLAUDE.md#banco-de-dados--schema-sql-completo)
-no SQL Editor do Supabase antes do primeiro deploy — isso cria todas as tabelas,
-triggers e políticas RLS.
+Rode [supabase/schema.sql](./supabase/schema.sql) no SQL Editor do Supabase
+antes do primeiro deploy — cria todas as tabelas, triggers e políticas RLS. Em
+bancos já provisionados, aplique as migrations em [supabase/migrations/](./supabase/migrations/).
+
+### WhatsApp (Evolution API)
+
+A Evolution API é self-hosted — suba o servidor com o Docker Compose em
+[infra/evolution/](./infra/evolution/) e configure `EVOLUTION_API_URL`,
+`EVOLUTION_API_KEY` e `WEBHOOK_SECRET` no `.env.local`/Vercel.

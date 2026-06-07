@@ -1,41 +1,39 @@
 # app/api/whatsapp/
 
-Endpoints de integração com a **Z-API** (SaaS). Cada profissional tem uma
-instância Z-API provisionada manualmente no painel z-api.io, com credenciais
-(`zapi_instance_id` e `zapi_token`) salvas em `professionals`.
+Endpoints de integração com a **Evolution API** (self-hosted). Cada
+profissional tem uma instância criada **via API** no primeiro "Conectar", com
+`instanceName`/`apikey` salvos em `professionals` (`zapi_instance_id` /
+`zapi_token`).
 
 ## Subpastas
 
-- [connect/](./connect/) — `POST` busca o QR Code atual da Z-API.
+- [connect/](./connect/) — `POST` cria a instância (se não existir) e devolve o
+  QR; se já existe, só busca o QR atual.
 - [status/](./status/) — `GET` consulta estado de conexão, sincroniza
   `whatsapp_connected` e, quando desconectado, devolve o QR junto.
-- [disconnect/](./disconnect/) — `POST` desconecta a instância na Z-API (não
-  apaga — instâncias são gerenciadas manualmente).
-- [webhook/](./webhook/) — `POST` público, autenticado por header
-  `client-token`, recebe mensagens recebidas pela Z-API e roteia para a IA.
+- [disconnect/](./disconnect/) — `POST` desloga + remove a instância na
+  Evolution e zera as colunas (`zapi_instance_id`/`zapi_token`).
+- [webhook/](./webhook/) — `POST` público, autenticado por `?secret=`, recebe
+  `messages.upsert` da Evolution e roteia para a IA.
 
 ## Fluxo
 
 1. Usuário acessa `/configuracoes/whatsapp`.
 2. UI chama `GET /api/whatsapp/status`.
-3. Se `provisioned = false` → UI mostra "contato suporte".
+3. Se `provisioned = false` → UI mostra botão "Conectar WhatsApp" →
+   `POST /api/whatsapp/connect` cria a instância e devolve o QR.
 4. Se `connected = true` → UI mostra "conectado" + botão desconectar.
-5. Se não conectado → UI mostra QR code (vindo do `status`) e faz polling a
-   cada 3s até conectar.
-6. Quando o profissional escaneia → Z-API marca `open` internamente; na
-   próxima chamada de status, o IAzen detecta e marca `whatsapp_connected=true`.
-7. Mensagens recebidas pela Z-API chegam no webhook → roteadas para
-   `processWhatsAppMessage` → IA responde → `sendWhatsAppMessage` envia de
-   volta.
+5. Se não conectado → UI mostra o QR e faz polling no `status` a cada 3s.
+6. Quando o profissional escaneia → Evolution marca `open`; no próximo poll de
+   status o IAzen detecta e marca `whatsapp_connected = true`.
+7. Mensagens recebidas chegam no webhook → `processWhatsAppMessage` → IA
+   responde → `sendWhatsAppMessage` envia de volta.
 
 ## Notas
 
-- **Webhook é público** (Z-API precisa chamá-lo sem autenticação de sessão).
-  A proteção é via header `client-token` comparado com
-  `process.env.ZAPI_CLIENT_TOKEN` — configurado no painel Z-API em
-  Configurações → Webhooks.
-- O `instanceId` alvo do webhook vem via query string
-  (`?instance=…`), configurada por instância no painel Z-API (cada instância
-  aponta para uma URL específica).
-- Mensagens de grupos (`isGroup: true`) e ecos do próprio número
-  (`fromMe: true`) são ignorados.
+- **Webhook é público** (a Evolution precisa chamá-lo sem sessão). A proteção é
+  o `?secret=` comparado com `process.env.WEBHOOK_SECRET`, registrado na URL do
+  webhook no `POST /instance/create`.
+- O `instanceName` alvo vem no corpo do evento (`body.instance`).
+- Mensagens de grupo (`remoteJid` em `@g.us`) e ecos próprios
+  (`data.key.fromMe`) são ignorados.

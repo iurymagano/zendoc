@@ -129,11 +129,7 @@ async function handle(req: NextRequest) {
       continue;
     }
 
-    if (
-      !prof.zapi_instance_id ||
-      !prof.zapi_token ||
-      !prof.whatsapp_connected
-    ) {
+    if (!prof.zapi_instance_id || !prof.whatsapp_connected) {
       await supabase
         .from('reminders')
         .update({
@@ -150,7 +146,7 @@ async function handle(req: NextRequest) {
     try {
       await sendWhatsAppMessage(
         prof.zapi_instance_id,
-        prof.zapi_token,
+        prof.zapi_token ?? '',
         appt.patient_phone,
         text,
       );

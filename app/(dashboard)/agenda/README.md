@@ -36,11 +36,14 @@ daquela data.
 - Botão "Novo agendamento" abre um formulário inline no topo da página
   (nome + telefone + `datetime-local` início/fim + notas).
 - O input de nome do paciente tem autocomplete: ao focar ou digitar, mostra
-  sugestões de pacientes já cadastrados (filtra por nome OU telefone).
-  Clicar em uma sugestão preenche nome + telefone de uma vez. A lista de
-  pacientes é carregada via `GET /api/patients` no mount da página e
-  atualizada após cada criação de agendamento (cobre o caso de criar
-  paciente novo pelo próprio form da agenda).
+  sugestões de pacientes já cadastrados (filtra por nome OU telefone) e exibe
+  telefone + CPF de cada sugestão. Clicar em uma sugestão preenche nome,
+  telefone e CPF de uma vez. A lista de pacientes é carregada via
+  `GET /api/patients` no mount da página e atualizada após cada criação de
+  agendamento (cobre o caso de criar paciente novo pelo próprio form da agenda).
+- Campo CPF opcional com máscara `000.000.000-00` (validado por checksum no
+  submit). Quando informado, é gravado no paciente via upsert no
+  `POST /api/appointments`; não é editável pelo `PATCH` de appointment.
 - Ao preencher o início, o fim é auto-preenchido para `+50min` (apenas se
   estava vazio ou inválido).
 - Botão "Editar" em cada item abre o mesmo formulário pré-preenchido e

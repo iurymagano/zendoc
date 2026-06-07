@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { hasAppointmentConflict } from '@/lib/appointments/conflicts';
+import { isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const phoneRegex = /^\d{11,13}$/;
@@ -16,6 +17,7 @@ const createSchema = z
   .object({
     patient_name: z.string().trim().min(1).max(120),
     patient_phone: z.string().regex(phoneRegex),
+    cpf: z.string().nullable().optional(),
     starts_at: z.string().datetime({ offset: true }),
     ends_at: z.string().datetime({ offset: true }),
     notes: z.string().max(2000).nullable().optional(),
@@ -100,7 +102,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Dados inválidos.' }, { status: 400 });
   }
 
-  const { patient_name, patient_phone, starts_at, ends_at, notes } = parsed.data;
+  const { patient_name, patient_phone, cpf, starts_at, ends_at, notes } =
+    parsed.data;
+
+  let normalizedCpf: string | null = null;
+  if (cpf != null && cpf.trim() !== '') {
+    normalizedCpf = normalizeCpf(cpf);
+    if (!isValidCpf(normalizedCpf)) {
+      return NextResponse.json({ error: 'CPF inválido.' }, { status: 400 });
+    }
+  }
 
   if (await hasAppointmentConflict(professionalId, starts_at, ends_at)) {
     return NextResponse.json(
@@ -117,6 +128,8 @@ export async function POST(req: NextRequest) {
         professional_id: professionalId,
         phone: patient_phone,
         name: patient_name,
+        // só grava CPF quando informado — não apaga um já existente no upsert
+        ...(normalizedCpf ? { cpf: normalizedCpf } : {}),
       },
       { onConflict: 'professional_id,phone' },
     )

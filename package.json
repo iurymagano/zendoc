@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "tunnel": "npx --yes untun@latest tunnel http://localhost:3000"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",

@@ -15,7 +15,7 @@ criar/editar pacientes.
    (`PATCH /api/patients/:id`).
 4. Botão "Excluir" pede confirmação via `window.confirm` e chama
    `DELETE /api/patients/:id`.
-5. Busca local por nome ou telefone filtra a lista já carregada (não
+5. Busca local por nome, telefone ou CPF filtra a lista já carregada (não
    refaz `GET` — assume que o volume é baixo para o MVP).
 
 **Formatação:**
@@ -23,11 +23,15 @@ criar/editar pacientes.
 - Telefone armazenado como dígitos puros no banco (`5511999998888`), mas
   renderizado na lista como `(11) 99999-8888` ou `+55 (11) 99999-8888`
   dependendo do tamanho.
+- CPF é opcional. O input usa `maskCpfInput` (máscara `000.000.000-00` ao
+  digitar) e é validado por checksum no submit; persiste só com dígitos. Na
+  lista aparece como `CPF 000.000.000-00` quando preenchido.
 - No submit, qualquer caractere não-dígito é removido antes de enviar à API.
 
 **Depende de:**
 
 - `@/components/ui/{button,input,textarea,card,form-field}`
+- `@/lib/patients/cpf` (`formatCpf`, `isValidCpf`, `maskCpfInput`, `normalizeCpf`)
 - `GET|POST /api/patients`, `PATCH|DELETE /api/patients/[id]`
 
 **Notas:**

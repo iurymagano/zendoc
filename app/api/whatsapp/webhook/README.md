@@ -1,49 +1,50 @@
 # app/api/whatsapp/webhook/
 
-Endpoint **público** — recebe eventos `on-message-received` da **Z-API**.
+Endpoint **público** — recebe eventos `messages.upsert` da **Evolution API**.
 
 ## route.ts
 
-**Endpoint:** `POST /api/whatsapp/webhook?instance={zapi_instance_id}`
+**Endpoint:** `POST /api/whatsapp/webhook?secret={WEBHOOK_SECRET}`
 
-**Autenticação:** header `client-token` deve bater com
-`process.env.ZAPI_CLIENT_TOKEN`. Sem match → 401. Configurado no painel
-Z-API em Configurações → Webhooks.
+**Autenticação:** `?secret=` da URL deve bater com
+`process.env.WEBHOOK_SECRET`. Sem match → 401. A URL (com o secret) é
+registrada no `POST /instance/create`.
 
-**Payload esperado (formato Z-API):**
+**Payload esperado (formato Evolution):**
 
 ```json
 {
-  "phone": "5511999999999",
-  "text": { "message": "texto da mensagem" },
-  "fromMe": false,
-  "isGroup": false
+  "event": "messages.upsert",
+  "instance": "iazen_<professionalId>",
+  "data": {
+    "key": { "remoteJid": "5511999999999@s.whatsapp.net", "fromMe": false },
+    "message": { "conversation": "texto da mensagem" }
+  }
 }
 ```
 
 **Fluxo:**
 
-1. Valida `client-token`. 401 se inválido.
-2. Ignora `fromMe: true` e `isGroup: true`.
-3. Lê `?instance=` da URL (a Z-API chama URLs diferentes por instância —
-   a URL com query é configurada em cada instância no painel).
-4. Extrai `body.phone` e `body.text.message`.
-5. Busca `professional` pelo `zapi_instance_id`. Descarta se ausente.
-6. Descarta se `ai_enabled = false` ou plano `past_due`/`cancelled`.
-7. Descarta com log se `zapi_token` estiver ausente (inconsistência de dados).
-8. Chama `processWhatsAppMessage(professional, phone, message)` — mesmo
-   processor usado pelo `POST /api/ai/test`.
-9. Responde via `sendWhatsAppMessage(instanceId, token, phone, reply)`.
+1. Valida `?secret=`. 401 se inválido.
+2. Ignora eventos que não sejam `messages.upsert`.
+3. `data` pode vir como objeto ou array (pega o primeiro).
+4. Ignora `data.key.fromMe = true` e `remoteJid` em `@g.us` (grupo).
+5. Extrai telefone do `remoteJid` (dígitos antes do `@`) e o texto de
+   `message.conversation` ou `message.extendedTextMessage.text`.
+6. Lê `body.instance` e busca `professional` por `zapi_instance_id`.
+7. Descarta se ausente, `ai_enabled = false` ou plano `past_due`/`cancelled`.
+8. `processWhatsAppMessage(professional, phone, message)` — mesmo processor do
+   `POST /api/ai/test`.
+9. Responde via `sendWhatsAppMessage(instanceName, token, phone, reply)`.
 
-**Retorna sempre `200 { ok: true }`** (exceto 401 de token inválido) para
-evitar retries da Z-API. Erros durante processamento só são logados.
+**Retorna sempre `200 { ok: true }`** (exceto 401), para evitar retries.
+Erros de processamento só são logados.
 
-**Configuração no painel Z-API:**
+**Configuração na Evolution:**
 
-- URL: `https://sua-url.com/api/whatsapp/webhook?instance={INSTANCE_ID}`
-  (substitua `{INSTANCE_ID}` pelo id daquela instância).
-- Enviar Client-Token: ativo; valor = `ZAPI_CLIENT_TOKEN`.
-- Ativar apenas o evento "Ao receber".
+- O webhook é registrado automaticamente no `createInstance` com a URL
+  `${NEXT_PUBLIC_URL}/api/whatsapp/webhook?secret=${WEBHOOK_SECRET}` e os
+  eventos `MESSAGES_UPSERT` / `CONNECTION_UPDATE`.
 
 **Depende de:**
 

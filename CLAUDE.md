@@ -71,7 +71,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
 | UI library         | shadcn/ui (Radix + Tailwind)                  | Instalado via CLI — não reinventar |
 | Banco de dados     | Supabase (Postgres + Auth + Realtime)         | RLS em todas as tabelas            |
 | Autenticação       | NextAuth.js v5                                | Email/senha + Google OAuth         |
-| WhatsApp           | Z-API (SaaS gerenciado)                       | Uma instância por cliente, ~R$69/mês |
+| WhatsApp           | Evolution API (self-hosted, Baileys/QR)       | Uma instância por cliente, criada via API |
 | IA                 | Anthropic Claude API                          | Modelo: claude-sonnet-4-20250514   |
 | Pagamentos         | Stripe                                        | Assinaturas + trial + webhooks     |
 | Deploy frontend    | Vercel                                        | Deploy automático via GitHub       |
@@ -216,14 +216,18 @@ GOOGLE_CLIENT_SECRET=GOCSPX-...
 
 # Anthropic
 ANTHROPIC_API_KEY=sk-ant-...
+AI_MODEL=claude-sonnet-4-20250514   # opcional; no dev use claude-haiku-4-5 p/ economizar
+AI_DEBUG=                           # opcional; "1" loga tokens/cache hits no console
 
 # Stripe
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_ID=price_...           # ID do produto R$297/mês
 
-# Z-API (WhatsApp)
-ZAPI_CLIENT_TOKEN=                  # token fixo do cliente Z-API, enviado no header `client-token` do webhook
+# Evolution API (WhatsApp self-hosted)
+EVOLUTION_API_URL=https://evo.iazen.com.br   # base do servidor Evolution
+EVOLUTION_API_KEY=                           # AUTHENTICATION_API_KEY global do servidor
+WEBHOOK_SECRET=                              # segredo validado no ?secret= do webhook
 
 # App
 NEXT_PUBLIC_URL=http://localhost:3000
@@ -299,11 +303,15 @@ create table patients (
   professional_id   uuid references professionals on delete cascade not null,
   name              text not null,
   phone             text not null,
+  cpf               text,
   notes             text,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
   unique (professional_id, phone)
 );
+create unique index patients_professional_cpf_idx
+  on patients(professional_id, cpf)
+  where cpf is not null;
 
 -- APPOINTMENTS
 create table appointments (
@@ -521,6 +529,7 @@ export interface Patient {
   professional_id: string;
   name: string;
   phone: string;
+  cpf: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -594,15 +603,22 @@ export function createBrowserClient() {
 
 ```typescript
 import type { Professional } from '@/types/database';
+import type { Slot } from '@/lib/availability/slots';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export function buildSystemPrompt(
   professional: Professional,
-  availableSlots: Date[],
+  availableSlots: Slot[],
 ): string {
+  // Cada horário traz o ISO exato (com ano + offset -03:00) para a IA COPIAR —
+  // sem isso ela montava o ISO na mão e chutava o ano errado.
   const slotList = availableSlots
-    .map((s) => format(s, "EEEE, dd 'de' MMMM 'às' HH:mm", { locale: ptBR }))
+    .map((s) => {
+      const label = format(s.start, "EEEE, dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR });
+      const iso = (d) => `${format(d, "yyyy-MM-dd'T'HH:mm:ss")}-03:00`;
+      return `- ${label} (starts_at=${iso(s.start)} ends_at=${iso(s.end)})`;
+    })
     .join('\n');
 
   const tone =
@@ -621,6 +637,8 @@ ${slotList || 'Nenhum horário disponível no momento.'}
 
 REGRAS:
 - Só ofereça horários da lista acima. Nunca invente horários.
+- Ao agendar/remarcar, copie EXATAMENTE starts_at e ends_at do horário escolhido
+  (na lista). Nunca construa nem altere a data/hora — use o ISO exato, com ano.
 - Responda em no máximo 3 frases.
 - Para cancelamentos, só cancele consultas futuras.
 
@@ -646,6 +664,9 @@ import type { Professional, AIResponse } from '@/types/database';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+// Modelo configurável por env (default Sonnet; dev pode usar claude-haiku-4-5).
+const AI_MODEL = process.env.AI_MODEL ?? 'claude-sonnet-4-20250514';
+
 export async function processWhatsAppMessage(
   professional: Professional,
   patientPhone: string,
@@ -666,9 +687,13 @@ export async function processWhatsAppMessage(
   const systemPrompt = buildSystemPrompt(professional, slots);
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: AI_MODEL,
     max_tokens: 1000,
-    system: systemPrompt,
+    // cache_control → prefixo estável (perfil + regras + slots) cacheado,
+    // ~10% do custo nas mensagens seguintes da conversa (TTL 5 min).
+    system: [
+      { type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } },
+    ],
     messages: [
       ...messages.map((m) => ({
         role: m.role as 'user' | 'assistant',
@@ -778,182 +803,87 @@ export async function executeAction(
 
 ---
 
-## Integração WhatsApp — Z-API
+## Integração WhatsApp — Evolution API (self-hosted)
 
-O IAzen usa a **Z-API** (SaaS em `api.z-api.io`) como provedor de WhatsApp.
-Cada profissional tem sua própria instância Z-API, gerenciada por nós
-(admins), não pelo profissional.
+O IAzen usa a **Evolution API** (open source, self-hosted, baseada em
+Baileys/QR) como provedor de WhatsApp. Um único servidor Evolution hospeda
+todas as instâncias — uma por profissional.
+
+> **Por que Evolution e não Z-API:** a Z-API exigia criar cada instância
+> manualmente no painel (sem API de provisionamento). A Evolution expõe
+> `POST /instance/create`, o que permite onboarding **self-service**: a
+> instância é criada na hora em que o profissional clica "Conectar WhatsApp".
+> Trade-off: é não-oficial (risco de ban do número). Migração futura para a
+> Cloud API oficial (BSP) segue como evolução — tudo isolado em
+> `lib/zapi/client.ts`.
 
 **Modelo operacional:**
 
-- Instâncias criadas manualmente no painel `z-api.io` pela equipe IAzen.
-- `instanceId` e `token` salvos na tabela `professionals` (campos
-  `zapi_instance_id` e `zapi_token`).
-- O profissional nunca acessa a Z-API — tudo acontece dentro do IAzen.
-- O QR Code é exibido diretamente na tela `/configuracoes/whatsapp`.
+- Instância criada **via API** no primeiro "Conectar" (`POST /api/whatsapp/connect`).
+- `instanceName` e a `apikey` da instância são salvos em `professionals`
+  (campos reaproveitados `zapi_instance_id` e `zapi_token`).
+- `instanceName` segue o padrão `iazen_<professionalId>`.
+- O profissional nunca acessa a Evolution — QR exibido em `/configuracoes/whatsapp`.
 
-**Credenciais por profissional (tabela `professionals`):**
+**Credenciais (env do servidor, não por profissional):**
 
-- `zapi_instance_id` → Instance ID da Z-API (ex.: `3F1F16CF3A3011713AE6BA4D31290A14`)
-- `zapi_token` → Token daquela instância (ex.: `CB90B72324299A97CB94BA0A`)
+- `EVOLUTION_API_URL` → base do servidor Evolution (ex.: `https://evo.iazen.com.br`)
+- `EVOLUTION_API_KEY` → `AUTHENTICATION_API_KEY` global do servidor
+- `WEBHOOK_SECRET` → segredo validado no `?secret=` do webhook
 
-**Base URL:** `https://api.z-api.io`
+**Colunas por profissional (tabela `professionals`, reaproveitadas):**
 
-**Endpoints Z-API usados:**
+- `zapi_instance_id` → `instanceName` da Evolution (ex.: `iazen_<uuid>`)
+- `zapi_token` → `apikey`/hash daquela instância (pode ser `null`; nesse caso
+  as chamadas usam a `EVOLUTION_API_KEY` global)
 
-| Ação               | Método | URL                                                          |
-| ------------------ | ------ | ------------------------------------------------------------ |
-| Buscar QR Code     | GET    | `/instances/{instanceId}/token/{token}/qr-code/image`        |
-| Status da conexão  | GET    | `/instances/{instanceId}/token/{token}/status`               |
-| Enviar mensagem    | POST   | `/instances/{instanceId}/token/{token}/send-text`            |
-| Desconectar        | POST   | `/instances/{instanceId}/token/{token}/disconnect`           |
+**Endpoints Evolution usados (header `apikey`):**
 
-**Formato de envio de mensagem:**
+| Ação              | Método | URL                                      |
+| ----------------- | ------ | ---------------------------------------- |
+| Criar instância   | POST   | `/instance/create`                       |
+| Buscar QR Code    | GET    | `/instance/connect/{instanceName}`       |
+| Status da conexão | GET    | `/instance/connectionState/{instanceName}` |
+| Enviar mensagem   | POST   | `/message/sendText/{instanceName}`       |
+| Deslogar          | DELETE | `/instance/logout/{instanceName}`        |
+| Remover instância | DELETE | `/instance/delete/{instanceName}`        |
+
+**Formato de envio de mensagem (`/message/sendText`):**
 
 ```json
-{ "phone": "5511999999999", "message": "texto da mensagem" }
+{ "number": "5511999999999", "text": "texto da mensagem" }
 ```
 
-**Formato do webhook recebido (mensagem do paciente):**
+**Formato do webhook recebido (`messages.upsert`):**
 
 ```json
 {
-  "phone": "5511999999999",
-  "text": { "message": "texto da mensagem" },
-  "fromMe": false,
-  "isGroup": false
+  "event": "messages.upsert",
+  "instance": "iazen_<professionalId>",
+  "data": {
+    "key": { "remoteJid": "5511999999999@s.whatsapp.net", "fromMe": false },
+    "message": { "conversation": "texto da mensagem" }
+  }
 }
 ```
+
+- Telefone vem em `data.key.remoteJid` (`<phone>@s.whatsapp.net`) — extrair só
+  os dígitos antes do `@`.
+- Texto: `data.message.conversation` ou `data.message.extendedTextMessage.text`.
+- Ignorar `data.key.fromMe === true` e `remoteJid` terminando em `@g.us` (grupo).
 
 **Segurança do webhook:**
 
-- Z-API envia o header `client-token` em todo webhook.
-- Validar esse header contra `process.env.ZAPI_CLIENT_TOKEN` antes de
-  processar qualquer evento. Sem match → 401.
-- Valor configurado no painel Z-API e armazenado em `ZAPI_CLIENT_TOKEN`.
-- O `instanceId` alvo vem pela URL configurada por instância no painel
-  (ex.: `https://app.iazen.com.br/api/whatsapp/webhook?instance={INSTANCE_ID}`).
+- A Evolution não envia header de auth — validamos o `?secret=` da URL contra
+  `process.env.WEBHOOK_SECRET`. Sem match → 401.
+- A URL do webhook (com `?secret=`) é registrada no `POST /instance/create`,
+  apontando para `${NEXT_PUBLIC_URL}/api/whatsapp/webhook`.
+- O `instanceName` alvo vem no corpo do evento (`body.instance`).
 
-### app/api/whatsapp/webhook/route.ts
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
-import { processWhatsAppMessage } from '@/lib/ai/processor';
-import { sendWhatsAppMessage } from '@/lib/zapi/client';
-import type { Professional } from '@/types/database';
-
-export async function POST(req: NextRequest) {
-  // 1. Valida o token fixo enviado pela Z-API em todo webhook
-  const clientToken = req.headers.get('client-token');
-  if (clientToken !== process.env.ZAPI_CLIENT_TOKEN) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-  }
-
-  const body = await req.json().catch(() => null);
-  if (!body || body.fromMe || body.isGroup) {
-    return NextResponse.json({ ok: true });
-  }
-
-  // 2. instanceId vem na URL configurada no painel Z-API (uma por instância)
-  const instanceId = req.nextUrl.searchParams.get('instance');
-  const patientPhone: string | undefined = body.phone;
-  const message: string | undefined = body.text?.message;
-
-  if (!instanceId || !patientPhone || !message) {
-    return NextResponse.json({ ok: true });
-  }
-
-  const supabase = createServerClient();
-  const { data: professional } = await supabase
-    .from('professionals')
-    .select('*')
-    .eq('zapi_instance_id', instanceId)
-    .maybeSingle<Professional>();
-
-  if (!professional || !professional.ai_enabled) {
-    return NextResponse.json({ ok: true });
-  }
-  if (!['trialing', 'active'].includes(professional.plan_status)) {
-    return NextResponse.json({ ok: true });
-  }
-
-  try {
-    const reply = await processWhatsAppMessage(
-      professional,
-      patientPhone,
-      message,
-    );
-    await sendWhatsAppMessage(
-      professional.zapi_instance_id!,
-      professional.zapi_token!,
-      patientPhone,
-      reply,
-    );
-  } catch (err) {
-    console.error('Erro ao processar mensagem WhatsApp:', err);
-  }
-
-  return NextResponse.json({ ok: true });
-}
-```
-
-### lib/zapi/client.ts
-
-```typescript
-const BASE = 'https://api.z-api.io';
-
-function url(instanceId: string, token: string, path: string): string {
-  return `${BASE}/instances/${instanceId}/token/${token}${path}`;
-}
-
-async function ensureOk(res: Response): Promise<unknown> {
-  if (res.ok) return res.json().catch(() => ({}));
-  const body = await res.text().catch(() => '');
-  throw new Error(`Z-API ${res.status}: ${body.slice(0, 200) || 'sem corpo'}`);
-}
-
-export async function sendWhatsAppMessage(
-  instanceId: string,
-  token: string,
-  phone: string,
-  message: string,
-): Promise<void> {
-  const res = await fetch(url(instanceId, token, '/send-text'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone, message }),
-  });
-  await ensureOk(res);
-}
-
-export async function getQRCode(
-  instanceId: string,
-  token: string,
-): Promise<string | null> {
-  const res = await fetch(url(instanceId, token, '/qr-code/image'));
-  if (!res.ok) return null;
-  const data = (await res.json()) as { value?: string };
-  return data.value ?? null; // base64 puro (sem prefixo data:)
-}
-
-export async function getConnectionStatus(
-  instanceId: string,
-  token: string,
-): Promise<{ connected: boolean }> {
-  const res = await fetch(url(instanceId, token, '/status'));
-  if (!res.ok) return { connected: false };
-  const data = (await res.json()) as { connected?: boolean };
-  return { connected: !!data.connected };
-}
-
-export async function disconnectInstance(
-  instanceId: string,
-  token: string,
-): Promise<void> {
-  await fetch(url(instanceId, token, '/disconnect'), { method: 'POST' });
-}
-```
+> O código real vive em `lib/zapi/client.ts` (cliente Evolution:
+> `createInstance`, `getQRCode`, `getConnectionStatus`, `sendWhatsAppMessage`,
+> `disconnectInstance`) e nas rotas `app/api/whatsapp/{connect,status,disconnect,webhook}`.
+> Os READMEs dessas pastas documentam o contrato detalhado.
 
 ---
 
@@ -1271,25 +1201,28 @@ export async function POST(req: NextRequest) {
 - `past_due` → IA pausada, dados preservados, banner no dashboard
 - `cancelled` → IA desativada, dados mantidos por 30 dias
 
-**WhatsApp (Z-API):**
+**WhatsApp (Evolution API):**
 
 - Telefone sempre no formato `5511999999999` (sem +, sem espaços, com DDI).
-- Ignorar mensagens com `fromMe: true` ou `isGroup: true` no webhook.
-- Validar header `client-token == ZAPI_CLIENT_TOKEN` em toda chamada ao webhook.
-- `instanceId` no webhook vem pela URL (`?instance=…`), configurada por
-  instância no painel Z-API.
+- Ignorar mensagens com `fromMe: true` ou de grupo (`remoteJid` em `@g.us`).
+- Validar `?secret= == WEBHOOK_SECRET` em toda chamada ao webhook.
+- `instanceName` no webhook vem no corpo (`body.instance`); a URL do webhook é
+  registrada no `POST /instance/create`.
 - Se `ai_enabled = false` ou plano inativo → ignorar silenciosamente.
-- Instância é criada manualmente no painel Z-API; `zapi_instance_id` e
-  `zapi_token` são salvos no banco depois que o profissional é ativado.
-- Se `zapi_instance_id` for `null` → UI orienta contatar suporte (não há
-  fluxo self-service de criação de instância).
+- Instância é criada **via API self-service** no primeiro "Conectar"
+  (`POST /api/whatsapp/connect`); `zapi_instance_id` (= instanceName) e
+  `zapi_token` (= apikey) são salvos nesse momento.
+- Se `zapi_instance_id` for `null` → UI mostra botão "Conectar WhatsApp" que
+  provisiona a instância na hora.
+- Desconectar deslogga + remove a instância no servidor e zera as colunas.
 
 **Precificação e margem:**
 
-- Preço ao profissional: **R$297/mês** (inclui a instância Z-API embutida).
-- Custo Z-API: ~R$69/mês por cliente.
+- Preço ao profissional: **R$297/mês**.
+- Custo de WhatsApp: servidor Evolution self-hosted rateado entre N instâncias
+  (cai bem abaixo dos ~R$69/mês/cliente da Z-API; melhora a margem).
 - Outros custos (Supabase, Vercel, Anthropic): ~R$12/mês por cliente.
-- Margem bruta aproximada: **~72%**.
+- Margem bruta aproximada: **>72%** (sobe com a Evolution self-hosted).
 
 ---
 

@@ -10,8 +10,11 @@ agendamentos existentes.
 
 **Exporta:**
 
-- `getAvailableSlots(professionalId: string, days = 14): Promise<Date[]>` —
-  lista de `Date` em ordem cronológica.
+- `type Slot = { start: Date; end: Date }`
+- `getAvailableSlots(professionalId: string, days = 14): Promise<Slot[]>` —
+  lista de `Slot` (início + fim) em ordem cronológica. O fim vem do
+  `slot_duration` do bloco; o prompt da IA usa os dois ISOs para o agendamento
+  copiar verbatim (evita a IA chutar ano/horário).
 
 **Depende de:** `@/lib/supabase`, `@/types/database`, `date-fns`.
 

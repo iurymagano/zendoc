@@ -15,7 +15,8 @@ usados em toda a aplicação.
   `AvailabilityException`, `Patient`, `Reminder`, `ConversationMessage`, `AIResponse`
 
 **Notas:** mantém paridade com o SQL em `CLAUDE.md`. Atualizar os dois lados em
-conjunto quando o schema mudar.
+conjunto quando o schema mudar. `Patient.cpf` é `string | null` (dígitos puros,
+sem máscara).
 
 ## next-auth.d.ts
 

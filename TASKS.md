@@ -78,6 +78,12 @@ Legenda:
 - [x] `lib/ai/executor.ts` (book / cancel / reschedule)
 - [x] Persistência de `conversation_history` (últimas 10 mensagens)
 - [x] `POST /api/ai/test` — endpoint para testar o fluxo sem WhatsApp
+- [x] Chat de teste na UI (`/configuracoes/testar-ia`) — simula um paciente e
+  conversa com a IA sem WhatsApp; usa telefone fake e consome `/api/ai/test`
+  - [x] Mostra a ação da IA por resposta (`processWhatsAppMessage` agora devolve
+    `AIResponse`; `/api/ai/test` expõe `action`) + botão "Limpar histórico" (DELETE)
+  - [x] Fix: IA chutava o ano (marcava em 2024). `getAvailableSlots` devolve
+    `Slot{start,end}` e o prompt lista o ISO exato p/ a IA copiar verbatim
 
 ### Lembretes
 
@@ -240,29 +246,58 @@ Legenda:
   para passar `zapi_token` no `sendWhatsAppMessage`
 - [x] Atualizar `.env.example` e `.env.local`: remover `EVOLUTION_API_URL`,
   `EVOLUTION_API_KEY`, `WEBHOOK_SECRET`; adicionar `ZAPI_CLIENT_TOKEN`
-- [ ] Adicionar `ZAPI_CLIENT_TOKEN` na Vercel (env var de produção)
-- [ ] Configurar webhook no painel Z-API: URL com
-  `?instance={INSTANCE_ID}` + Client-Token igual ao `ZAPI_CLIENT_TOKEN` +
-  evento "Ao receber" ativo
-- [ ] Provisionar instâncias Z-API dos beta testers manualmente no painel
-  z-api.io e salvar `zapi_instance_id` + `zapi_token` em `professionals`
-- [ ] Remover serviços Evolution API e WPPConnect do Railway após validação
-  do fluxo Z-API end-to-end
+### Migração Z-API → Evolution API (self-service por API)
+
+> Motivo: a Z-API não tinha API para criar instâncias (provisionamento manual
+> por número). A Evolution expõe `POST /instance/create` → onboarding
+> self-service. Colunas `zapi_*` reaproveitadas (instanceName / apikey).
+
+- [x] Reescrever [lib/zapi/client.ts](lib/zapi/client.ts) para Evolution
+  - [x] `createInstance(instanceName)` → `POST /instance/create` (qrcode +
+    webhook), devolve `{ instanceName, apiKey, qrcode }`
+  - [x] `getQRCode` → `GET /instance/connect/{name}` (busca QR confiável)
+  - [x] `getConnectionStatus` → `GET /instance/connectionState/{name}`
+    (`state === 'open'`)
+  - [x] `sendWhatsAppMessage` → `POST /message/sendText/{name}` (`{ number, text }`)
+  - [x] `disconnectInstance` → logout + delete
+  - [x] Propaga corpo de erro cru do Evolution (debug do QR em branco)
+- [x] `connect`: cria instância self-service se não existir e devolve QR
+- [x] `status`: provisioned = tem instância; token pode ser null (usa key global)
+- [x] `disconnect`: logout + delete + zera `zapi_instance_id`/`zapi_token`
+- [x] `webhook`: auth por `?secret=`, parsing `messages.upsert`
+  (`remoteJid`/`conversation`), ignora grupo e `fromMe`
+- [x] `/configuracoes/whatsapp`: estado `not_provisioned` vira botão "Conectar"
+- [x] Dispatch de lembretes não exige mais `zapi_token`
+- [x] `.env.local`: remover `ZAPI_CLIENT_TOKEN`; adicionar `EVOLUTION_API_URL`,
+  `EVOLUTION_API_KEY`, `WEBHOOK_SECRET`
+- [x] Atualizar [CLAUDE.md](CLAUDE.md) e READMEs (lib/zapi + app/api/whatsapp)
+- [x] Stack Docker da Evolution em `infra/evolution/` (compose + Postgres + Redis)
+- [x] Fix do QR em branco: fixar `CONFIG_SESSION_PHONE_VERSION` (versão do WhatsApp Web)
+- [x] Fix do LID (`@lid`): webhook responde no JID completo + imagem
+  `evoapicloud/evolution-api:v2.3.7` (a `atendai` parou no 2.2.3 c/ LID quebrado;
+  a 2.4.x exige licença). `senderIdentifier()` no webhook trata `@lid` x `@s.whatsapp.net`
+- [x] **Testar end-to-end local: conectar (criar instância + QR), mensagem de
+  número externo, resposta da IA entregue e persistência** ✅
+- [ ] Produção: hospedar servidor Evolution (Railway/VPS) e setar
+  `EVOLUTION_API_URL`/`EVOLUTION_API_KEY`/`WEBHOOK_SECRET` na Vercel
+- [ ] Em produção, `NEXT_PUBLIC_URL` = domínio público (não `host.docker.internal`)
 
 ### Cadastro rico de paciente
 
-- [ ] Adicionar campo **CPF** no cadastro de pacientes
-  - [ ] Migration SQL: `alter table patients add column cpf text;`
-  - [ ] Índice único parcial: `create unique index patients_professional_cpf_idx
+- [x] Adicionar campo **CPF** no cadastro de pacientes
+  - [x] Migration SQL: `alter table patients add column cpf text;`
+    (em `supabase/migrations/0001_patients_cpf.sql` + `schema.sql`)
+  - [x] Índice único parcial: `create unique index patients_professional_cpf_idx
     on patients(professional_id, cpf) where cpf is not null;`
-  - [ ] Atualizar `Patient` em [types/database.ts](types/database.ts)
-  - [ ] Validação server-side nos endpoints (`POST/PATCH /api/patients` e
+  - [x] Atualizar `Patient` em [types/database.ts](types/database.ts)
+  - [x] Validação server-side nos endpoints (`POST/PATCH /api/patients` e
     `POST /api/appointments`): 11 dígitos + checksum opcional
-  - [ ] Input com máscara `000.000.000-00` em
+    (em [lib/patients/cpf.ts](lib/patients/cpf.ts))
+  - [x] Input com máscara `000.000.000-00` em
     [/pacientes](app/(dashboard)/pacientes/page.tsx) e no form de
     [/agenda](app/(dashboard)/agenda/page.tsx)
-  - [ ] Exibir CPF na lista de pacientes e no autocomplete
-  - [ ] Atualizar o schema completo em [CLAUDE.md](CLAUDE.md)
+  - [x] Exibir CPF na lista de pacientes e no autocomplete
+  - [x] Atualizar o schema completo em [CLAUDE.md](CLAUDE.md)
 
 ### Histórico do paciente
 

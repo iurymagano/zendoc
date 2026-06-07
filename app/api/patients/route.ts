@@ -2,14 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
+import { isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
 
 const phoneRegex = /^\d{11,13}$/;
 
 const bodySchema = z.object({
   name: z.string().trim().min(1).max(120),
   phone: z.string().regex(phoneRegex),
+  cpf: z.string().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
+
+/**
+ * Normaliza/valida o CPF recebido. Vazio → null (campo opcional).
+ * Retorna `{ ok: true, cpf }` ou `{ ok: false }` se inválido.
+ */
+function parseCpf(
+  raw: string | null | undefined,
+): { ok: true; cpf: string | null } | { ok: false } {
+  if (raw == null || raw.trim() === '') return { ok: true, cpf: null };
+  const norm = normalizeCpf(raw);
+  if (!isValidCpf(norm)) return { ok: false };
+  return { ok: true, cpf: norm };
+}
+
+/** Mensagem de conflito conforme o índice violado (cpf x telefone). */
+function uniqueConflictMessage(message?: string): string {
+  return message?.includes('cpf')
+    ? 'Já existe um paciente com este CPF.'
+    : 'Já existe um paciente com este telefone.';
+}
 
 async function getProfessionalId(userId: string) {
   const supabase = createServerClient();
@@ -43,7 +65,10 @@ export async function GET(req: NextRequest) {
     .order('name');
 
   if (search) {
-    query = query.or(`name.ilike.%${search}%,phone.ilike.%${search}%`);
+    const digits = search.replace(/\D/g, '');
+    const clauses = [`name.ilike.%${search}%`, `phone.ilike.%${search}%`];
+    if (digits) clauses.push(`cpf.ilike.%${digits}%`);
+    query = query.or(clauses.join(','));
   }
 
   const { data, error } = await query;
@@ -75,6 +100,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Dados inválidos.' }, { status: 400 });
   }
 
+  const cpfResult = parseCpf(parsed.data.cpf);
+  if (!cpfResult.ok) {
+    return NextResponse.json({ error: 'CPF inválido.' }, { status: 400 });
+  }
+
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('patients')
@@ -82,6 +112,7 @@ export async function POST(req: NextRequest) {
       professional_id: professionalId,
       name: parsed.data.name,
       phone: parsed.data.phone,
+      cpf: cpfResult.cpf,
       notes: parsed.data.notes?.trim() || null,
     })
     .select()
@@ -90,7 +121,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     if (error.code === '23505') {
       return NextResponse.json(
-        { error: 'Já existe um paciente com este telefone.' },
+        { error: uniqueConflictMessage(error.message) },
         { status: 409 },
       );
     }

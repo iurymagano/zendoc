@@ -9,7 +9,9 @@ Rota dinâmica para operações em um paciente específico.
 - `GET /api/patients/:id` — retorna `{ patient }`. 404 se não for do
   profissional logado.
 - `PATCH /api/patients/:id` — atualiza parcial (qualquer subconjunto de
-  `name`, `phone`, `notes`). Envio vazio → 400.
+  `name`, `phone`, `cpf`, `notes`). Envio vazio → 400. `cpf` aceita com/sem
+  máscara (validado por checksum); `cpf: null`/`""` limpa o campo. CPF
+  inválido → 400.
 - `DELETE /api/patients/:id` — remove. Idempotente (não erra se já não
   existe). A FK em `appointments.patient_id` é `ON DELETE SET NULL`, então
   agendamentos antigos viram "paciente removido" mas preservam `patient_name`
@@ -21,5 +23,5 @@ RLS).
 
 **Erros:**
 
-- `409` no `PATCH` se o novo telefone colidir com outro paciente do mesmo
-  profissional.
+- `409` no `PATCH` se o novo telefone **ou CPF** colidir com outro paciente do
+  mesmo profissional (a mensagem diferencia o campo).

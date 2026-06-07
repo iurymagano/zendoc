@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
 import type {
   Appointment,
   AppointmentStatus,
@@ -51,6 +52,7 @@ const SOURCE_LABEL: Record<BookedVia, string> = {
 type FormState = {
   patient_name: string;
   patient_phone: string;
+  patient_cpf: string;
   starts_local: string;
   ends_local: string;
   notes: string;
@@ -59,6 +61,7 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   patient_name: '',
   patient_phone: '',
+  patient_cpf: '',
   starts_local: '',
   ends_local: '',
   notes: '',
@@ -221,6 +224,7 @@ export default function AgendaPage() {
       ...prev,
       patient_name: p.name,
       patient_phone: p.phone,
+      patient_cpf: p.cpf ? formatCpf(p.cpf) : '',
     }));
     setSuggestionsOpen(false);
   }
@@ -245,6 +249,7 @@ export default function AgendaPage() {
     setForm({
       patient_name: a.patient_name,
       patient_phone: a.patient_phone,
+      patient_cpf: '',
       starts_local: isoToLocal(a.starts_at),
       ends_local: isoToLocal(a.ends_at),
       notes: a.notes ?? '',
@@ -283,11 +288,17 @@ export default function AgendaPage() {
       setFormError('O horário final precisa ser maior que o inicial.');
       return;
     }
+    const cpf = normalizeCpf(form.patient_cpf);
+    if (cpf && !isValidCpf(cpf)) {
+      setFormError('CPF inválido.');
+      return;
+    }
 
     setSaving(true);
     const payload = {
       patient_name: form.patient_name.trim(),
       patient_phone: phone,
+      cpf: cpf || null,
       starts_at: localToISO(form.starts_local),
       ends_at: localToISO(form.ends_local),
       notes: form.notes.trim() || null,
@@ -474,6 +485,7 @@ export default function AgendaPage() {
                                 </span>
                                 <span className="text-xs text-muted-foreground truncate w-full">
                                   {p.phone}
+                                  {p.cpf ? ` · ${formatCpf(p.cpf)}` : ''}
                                 </span>
                               </button>
                             </li>
@@ -496,6 +508,20 @@ export default function AgendaPage() {
                       }
                       placeholder="5511999998888"
                       required
+                    />
+                  </FormField>
+                  <FormField label="CPF (opcional)" htmlFor="ap_cpf">
+                    <Input
+                      id="ap_cpf"
+                      value={form.patient_cpf}
+                      onChange={(e) =>
+                        setForm((p) => ({
+                          ...p,
+                          patient_cpf: maskCpfInput(e.target.value),
+                        }))
+                      }
+                      placeholder="000.000.000-00"
+                      inputMode="numeric"
                     />
                   </FormField>
                 </div>

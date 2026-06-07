@@ -20,7 +20,9 @@ export async function GET() {
     return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 404 });
   }
 
-  if (!professional.zapi_instance_id || !professional.zapi_token) {
+  // Sem instância criada ainda — a tela oferece o botão "Conectar" que
+  // provisiona via POST /api/whatsapp/connect (self-service).
+  if (!professional.zapi_instance_id) {
     return NextResponse.json({
       provisioned: false,
       connected: false,
@@ -31,7 +33,7 @@ export async function GET() {
   try {
     const { connected } = await getConnectionStatus(
       professional.zapi_instance_id,
-      professional.zapi_token,
+      professional.zapi_token ?? '',
     );
 
     if (connected !== professional.whatsapp_connected) {
@@ -45,7 +47,7 @@ export async function GET() {
       ? null
       : await getQRCode(
           professional.zapi_instance_id,
-          professional.zapi_token,
+          professional.zapi_token ?? '',
         );
 
     return NextResponse.json({
@@ -54,7 +56,7 @@ export async function GET() {
       qrcode,
     });
   } catch (err) {
-    console.error('Erro ao consultar status Z-API:', err);
+    console.error('Erro ao consultar status (Evolution):', err);
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });
   }

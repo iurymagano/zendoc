@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
-import { getQRCode } from '@/lib/zapi/client';
+import { createInstance, getQRCode } from '@/lib/zapi/client';
 
 export async function POST() {
   const session = await auth();
@@ -20,24 +20,36 @@ export async function POST() {
     return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 404 });
   }
 
-  if (!professional.zapi_instance_id || !professional.zapi_token) {
-    return NextResponse.json(
-      {
-        error:
-          'Instância do WhatsApp ainda não foi provisionada. Entre em contato com o suporte.',
-      },
-      { status: 400 },
-    );
-  }
-
   try {
-    const qrcode = await getQRCode(
-      professional.zapi_instance_id,
-      professional.zapi_token,
-    );
+    // Já tem instância → só busca o QR atual.
+    if (professional.zapi_instance_id) {
+      const qrcode = await getQRCode(
+        professional.zapi_instance_id,
+        professional.zapi_token ?? '',
+      );
+      return NextResponse.json({ qrcode });
+    }
+
+    // Self-service: cria a instância na Evolution na hora.
+    const instanceName = `iazen_${professional.id}`;
+    const result = await createInstance(instanceName);
+
+    await supabase
+      .from('professionals')
+      .update({
+        zapi_instance_id: result.instanceName,
+        zapi_token: result.apiKey,
+      })
+      .eq('id', professional.id);
+
+    // O QR pode não vir no create; busca pelo connect como garantia.
+    const qrcode =
+      result.qrcode ??
+      (await getQRCode(result.instanceName, result.apiKey ?? ''));
+
     return NextResponse.json({ qrcode });
   } catch (err) {
-    console.error('Erro ao buscar QR Code Z-API:', err);
+    console.error('Erro ao conectar WhatsApp (Evolution):', err);
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });
   }

@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: '/pacientes', label: 'Pacientes' },
   { href: '/configuracoes/disponibilidade', label: 'Disponibilidade' },
   { href: '/configuracoes/whatsapp', label: 'WhatsApp' },
+  { href: '/configuracoes/testar-ia', label: 'Testar IA' },
 ];
 
 export function Navbar() {

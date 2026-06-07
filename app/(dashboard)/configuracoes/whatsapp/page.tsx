@@ -36,6 +36,7 @@ export default function WhatsAppConfigPage() {
   const [status, setStatus] = useState<UiStatus>('loading');
   const [qrcode, setQrcode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = useCallback(() => {
@@ -92,6 +93,30 @@ export default function WhatsAppConfigPage() {
     pollRef.current = setInterval(fetchStatus, POLL_INTERVAL_MS);
     return () => stopPolling();
   }, [status, fetchStatus, stopPolling]);
+
+  async function onConnect() {
+    setConnecting(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/whatsapp/connect', { method: 'POST' });
+      const body = (await res.json().catch(() => ({}))) as {
+        qrcode?: string | null;
+        error?: string;
+      };
+      if (!res.ok) {
+        setError(body.error ?? 'Não foi possível iniciar a conexão.');
+        setStatus('error');
+        return;
+      }
+      setQrcode(body.qrcode ?? null);
+      setStatus('waiting_scan');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setStatus('error');
+    } finally {
+      setConnecting(false);
+    }
+  }
 
   async function onDisconnect() {
     const ok = window.confirm(
@@ -153,15 +178,20 @@ export default function WhatsAppConfigPage() {
         )}
 
         {status === 'not_provisioned' && (
-          <Card className="border-amber-500/40">
+          <Card>
             <CardHeader>
-              <CardTitle>Instância ainda não ativada</CardTitle>
+              <CardTitle>Conectar seu WhatsApp</CardTitle>
               <CardDescription>
-                Seu acesso ao WhatsApp ainda não foi provisionado. Entre em
-                contato com o suporte do IAzen para ativar a instância da sua
-                conta.
+                Clique para gerar o QR Code e parear o número do seu consultório.
+                A partir daí a secretária virtual responde seus pacientes
+                automaticamente.
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <Button onClick={onConnect} disabled={connecting}>
+                {connecting ? 'Gerando QR Code…' : 'Conectar WhatsApp'}
+              </Button>
+            </CardContent>
           </Card>
         )}
 
@@ -199,7 +229,7 @@ export default function WhatsAppConfigPage() {
               />
               <p className="text-xs text-muted-foreground text-center">
                 Aguardando leitura… a tela atualiza automaticamente a cada 3
-                segundos. O QR é renovado pela Z-API periodicamente.
+                segundos. O QR é renovado periodicamente.
               </p>
             </CardContent>
           </Card>
@@ -208,7 +238,7 @@ export default function WhatsAppConfigPage() {
         {status === 'waiting_scan' && !qrSrc && (
           <Card>
             <CardContent className="py-6 text-sm text-muted-foreground">
-              Buscando QR Code na Z-API…
+              Buscando QR Code…
             </CardContent>
           </Card>
         )}
@@ -218,7 +248,7 @@ export default function WhatsAppConfigPage() {
             <CardHeader>
               <CardTitle>Não foi possível conectar</CardTitle>
               <CardDescription>
-                {error ?? 'Erro desconhecido ao consultar a Z-API.'}
+                {error ?? 'Erro desconhecido ao conectar o WhatsApp.'}
               </CardDescription>
             </CardHeader>
             <CardContent>

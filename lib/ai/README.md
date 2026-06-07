@@ -4,7 +4,8 @@ Integração com a API da Anthropic (Claude). Orquestra o fluxo de mensagens:
 histórico → prompt → resposta da IA → ação no banco → persistência do
 histórico.
 
-Modelo atual: `claude-sonnet-4-20250514` (configurado em `processor.ts`).
+Modelo: configurável via env `AI_MODEL` (default `claude-sonnet-4-20250514`; no
+dev use `claude-haiku-4-5` p/ economizar). Configurado em `processor.ts`.
 
 ## prompt-builder.ts
 
@@ -13,9 +14,14 @@ secretária do consultório.
 
 **Exporta:**
 
-- `buildSystemPrompt(professional: Professional, availableSlots: Date[]): string`
+- `buildSystemPrompt(professional: Professional, availableSlots: Slot[]): string`
+  — cada horário é listado com o **ISO exato** (`starts_at`/`ends_at`, com ano e
+  offset `-03:00`) para a IA **copiar verbatim** no agendamento, em vez de
+  construir a data na mão. Inclui também a data de hoje como âncora. (Sem isso a
+  IA chutava o ano errado, ex.: marcava em 2024.)
 
-**Depende de:** `@/types/database`, `date-fns`, `date-fns/locale` (pt-BR).
+**Depende de:** `@/types/database`, `@/lib/availability/slots` (`Slot`),
+`date-fns`, `date-fns/locale` (pt-BR).
 
 **Notas:**
 
@@ -50,8 +56,9 @@ secretária do consultório.
 
 **Exporta:**
 
-- `processWhatsAppMessage(professional, patientPhone, patientMessage): Promise<string>` —
-  retorna o texto a ser enviado ao paciente.
+- `processWhatsAppMessage(professional, patientPhone, patientMessage): Promise<AIResponse>` —
+  retorna o `AIResponse` completo (ação + `message_to_patient` + booking/cancel/slots).
+  O webhook envia `aiResponse.message_to_patient`; o `/api/ai/test` expõe a ação na UI.
 
 **Fluxo:**
 
@@ -70,6 +77,14 @@ secretária do consultório.
 
 **Notas:**
 
+- **Prompt caching:** o system prompt vai como bloco com
+  `cache_control: { type: 'ephemeral' }`. O prefixo estável (perfil + regras +
+  lista de slots) é cacheado e custa ~10% nas mensagens seguintes da mesma
+  conversa (TTL 5 min). Verificável via `response.usage.cache_read_input_tokens`
+  (ou setando `AI_DEBUG=1`, que loga os tokens no console). Mínimo cacheável
+  depende do modelo (~1024 tokens no Sonnet 4, ~4096 no Haiku 4.5) — prompts
+  menores simplesmente não cacheiam, sem erro.
+- `AI_MODEL` permite usar um modelo barato (Haiku) no dev sem mexer no código.
 - Histórico limitado a 10 mensagens para controlar custo (~R$2,70 por
   paciente/mês na estimativa inicial).
 - A IA é instruída a devolver JSON, mas se vier markdown ou prosa, o `JSON.parse`

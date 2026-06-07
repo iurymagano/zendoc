@@ -34,5 +34,6 @@ Não remover.
 - [availability/](./availability/) — cálculo de slots (`slots.ts`).
 - [appointments/](./appointments/) — utilitários de domínio (checagem de
   conflito de horário).
+- [patients/](./patients/) — utilitários de paciente (validação/máscara de CPF).
 - [zapi/](./zapi/) — cliente Evolution API (`sendWhatsAppMessage`; demais
   funções entram quando a conexão WhatsApp for implementada).
