@@ -66,7 +66,12 @@ export type CreateInstanceResult = {
 export async function createInstance(
   instanceName: string,
 ): Promise<CreateInstanceResult> {
-  const publicUrl = process.env.NEXT_PUBLIC_URL?.replace(/\/+$/, '');
+  // A Evolution roda em container e precisa de uma URL que ela alcance (no dev,
+  // host.docker.internal). EVOLUTION_WEBHOOK_URL desacopla isso do NEXT_PUBLIC_URL,
+  // que é browser-facing (usado, por ex., nos redirects do Stripe = localhost).
+  const publicUrl = (
+    process.env.EVOLUTION_WEBHOOK_URL ?? process.env.NEXT_PUBLIC_URL
+  )?.replace(/\/+$/, '');
   const webhookUrl = publicUrl
     ? `${publicUrl}/api/whatsapp/webhook?secret=${process.env.WEBHOOK_SECRET ?? ''}`
     : undefined;

@@ -1,8 +1,20 @@
 # components/billing/
 
-Componentes relacionados ao ciclo de vida do plano e cobrança. Hoje contém só
-o banner de status — quando a integração Stripe entrar (Sprint 4), esta pasta
-vai receber os componentes de portal/checkout.
+Componentes relacionados ao ciclo de vida do plano e cobrança (integração
+Stripe — Sprint 4).
+
+## BillingButton.tsx
+
+**O que faz:** botão client que dispara o checkout ou o portal do Stripe — faz
+`POST` no endpoint e redireciona o navegador para a `url` hospedada devolvida.
+
+**Exporta:**
+
+- `BillingButton({ endpoint, label, variant?, className? })` — `endpoint` é
+  `/api/billing/checkout` ou `/api/billing/portal`. Mostra estado "Abrindo…" e
+  erro inline.
+
+**Usado em:** `PlanStatusBanner` (CTA por variante) e `/configuracoes/assinatura`.
 
 ## PlanStatusBanner.tsx
 
@@ -11,8 +23,8 @@ está em algum estado que exige atenção do profissional.
 
 **Exporta:**
 
-- `PlanStatusBanner({ professional: Professional })` — server-friendly, sem
-  hooks nem `'use client'`.
+- `PlanStatusBanner({ professional: Professional })` — server component que
+  renderiza o `BillingButton` (client) como CTA por variante.
 
 **Variantes:**
 
@@ -27,11 +39,13 @@ está em algum estado que exige atenção do profissional.
 Retorna `null` quando não há nada a mostrar, então pode ser renderizado sem
 condicional no chamador.
 
-**Depende de:** `@/types/database`.
+**CTA por variante:** `past_due` → portal ("Atualizar pagamento"); `cancelled`
+→ checkout ("Reativar plano"); `trial_ending`/`trial_expired` → checkout
+("Assinar agora").
+
+**Depende de:** `@/types/database`, `./BillingButton`.
 
 **Notas:**
 
 - Cálculo de dias usa `Math.ceil` sobre a diferença em ms — qualquer resto
   conta como um dia. Ex.: faltando 2h conta como 1 dia.
-- Texto e CTA futuros de "atualizar pagamento" entram junto com a integração
-  Stripe.

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "tunnel": "npx --yes untun@latest tunnel http://localhost:3000"
+    "tunnel": "npx --yes untun@latest tunnel http://localhost:3000",
+    "stripe:setup": "npx --yes tsx scripts/stripe-setup.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",

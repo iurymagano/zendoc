@@ -72,7 +72,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
 | Banco de dados     | Supabase (Postgres + Auth + Realtime)         | RLS em todas as tabelas            |
 | Autenticação       | NextAuth.js v5                                | Email/senha + Google OAuth         |
 | WhatsApp           | Evolution API (self-hosted, Baileys/QR)       | Uma instância por cliente, criada via API |
-| IA                 | Anthropic Claude API                          | Modelo: claude-sonnet-4-20250514   |
+| IA                 | Anthropic Claude API                          | Modelo: claude-sonnet-4-6 (via `AI_MODEL`) |
 | Pagamentos         | Stripe                                        | Assinaturas + trial + webhooks     |
 | Deploy frontend    | Vercel                                        | Deploy automático via GitHub       |
 
@@ -216,7 +216,7 @@ GOOGLE_CLIENT_SECRET=GOCSPX-...
 
 # Anthropic
 ANTHROPIC_API_KEY=sk-ant-...
-AI_MODEL=claude-sonnet-4-20250514   # opcional; no dev use claude-haiku-4-5 p/ economizar
+AI_MODEL=claude-sonnet-4-6          # opcional; default. Haiku é + barato porém flaky no JSON
 AI_DEBUG=                           # opcional; "1" loga tokens/cache hits no console
 
 # Stripe
@@ -228,6 +228,8 @@ STRIPE_PRICE_ID=price_...           # ID do produto R$297/mês
 EVOLUTION_API_URL=https://evo.iazen.com.br   # base do servidor Evolution
 EVOLUTION_API_KEY=                           # AUTHENTICATION_API_KEY global do servidor
 WEBHOOK_SECRET=                              # segredo validado no ?secret= do webhook
+EVOLUTION_WEBHOOK_URL=                       # opcional; URL que a Evolution usa p/ chamar o webhook
+                                             # (dev: http://host.docker.internal:3000). Cai no NEXT_PUBLIC_URL se vazio.
 
 # App
 NEXT_PUBLIC_URL=http://localhost:3000
@@ -665,7 +667,7 @@ import type { Professional, AIResponse } from '@/types/database';
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // Modelo configurável por env (default Sonnet; dev pode usar claude-haiku-4-5).
-const AI_MODEL = process.env.AI_MODEL ?? 'claude-sonnet-4-20250514';
+const AI_MODEL = process.env.AI_MODEL ?? 'claude-sonnet-4-6';
 
 export async function processWhatsAppMessage(
   professional: Professional,
@@ -1067,116 +1069,37 @@ export const config = {
 
 ## Pagamentos Stripe
 
-### app/api/billing/checkout/route.ts
+Assinatura R$297/mês via **Checkout** e **Billing Portal** hospedados (sem
+coletar cartão no app). O **teste grátis de 7 dias é o do onboarding** (sem
+cartão, `plan_status='trialing'`); o **checkout não tem trial** — ao assinar,
+cobra na hora e a assinatura nasce `active`. Cliente Stripe **lazy** em
+`lib/stripe.ts` (`getStripe()` + `planStatusFromStripe()`) — não estoura no
+import quando a env não está setada.
 
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { auth } from '@/auth';
-import { createServerClient } from '@/lib/supabase';
+**Produto/preço:** criados via `npm run stripe:setup` (script
+`scripts/stripe-setup.ts`), que imprime o `STRIPE_PRICE_ID`.
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+**Endpoints (ver os arquivos para o contrato detalhado):**
 
-export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user)
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+- `POST /api/billing/checkout` — garante o `stripe_customer_id` do profissional
+  e cria uma Checkout Session de assinatura (sem trial — cobra na hora). Retorna
+  `{ url }`. `success_url`/`cancel_url` → `/configuracoes/assinatura`.
+- `POST /api/billing/portal` — cria uma sessão do Billing Portal (gerenciar/
+  cancelar/trocar cartão). Retorna `{ url }`. 400 se não houver customer.
+- `POST /api/webhooks/stripe` — **público** (Stripe chama). Valida assinatura com
+  `STRIPE_WEBHOOK_SECRET` sobre o corpo cru. Fonte da verdade são os eventos de
+  subscription: `customer.subscription.created/updated/deleted` →
+  `syncSubscription()` mapeia `subscription.status` → `plan_status` +
+  `ai_enabled` + `stripe_subscription_id` + `trial_ends_at`. Também trata
+  `checkout.session.completed` (recupera a subscription) e
+  `invoice.payment_failed` (pausa rápida).
 
-  const supabase = createServerClient();
-  const { data: professional } = await supabase
-    .from('professionals')
-    .select('stripe_customer_id, name')
-    .eq('user_id', session.user.id)
-    .single();
+**UI:** `components/billing/BillingButton.tsx` (client) faz o POST e redireciona
+para a URL do Stripe; usado no `PlanStatusBanner` (CTA por variante) e na tela
+`/configuracoes/assinatura` (status + assinar/gerenciar).
 
-  let customerId = professional?.stripe_customer_id;
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: session.user.email!,
-      name: professional?.name,
-    });
-    customerId = customer.id;
-    await supabase
-      .from('professionals')
-      .update({ stripe_customer_id: customerId })
-      .eq('user_id', session.user.id);
-  }
-
-  const checkout = await stripe.checkout.sessions.create({
-    customer: customerId,
-    mode: 'subscription',
-    line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
-    subscription_data: { trial_period_days: 7 },
-    success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard?success=1`,
-    cancel_url: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
-  });
-
-  return NextResponse.json({ url: checkout.url });
-}
-```
-
-### app/api/webhooks/stripe/route.ts
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { createServerClient } from '@/lib/supabase';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const sig = req.headers.get('stripe-signature')!;
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!,
-    );
-  } catch {
-    return NextResponse.json({ error: 'Webhook inválido' }, { status: 400 });
-  }
-
-  const supabase = createServerClient();
-  const update = (customerId: string, data: object) =>
-    supabase
-      .from('professionals')
-      .update(data)
-      .eq('stripe_customer_id', customerId);
-
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const s = event.data.object as Stripe.CheckoutSession;
-      await update(s.customer as string, {
-        plan_status: 'active',
-        stripe_subscription_id: s.subscription,
-        ai_enabled: true,
-      });
-      break;
-    }
-    case 'invoice.paid':
-      await update((event.data.object as Stripe.Invoice).customer as string, {
-        plan_status: 'active',
-        ai_enabled: true,
-      });
-      break;
-    case 'invoice.payment_failed':
-      await update((event.data.object as Stripe.Invoice).customer as string, {
-        plan_status: 'past_due',
-        ai_enabled: false,
-      });
-      break;
-    case 'customer.subscription.deleted':
-      await update(
-        (event.data.object as Stripe.Subscription).customer as string,
-        { plan_status: 'cancelled', ai_enabled: false },
-      );
-      break;
-  }
-  return NextResponse.json({ received: true });
-}
-```
+**Bloqueio da IA:** o webhook seta `ai_enabled=false` em `past_due`/`cancelled`;
+o webhook do WhatsApp já ignora mensagens fora de `['trialing','active']`.
 
 ---
 

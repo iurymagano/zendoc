@@ -94,6 +94,19 @@ CRUD manual de agendamentos + endpoint dedicado de cancelamento com motivo
 [lib/appointments/conflicts.ts](../../lib/appointments/conflicts.ts). Detalhes
 em [appointments/README.md](./appointments/README.md).
 
+### Billing (Stripe) — `/api/billing/*` e `/api/webhooks/stripe`
+
+Arquivos: [billing/checkout/route.ts](./billing/checkout/route.ts),
+[billing/portal/route.ts](./billing/portal/route.ts),
+[webhooks/stripe/route.ts](./webhooks/stripe/route.ts)
+
+Assinatura R$297/mês (trial 7d). `POST /billing/checkout` cria a Checkout
+Session, `POST /billing/portal` abre o Billing Portal (ambos exigem sessão e
+devolvem `{ url }`). `POST /webhooks/stripe` é **público** (validado por
+assinatura) e sincroniza `plan_status`/`ai_enabled`. Detalhes em
+[billing/README.md](./billing/README.md) e
+[webhooks/README.md](./webhooks/README.md).
+
 ## Autenticação
 
 Todas as rotas (exceto o catch-all do NextAuth) começam com

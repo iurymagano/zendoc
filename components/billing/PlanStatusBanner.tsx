@@ -1,11 +1,18 @@
 import type { Professional } from '@/types/database';
+import { BillingButton } from './BillingButton';
 
 type BannerVariant = 'past_due' | 'cancelled' | 'trial_ending' | 'trial_expired';
+
+type Cta = {
+  endpoint: '/api/billing/checkout' | '/api/billing/portal';
+  label: string;
+};
 
 type BannerContent = {
   variant: BannerVariant;
   title: string;
   description: string;
+  cta: Cta;
 };
 
 const STYLES: Record<BannerVariant, string> = {
@@ -24,6 +31,7 @@ function buildBanner(professional: Professional): BannerContent | null {
       title: 'Pagamento em atraso',
       description:
         'A cobrança do seu plano falhou — a secretária virtual foi pausada automaticamente. Atualize sua forma de pagamento para reativar.',
+      cta: { endpoint: '/api/billing/portal', label: 'Atualizar pagamento' },
     };
   }
 
@@ -33,6 +41,7 @@ function buildBanner(professional: Professional): BannerContent | null {
       title: 'Plano cancelado',
       description:
         'Seu plano foi cancelado. Os dados serão mantidos por 30 dias — reative antes desse prazo para não perder nada.',
+      cta: { endpoint: '/api/billing/checkout', label: 'Reativar plano' },
     };
   }
 
@@ -46,6 +55,7 @@ function buildBanner(professional: Professional): BannerContent | null {
         title: 'Trial expirado',
         description:
           'Seu trial terminou. Configure o pagamento para continuar usando o IAzen sem interrupção.',
+        cta: { endpoint: '/api/billing/checkout', label: 'Assinar agora' },
       };
     }
 
@@ -56,6 +66,7 @@ function buildBanner(professional: Professional): BannerContent | null {
         title: `Seu trial termina em ${days} ${suffix}`,
         description:
           'Configure o pagamento para manter a secretária virtual ativa após o fim do trial.',
+        cta: { endpoint: '/api/billing/checkout', label: 'Assinar agora' },
       };
     }
   }
@@ -71,6 +82,12 @@ export function PlanStatusBanner({ professional }: { professional: Professional 
     <div className={`rounded-lg border p-4 ${STYLES[banner.variant]}`}>
       <h2 className="text-sm font-semibold">{banner.title}</h2>
       <p className="text-sm opacity-90 mt-1">{banner.description}</p>
+      <BillingButton
+        endpoint={banner.cta.endpoint}
+        label={banner.cta.label}
+        variant="outline"
+        className="mt-3"
+      />
     </div>
   );
 }

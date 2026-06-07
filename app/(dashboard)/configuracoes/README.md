@@ -11,7 +11,8 @@ Route group com as páginas de configuração do consultório (protegidas por lo
   status + desconectar).
 - [testar-ia/](./testar-ia/) — chat de teste que simula um paciente e roda a IA
   sem WhatsApp (consome `POST /api/ai/test`).
+- [assinatura/](./assinatura/) — status do plano + assinar/gerenciar (Stripe).
 
 **Futuras telas:**
 
-- `conta/` — dados pessoais, plano, cancelamento.
+- `conta/` — dados pessoais, cancelamento.

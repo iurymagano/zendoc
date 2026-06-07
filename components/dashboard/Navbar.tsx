@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: '/configuracoes/disponibilidade', label: 'Disponibilidade' },
   { href: '/configuracoes/whatsapp', label: 'WhatsApp' },
   { href: '/configuracoes/testar-ia', label: 'Testar IA' },
+  { href: '/configuracoes/assinatura', label: 'Assinatura' },
 ];
 
 export function Navbar() {

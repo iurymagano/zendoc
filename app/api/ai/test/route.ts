@@ -22,6 +22,62 @@ async function getProfessional(userId: string): Promise<Professional | null> {
   return data ?? null;
 }
 
+// GET: lista conversas (sem ?phone) ou as mensagens de uma conversa (com ?phone).
+export async function GET(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+  }
+
+  const professional = await getProfessional(session.user.id);
+  if (!professional) {
+    return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 404 });
+  }
+
+  const supabase = createServerClient();
+  const phone = req.nextUrl.searchParams.get('phone');
+
+  if (phone) {
+    const { data } = await supabase
+      .from('conversation_history')
+      .select('role, content, created_at')
+      .eq('professional_id', professional.id)
+      .eq('patient_phone', phone)
+      .order('created_at', { ascending: true });
+    return NextResponse.json({ messages: data ?? [] });
+  }
+
+  // Lista de conversas: agrupa as mensagens recentes por telefone (mais recente
+  // primeiro), com a última mensagem e a contagem.
+  const { data } = await supabase
+    .from('conversation_history')
+    .select('patient_phone, role, content, created_at')
+    .eq('professional_id', professional.id)
+    .order('created_at', { ascending: false })
+    .limit(1000);
+
+  const byPhone = new Map<
+    string,
+    { phone: string; last: string; lastRole: string; lastAt: string; count: number }
+  >();
+  for (const row of data ?? []) {
+    const existing = byPhone.get(row.patient_phone);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      byPhone.set(row.patient_phone, {
+        phone: row.patient_phone,
+        last: row.content,
+        lastRole: row.role,
+        lastAt: row.created_at,
+        count: 1,
+      });
+    }
+  }
+
+  return NextResponse.json({ conversations: Array.from(byPhone.values()) });
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {

@@ -4,8 +4,9 @@ Integração com a API da Anthropic (Claude). Orquestra o fluxo de mensagens:
 histórico → prompt → resposta da IA → ação no banco → persistência do
 histórico.
 
-Modelo: configurável via env `AI_MODEL` (default `claude-sonnet-4-20250514`; no
-dev use `claude-haiku-4-5` p/ economizar). Configurado em `processor.ts`.
+Modelo: configurável via env `AI_MODEL` (default `claude-sonnet-4-6` — confiável
+no formato JSON). `claude-haiku-4-5` é mais barato porém às vezes responde em
+prosa e erra o JSON; há fallback, mas a confiabilidade cai. Em `processor.ts`.
 
 ## prompt-builder.ts
 
@@ -64,8 +65,11 @@ secretária do consultório.
 
 1. Busca as últimas 10 mensagens em `conversation_history` para
    `(professional_id, patient_phone)`.
-2. Calcula slots disponíveis via `getAvailableSlots` (14 dias).
-3. Monta system prompt via `buildSystemPrompt`.
+2. Calcula slots disponíveis via `getAvailableSlots` (14 dias) e monta o
+   **contexto do paciente** (`buildPatientContext`) — se o telefone já for
+   cadastrado: nome, consultas realizadas, faltas, próxima consulta marcada e
+   notas. Injetado no system prompt p/ a IA personalizar (e não marcar duplicado).
+3. Monta system prompt via `buildSystemPrompt(professional, slots, patientContext)`.
 4. Chama `anthropic.messages.create` — se falhar o parse do JSON, usa
    `FALLBACK_REPLY`.
 5. Executa a ação via `executeAction` (erros apenas logados — não quebra o
@@ -87,8 +91,17 @@ secretária do consultório.
 - `AI_MODEL` permite usar um modelo barato (Haiku) no dev sem mexer no código.
 - Histórico limitado a 10 mensagens para controlar custo (~R$2,70 por
   paciente/mês na estimativa inicial).
-- A IA é instruída a devolver JSON, mas se vier markdown ou prosa, o `JSON.parse`
-  quebra e caímos no fallback — nenhuma ação no banco é tomada nesse caso.
+- A IA é instruída a devolver **só** o JSON. O `parseAIResponse` é tolerante:
+  remove cercas ```` ```json ```` e, se preciso, extrai do primeiro `{` ao último
+  `}`. Fallback em camadas quando não dá pra montar um AIResponse válido:
+  1. Se o modelo respondeu em **prosa** (sem JSON), usa o próprio texto como
+     `reply` — melhor que "não entendi" (mas não executa ação no banco).
+  2. Só cai no `FALLBACK_REPLY` genérico se vier vazio ou um JSON quebrado
+     (que não dá pra mostrar ao paciente).
+  (Haiku às vezes responde em prosa/markdown; por isso o default é Sonnet 4.6.)
+- O `prompt-builder` traz exemplos (few-shot) e regras de condução: ao perguntarem
+  horários → oferecer 2–4 opções (`offer_slots`), pedir o nome antes de confirmar,
+  etc.
 - `executor` e `processor` usam `createServerClient` (service key) — chamar só
   do server.
 

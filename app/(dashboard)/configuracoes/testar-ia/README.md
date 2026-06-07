@@ -5,28 +5,30 @@ WhatsApp nem de outra pessoa mandando mensagem.
 
 ## page.tsx
 
-**O que faz:** client component com uma interface de chat. Você digita como se
-fosse o paciente; a IA responde usando o mesmo fluxo de produção
-(`processWhatsAppMessage`) — perfil, regras e disponibilidade reais.
+**O que faz:** inbox tipo WhatsApp — lista de conversas à esquerda (persistidas),
+chat à direita. Você digita como se fosse o paciente; a IA responde pelo mesmo
+fluxo de produção (`processWhatsAppMessage`).
 
 **Fluxo:**
 
-1. Ao montar, gera um **telefone fake** (prefixo `5500`) só no cliente.
-2. Cada envio faz `POST /api/ai/test` com `{ phone, message }` e exibe o
-   `reply`. O endpoint é autenticado por sessão (cookie vai junto).
-3. O histórico/contexto é mantido **no servidor** por telefone
-   (`conversation_history`, últimas 10) — o cliente só exibe.
-4. "Nova conversa" gera outro telefone fake e zera a tela → contexto limpo.
-5. Cada resposta mostra um selo com a **ação** da IA (agendou / cancelou /
-   ofereceu horários / respondeu / aguardando aprovação), vindo do `action`
-   no payload do `/api/ai/test`.
-6. "Limpar histórico" faz `DELETE /api/ai/test?phone=…` — apaga o
-   `conversation_history` do número atual (mantém o mesmo telefone).
+1. Ao montar, `GET /api/ai/test` lista as conversas (agrupadas por telefone) e
+   restaura a última selecionada (salva em `localStorage`,
+   `iazen:testchat:phone`) — então ao sair e voltar, você cai na mesma conversa.
+2. Selecionar uma conversa → `GET /api/ai/test?phone=…` carrega as mensagens.
+3. Enviar → `POST /api/ai/test` com `{ phone, message }`; mostra o `reply` e joga
+   a conversa pro topo da lista. O histórico vive no servidor
+   (`conversation_history`) — por isso persiste entre reloads.
+4. "Nova conversa" gera um **telefone fake** novo (prefixo `5500`) e abre a
+   conversa vazia → você pode ter **várias** ao mesmo tempo.
+5. Cada resposta mostra um selo com a **ação** da IA (vindo de `action`).
+   Mensagens carregadas do histórico não têm selo (o banco guarda só texto).
+6. "Limpar" → `DELETE /api/ai/test?phone=…` apaga a conversa do número atual e
+   seleciona a próxima da lista.
 
 **Depende de:**
 
 - `@/components/ui/{button,input,card}`, `@/components/dashboard/PageHeader`
-- `POST /api/ai/test`
+- `GET|POST|DELETE /api/ai/test`
 
 **Notas:**
 

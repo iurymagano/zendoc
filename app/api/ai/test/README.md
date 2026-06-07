@@ -37,6 +37,16 @@ Consumido pela UI de chat de teste em
 (`booking`/`cancel`/`slots` vêm `null` quando não se aplicam. A UI de teste usa
 `action` para mostrar o que a IA fez em cada resposta.)
 
+## GET /api/ai/test
+
+Sem `?phone`: lista as conversas do profissional (inbox tipo WhatsApp) —
+`{ conversations: [{ phone, last, lastRole, lastAt, count }] }`, agrupando o
+`conversation_history` por telefone (mais recente primeiro, limite 1000 linhas).
+
+Com `?phone=...`: retorna as mensagens daquela conversa em ordem cronológica —
+`{ messages: [{ role, content, created_at }] }`. Usado para abrir/retomar uma
+conversa salva.
+
 ## DELETE /api/ai/test?phone=...
 
 Limpa o `conversation_history` de um telefone (o contexto que a IA enxerga) para

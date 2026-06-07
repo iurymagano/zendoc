@@ -15,8 +15,10 @@ profissional, criada **via API**.
 instância, QR, status, envio, desconectar).
 
 **Envs:** `EVOLUTION_API_URL` (base do servidor), `EVOLUTION_API_KEY` (apikey
-global), `WEBHOOK_SECRET` e `NEXT_PUBLIC_URL` (para montar a URL do webhook no
-create). Header de auth: `apikey` (hash da instância quando há, senão a global).
+global), `WEBHOOK_SECRET`, e `EVOLUTION_WEBHOOK_URL` (base que a Evolution usa
+pra chamar o webhook — no dev `http://host.docker.internal:3000`; cai no
+`NEXT_PUBLIC_URL` se vazia). Header de auth: `apikey` (hash da instância quando
+há, senão a global).
 
 **Exporta:**
 

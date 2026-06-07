@@ -84,6 +84,12 @@ Legenda:
     `AIResponse`; `/api/ai/test` expõe `action`) + botão "Limpar histórico" (DELETE)
   - [x] Fix: IA chutava o ano (marcava em 2024). `getAvailableSlots` devolve
     `Slot{start,end}` e o prompt lista o ISO exato p/ a IA copiar verbatim
+  - [x] Parsing robusto da resposta da IA (tira ```json```, extrai `{…}`) +
+    prompt com exemplos few-shot — fim do fallback "não entendi" com Haiku
+  - [x] Contexto do paciente no prompt (`buildPatientContext`): nome, consultas
+    realizadas, faltas, próxima consulta marcada e notas, p/ números já cadastrados
+  - [x] Inbox persistente no chat de teste: lista de conversas (GET), retoma a
+    selecionada (localStorage), múltiplas conversas — simula o WhatsApp
 
 ### Lembretes
 
@@ -182,14 +188,24 @@ Legenda:
 
 ---
 
-## Sprint 4 — Pagamentos (pendente)
+## Sprint 4 — Pagamentos (em andamento)
 
-- [ ] Setup Stripe (produto + price R$197/mês)
-- [ ] `POST /api/billing/checkout`
-- [ ] `POST /api/webhooks/stripe` (checkout.session.completed, invoice.paid, payment_failed, subscription.deleted)
-- [ ] Tela de "gerenciar assinatura" (portal Stripe)
-- [ ] Bloqueio de IA quando `plan_status = past_due` ou `cancelled`
-- [ ] CTA real no `PlanStatusBanner` (portal Stripe ou checkout)
+- [x] Setup Stripe (produto + price R$297/mês) — script `npm run stripe:setup`
+  cria via API e imprime o `STRIPE_PRICE_ID`
+- [x] `lib/stripe.ts` — cliente lazy + `planStatusFromStripe`
+- [x] `POST /api/billing/checkout` — customer + sessão de assinatura (trial 7d)
+- [x] `POST /api/billing/portal` — portal de gerenciamento Stripe
+- [x] `POST /api/webhooks/stripe` (checkout.session.completed,
+  customer.subscription.created/updated/deleted, invoice.payment_failed)
+- [x] Tela de assinatura (`/configuracoes/assinatura`) — status + assinar/gerenciar
+- [x] Bloqueio de IA quando `plan_status = past_due` ou `cancelled` (webhook seta
+  `ai_enabled`; o webhook do WhatsApp já filtra por `plan_status`)
+- [x] CTA real no `PlanStatusBanner` (`BillingButton` → checkout/portal)
+- [x] Testar end-to-end no dev (4242…): checkout → webhook `[200]` →
+  `stripe_subscription_id` + `trial_ends_at` gravados, `plan_status='trialing'`
+  (correto: assinatura nasce em trial). Falta validar a transição trial→active.
+- [ ] Operacional (produção): configurar o endpoint de webhook no painel Stripe
+  e setar as envs na Vercel (`STRIPE_*`, `NEXT_PUBLIC_URL` = domínio público)
 
 ---
 
