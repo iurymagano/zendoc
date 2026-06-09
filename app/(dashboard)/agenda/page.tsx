@@ -45,6 +45,13 @@ type View = 'month' | 'week';
 
 type Repeat = 'none' | 'weekly' | 'biweekly';
 
+// base-ui Select usa `items` p/ mapear value → rótulo exibido no gatilho.
+const REPEAT_ITEMS: Record<Repeat, string> = {
+  none: 'Não repete',
+  weekly: 'Toda semana',
+  biweekly: 'A cada 2 semanas',
+};
+
 type FormState = {
   patient_name: string;
   patient_phone: string;
@@ -287,6 +294,16 @@ export default function AgendaPage() {
     }
     if (form.starts_local >= form.ends_local) {
       setFormError('O horário final precisa ser maior que o inicial.');
+      return;
+    }
+    if (
+      !editing &&
+      form.repeat !== 'none' &&
+      form.starts_local.slice(0, 10) !== form.ends_local.slice(0, 10)
+    ) {
+      setFormError(
+        'Para repetir, início e fim devem ser no mesmo dia — eles definem o horário de UMA consulta. Use "Repetir até" para a data em que a série termina.',
+      );
       return;
     }
     const cpf = normalizeCpf(form.patient_cpf);
@@ -643,37 +660,69 @@ export default function AgendaPage() {
               </div>
 
               {!editing && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField label="Repetir" htmlFor="ap_repeat">
-                    <Select
-                      value={form.repeat}
-                      onValueChange={(v) =>
-                        setForm((p) => ({ ...p, repeat: v as Repeat }))
-                      }
-                    >
-                      <SelectTrigger id="ap_repeat">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Não repete</SelectItem>
-                        <SelectItem value="weekly">Toda semana</SelectItem>
-                        <SelectItem value="biweekly">A cada 2 semanas</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormField>
-                  {form.repeat !== 'none' && (
-                    <FormField label="Repetir até (opcional)" htmlFor="ap_until">
-                      <Input
-                        id="ap_until"
-                        type="date"
-                        value={form.until}
-                        onChange={(e) =>
-                          setForm((p) => ({ ...p, until: e.target.value }))
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField label="Repetir" htmlFor="ap_repeat">
+                      <Select
+                        items={REPEAT_ITEMS}
+                        value={form.repeat}
+                        onValueChange={(v) =>
+                          setForm((p) => {
+                            const repeat = (v ?? 'none') as Repeat;
+                            // Ao ativar a repetição, garante que o fim fique no
+                            // mesmo dia do início (é o horário de UMA consulta).
+                            const sameDay =
+                              p.starts_local.slice(0, 10) ===
+                              p.ends_local.slice(0, 10);
+                            const ends_local =
+                              repeat !== 'none' && p.starts_local && !sameDay
+                                ? addMinutesToLocal(
+                                    p.starts_local,
+                                    DEFAULT_DURATION_MIN,
+                                  )
+                                : p.ends_local;
+                            return { ...p, repeat, ends_local };
+                          })
                         }
-                      />
+                      >
+                        <SelectTrigger id="ap_repeat" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Não repete</SelectItem>
+                          <SelectItem value="weekly">Toda semana</SelectItem>
+                          <SelectItem value="biweekly">
+                            A cada 2 semanas
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormField>
+                    {form.repeat !== 'none' && (
+                      <FormField label="Repetir até (opcional)" htmlFor="ap_until">
+                        <Input
+                          id="ap_until"
+                          type="date"
+                          value={form.until}
+                          onChange={(e) =>
+                            setForm((p) => ({ ...p, until: e.target.value }))
+                          }
+                        />
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Data em que a repetição para. Deixe vazio para repetir
+                          sem fim.
+                        </p>
+                      </FormField>
+                    )}
+                  </div>
+                  {form.repeat !== 'none' && (
+                    <p className="-mt-1 text-xs text-muted-foreground">
+                      🔁 <strong>Início</strong> e <strong>Fim</strong> acima são o
+                      horário de <strong>uma</strong> consulta (mesmo dia). Ela vai
+                      se repetir {form.repeat === 'weekly' ? 'toda semana' : 'a cada 2 semanas'} no
+                      mesmo dia e horário, até a data de “Repetir até”.
+                    </p>
                   )}
-                </div>
+                </>
               )}
 
               <FormField label="Anotações (opcional)" htmlFor="ap_notes">
