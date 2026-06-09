@@ -55,3 +55,5 @@ mapeamento de status.
   de eventos; `syncAppointmentToGoogle` é o gancho chamado pelos endpoints).
 - [recurrences/](./recurrences/) — consultas recorrentes (materialização das
   ocorrências como appointments reais + encerrar série).
+- [conversations/](./conversations/) — estado das conversas (handoff: pausar a
+  IA por contato).

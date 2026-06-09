@@ -22,6 +22,7 @@ não precisa repetir wrapper de `min-h-screen` nem padding.
   exceções, Google Agenda, WhatsApp, assinatura).
 - [pacientes/](./pacientes/) — cadastro e gestão manual de pacientes.
 - [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) dos agendamentos.
+- [conversas/](./conversas/) — caixa de conversas do WhatsApp + handoff (pausar a IA).
 
 ## dashboard/page.tsx
 

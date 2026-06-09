@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { processWhatsAppMessage } from '@/lib/ai/processor';
+import { isConversationPaused } from '@/lib/conversations/state';
 import { sendWhatsAppMessage } from '@/lib/zapi/client';
 import type { Professional } from '@/types/database';
 
@@ -75,6 +76,18 @@ export async function POST(req: NextRequest) {
   if (!professional.ai_enabled) return ok();
   if (!['trialing', 'active'].includes(professional.plan_status)) return ok();
   if (!professional.zapi_instance_id) return ok();
+
+  // Handoff: se a IA está pausada neste contato, guarda a mensagem recebida
+  // (para o profissional ver na caixa de conversas) e NÃO responde.
+  if (await isConversationPaused(supabase, professional.id, patientPhone)) {
+    await supabase.from('conversation_history').insert({
+      professional_id: professional.id,
+      patient_phone: patientPhone,
+      role: 'user',
+      content: message,
+    });
+    return ok();
+  }
 
   try {
     const aiResponse = await processWhatsAppMessage(

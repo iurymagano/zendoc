@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Visão geral' },
   { href: '/agenda', label: 'Agenda' },
+  { href: '/conversas', label: 'Conversas' },
   { href: '/pacientes', label: 'Pacientes' },
   { href: '/configuracoes/disponibilidade', label: 'Disponibilidade' },
   { href: '/configuracoes/servicos', label: 'Serviços' },

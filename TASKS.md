@@ -284,9 +284,14 @@ Legenda:
   - [ ] Consentimento do paciente para receber mensagens (opt-in/opt-out)
   - [ ] Política de privacidade publicada (também exigida pela verificação Google)
   - [ ] Exportar e excluir dados do paciente
-- [ ] **Pausar a IA / assumir a conversa** (human handoff por contato)
-  - [ ] Flag de "IA pausada" por `patient_phone` (não só o `ai_enabled` global)
-  - [ ] Botão na conversa para o profissional assumir/retomar
+- [x] **Pausar a IA / assumir a conversa** (human handoff por contato)
+  - [x] Migration `0005_conversation_state.sql` (flag `ai_paused` por
+    `professional_id + patient_phone`) **(rodar no Supabase SQL Editor)**
+  - [x] `lib/conversations/state.ts` (`isConversationPaused`/`setConversationPaused`)
+  - [x] Webhook do WhatsApp: se pausado, guarda a mensagem e não aciona a IA
+  - [x] Caixa de conversas `/conversas` (inbox + thread, poll de 10s) +
+    `GET|POST /api/conversations[...]` (listar, abrir, pausar, enviar manual)
+  - [x] Botão "Assumir conversa"/"Retomar IA" + envio manual pelo WhatsApp
 
 ### 🟡 Alto impacto — vira "gestão" e justifica o preço
 

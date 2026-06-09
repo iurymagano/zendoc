@@ -121,6 +121,18 @@ materializa as ocorrências; `POST /recurrences/:id/stop` encerra (cancela as
 futuras); `materialize` é o cron (`CRON_SECRET`) que mantém ~8 semanas à frente.
 Detalhes em [recurrences/README.md](./recurrences/README.md).
 
+### Conversas (WhatsApp) — `/api/conversations/*`
+
+Arquivos: [conversations/route.ts](./conversations/route.ts),
+[conversations/[phone]/route.ts](./conversations/[phone]/route.ts),
+[conversations/[phone]/pause/route.ts](./conversations/[phone]/pause/route.ts),
+[conversations/[phone]/send/route.ts](./conversations/[phone]/send/route.ts)
+
+Caixa de conversas + handoff. `GET /conversations` lista; `GET
+/conversations/:phone` traz a thread; `/pause` pausa/retoma a IA no contato;
+`/send` envia mensagem manual pelo WhatsApp. Detalhes em
+[conversations/README.md](./conversations/README.md).
+
 ### Serviços e perfil — `/api/services/*`, `/api/professionals`
 
 Arquivos: [services/route.ts](./services/route.ts),
