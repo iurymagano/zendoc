@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
+import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
 
 const bodySchema = z.object({
   cancellation_note: z.string().trim().max(500).optional(),
@@ -62,6 +63,9 @@ export async function POST(
   if (!data) {
     return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 });
   }
+
+  // Remove o evento espelhado no Google (cancelamento).
+  await syncAppointmentToGoogle(data);
 
   return NextResponse.json({ ok: true, appointment: data });
 }

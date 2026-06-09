@@ -51,3 +51,5 @@ mapeamento de status.
 - [patients/](./patients/) — utilitários de paciente (validação/máscara de CPF).
 - [zapi/](./zapi/) — cliente Evolution API (`sendWhatsAppMessage`; demais
   funções entram quando a conexão WhatsApp for implementada).
+- [google/](./google/) — integração Google Calendar mão-dupla (OAuth + push/pull
+  de eventos; `syncAppointmentToGoogle` é o gancho chamado pelos endpoints).

@@ -9,9 +9,11 @@ logado. Appointments também são criados pelo fluxo da IA em
 **Endpoint:**
 
 - `GET /api/appointments?from=YYYY-MM-DD&to=YYYY-MM-DD` — retorna
-  `{ appointments: Appointment[] }` ordenados por `starts_at` ascendente.
-  Inclui todos os status (`scheduled`, `confirmed`, `pending_approval`,
-  `cancelled`, `no_show`) — filtrar visualmente fica a cargo do cliente.
+  `{ appointments: Appointment[], googleBusy: BusyEvent[] }`. Appointments
+  ordenados por `starts_at` ascendente, incluindo todos os status (`scheduled`,
+  `confirmed`, `pending_approval`, `cancelled`, `no_show`) — filtrar visualmente
+  fica a cargo do cliente. `googleBusy` traz os compromissos pessoais do Google
+  (`google_busy_events`) que tocam a janela, para o calendário exibir read-only.
 
 **Parâmetros:**
 
@@ -58,6 +60,11 @@ Cria um appointment manual (`booked_via = 'manual'`, `status = 'scheduled'`).
   `:00-03:00` antes de enviar.
 
 **Retorno:** `{ ok: true, appointment }`.
+
+- Após persistir, chama `syncAppointmentToGoogle` (best-effort) — cria o evento
+  espelho no Google Agenda e grava o `google_event_id` na linha. O mesmo gancho
+  roda no `PATCH` (atualiza/remove) e no `cancel` (remove). Ver
+  [lib/google/README.md](../../../lib/google/README.md).
 
 **Erros:**
 

@@ -39,6 +39,17 @@ export interface Professional {
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   trial_ends_at: string | null;
+  // Google Calendar (integração mão-dupla — ver lib/google/)
+  google_calendar_connected: boolean;
+  google_email: string | null;
+  google_refresh_token: string | null;
+  google_access_token: string | null;
+  google_token_expiry: string | null;
+  google_calendar_id: string;
+  google_sync_token: string | null;
+  google_channel_id: string | null;
+  google_resource_id: string | null;
+  google_channel_expiry: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -56,7 +67,20 @@ export interface Appointment {
   cancelled_by: 'patient' | 'professional' | null;
   cancellation_note: string | null;
   notes: string | null;
+  google_event_id: string | null;
   created_at: string;
+  updated_at: string;
+}
+
+/** Evento pessoal puxado do Google que bloqueia disponibilidade (read-only no IAzen). */
+export interface GoogleBusyEvent {
+  id: string;
+  professional_id: string;
+  google_event_id: string;
+  summary: string | null;
+  starts_at: string;
+  ends_at: string;
+  all_day: boolean;
   updated_at: string;
 }
 
@@ -122,6 +146,7 @@ export interface AIResponse {
   booking?: {
     starts_at: string;
     ends_at: string;
+    patient_name?: string;
   };
   cancel?: {
     appointment_id: string;

@@ -210,7 +210,12 @@ SUPABASE_SERVICE_KEY=eyJ...         # nunca expor no frontend
 NEXTAUTH_SECRET=                    # gerar: openssl rand -base64 32
 NEXTAUTH_URL=http://localhost:3000
 
-# Google OAuth
+# Google OAuth — login com Google E integração Google Calendar
+# (/configuracoes/google). Mesma credencial nos dois fluxos.
+# Para o Calendar: habilite a "Google Calendar API" no projeto e adicione o
+# redirect URI ${NEXT_PUBLIC_URL}/api/google/calendar/callback no OAuth client.
+# O escopo calendar.events é sensível → em modo testing só funciona para os
+# test users; abrir ao público exige verificação do app.
 GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=GOCSPX-...
 
@@ -231,8 +236,15 @@ WEBHOOK_SECRET=                              # segredo validado no ?secret= do w
 EVOLUTION_WEBHOOK_URL=                       # opcional; URL que a Evolution usa p/ chamar o webhook
                                              # (dev: http://host.docker.internal:3000). Cai no NEXT_PUBLIC_URL se vazio.
 
+# Cron (lembretes + sync do Google Calendar) — Authorization: Bearer ${CRON_SECRET}
+CRON_SECRET=
+
 # App
-NEXT_PUBLIC_URL=http://localhost:3000
+NEXT_PUBLIC_URL=http://localhost:3000   # em produção, https público: além do
+                                        # Stripe, habilita o push (watch) do
+                                        # Google Calendar. Em http/localhost o
+                                        # sync vem do botão "Sincronizar agora"
+                                        # + cron a cada 30 min.
 ```
 
 ---

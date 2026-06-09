@@ -19,9 +19,9 @@ não precisa repetir wrapper de `min-h-screen` nem padding.
 
 - [dashboard/](./dashboard/) — visão geral após login.
 - [configuracoes/](./configuracoes/) — telas de configuração (disponibilidade,
-  exceções, WhatsApp).
+  exceções, Google Agenda, WhatsApp, assinatura).
 - [pacientes/](./pacientes/) — cadastro e gestão manual de pacientes.
-- [agenda/](./agenda/) — visão semanal dos agendamentos.
+- [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) dos agendamentos.
 
 ## dashboard/page.tsx
 

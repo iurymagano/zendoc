@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { hasAppointmentConflict } from '@/lib/appointments/conflicts';
+import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
 
 const phoneRegex = /^\d{11,13}$/;
 
@@ -151,6 +152,9 @@ export async function PATCH(
   if (!data) {
     return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 });
   }
+
+  // Reflete a alteração no Google (atualiza horário/paciente ou remove se no_show).
+  await syncAppointmentToGoogle(data);
 
   return NextResponse.json({ ok: true, appointment: data });
 }

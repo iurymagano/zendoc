@@ -27,6 +27,9 @@ agendamentos existentes.
     (com fallback de `slot_duration = 50` se a exceção não definir).
 - Conflitos com `appointments` em status `scheduled`, `confirmed` ou
   `pending_approval` são descartados.
+- Conflitos com `google_busy_events` (compromissos pessoais sincronizados do
+  Google Calendar) também são descartados — a IA não oferece horário ocupado na
+  agenda pessoal do profissional.
 - Apenas slots estritamente **no futuro** (`slot > now`) entram no retorno.
 
 **Notas:**

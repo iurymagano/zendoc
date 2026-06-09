@@ -43,13 +43,20 @@ secretária do consultório.
 
 - `book` — upsert do paciente em `patients` (por `professional_id,phone`) e
   insert em `appointments`. Status vira `pending_approval` se
-  `professional.requires_approval`, senão `scheduled`.
+  `professional.requires_approval`, senão `scheduled`. O nome vem de
+  `booking.patient_name` (a IA é instruída a sempre enviá-lo); se ausente,
+  preserva o nome já cadastrado e só cai em `'Paciente'` se não houver nenhum —
+  nunca reescreve um nome real com o placeholder.
 - `cancel` — marca o appointment como `cancelled` com `cancelled_by = 'patient'`,
   filtrando por `professional_id` como defesa em profundidade.
 - `reschedule` — faz `cancel` e depois chama recursivamente com `action = book`.
 - Outras ações (`offer_slots`, `reply`, `approval_needed`) não mexem no banco.
 
-**Depende de:** `@/lib/supabase`, `@/types/database`.
+Após cada escrita, reflete o appointment no Google Calendar via
+`syncAppointmentToGoogle` (best-effort) — `book` cria o evento, `cancel`/`no_show`
+removem. Por isso `book`/`cancel` agora fazem `.select()` da linha afetada.
+
+**Depende de:** `@/lib/supabase`, `@/lib/google/appointment-sync`, `@/types/database`.
 
 ## processor.ts
 

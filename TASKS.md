@@ -213,7 +213,34 @@ Legenda:
 
 - [ ] Landing page pública com conversão (aplicar identidade IAzen)
 - [ ] Relatório semanal por email (agendamentos, cancelamentos, no-show)
-- [ ] Integração com Google Calendar (sync bidirecional)
+- [x] Integração com Google Calendar (sync bidirecional)
+  - [x] Migration `0002_google_calendar.sql` — colunas `google_*` em
+    `professionals`, `google_event_id` em `appointments`, tabela
+    `google_busy_events` + RLS **(rodar manualmente no Supabase SQL Editor)**
+  - [x] `lib/google/auth.ts` — OAuth dedicado (offline + `calendar.events`),
+    refresh token, state assinado, `getAccessToken` com renovação/persistência
+  - [x] `lib/google/calendar.ts` — push/delete de eventos, pull incremental
+    (syncToken), watch/stopWatch; anti-loop via `extendedProperties.iazenAppointmentId`
+  - [x] `lib/google/appointment-sync.ts` — gancho best-effort chamado nos writes
+  - [x] Rotas `app/api/google/calendar/{connect,callback,status,sync,disconnect,webhook}`
+  - [x] Push ligado em `POST/PATCH /api/appointments`, `/cancel` e `lib/ai/executor.ts`
+  - [x] `getAvailableSlots` desconta `google_busy_events` (IA não oferece horário ocupado)
+  - [x] `GET /api/appointments` devolve `googleBusy` na janela
+  - [x] UI calendário Mês + Semana (`components/agenda/`) + tela `/configuracoes/google`
+  - [x] Cron de sync em `vercel.json` (a cada 30 min) como fallback do webhook
+  - [ ] **Operacional:** cadastrar o redirect URI
+    `${NEXT_PUBLIC_URL}/api/google/calendar/callback` no Google Cloud Console
+    (OAuth client) e habilitar a **Google Calendar API** no projeto
+  - [x] Testar end-to-end: conectar → criar consulta → conferir evento no Google;
+    criar evento pessoal no Google → some da disponibilidade
+  - [x] Auto-sync na `/agenda` (ao abrir, ao focar a aba e a cada 60s) — cobre o
+    dev sem push; em prod o watch mantém em tempo real
+  - [x] Fix: nome do paciente não era salvo pela IA (booking ganhou `patient_name`;
+    executor não reescreve mais nome real com "Paciente")
+  - [ ] **Pré-lançamento:** publicar o app no Google + passar pela **verificação
+    OAuth** (escopo `calendar.events` é sensível). Sem isso: aviso de "app não
+    verificado" e, em modo testing, o **refresh token expira em 7 dias** (a
+    conexão cai e precisa reconectar)
 - [ ] Programa de indicação
 - [ ] Métricas de produto (conversão trial → paid, churn)
 

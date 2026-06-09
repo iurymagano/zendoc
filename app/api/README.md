@@ -91,8 +91,24 @@ Arquivos: [appointments/route.ts](./appointments/route.ts),
 
 CRUD manual de agendamentos + endpoint dedicado de cancelamento com motivo
 (grava `cancelled_by = 'professional'`). Checagem de sobreposição via
-[lib/appointments/conflicts.ts](../../lib/appointments/conflicts.ts). Detalhes
-em [appointments/README.md](./appointments/README.md).
+[lib/appointments/conflicts.ts](../../lib/appointments/conflicts.ts). `GET`
+também devolve `googleBusy` (compromissos pessoais do Google na janela) e toda
+escrita reflete no Google via `syncAppointmentToGoogle`. Detalhes em
+[appointments/README.md](./appointments/README.md).
+
+### Google Calendar — `/api/google/calendar/*`
+
+Arquivos: [google/calendar/connect](./google/calendar/connect/route.ts),
+[callback](./google/calendar/callback/route.ts),
+[status](./google/calendar/status/route.ts),
+[sync](./google/calendar/sync/route.ts),
+[disconnect](./google/calendar/disconnect/route.ts),
+[webhook](./google/calendar/webhook/route.ts)
+
+OAuth dedicado + sincronização mão-dupla com o Google Agenda. `connect`/`callback`
+fazem o OAuth offline; `sync` (sessão ou cron `CRON_SECRET`) e `webhook` (push do
+Google) puxam os compromissos pessoais. Detalhes em
+[google/README.md](./google/README.md).
 
 ### Billing (Stripe) — `/api/billing/*` e `/api/webhooks/stripe`
 

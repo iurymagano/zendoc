@@ -7,6 +7,7 @@ Componentes React. Organizado por domínio:
 - [dashboard/](./dashboard/) — shell do dashboard (navbar, cabeçalho de página)
 - [onboarding/](./onboarding/) — componentes do fluxo de onboarding
 - [availability/](./availability/) — componentes da tela de disponibilidade
+- [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) da página /agenda
 - [billing/](./billing/) — banner de status do plano (e futuros componentes
   de Stripe)
 

@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { hasAppointmentConflict } from '@/lib/appointments/conflicts';
 import { isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
+import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const phoneRegex = /^\d{11,13}$/;
@@ -82,7 +83,19 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ appointments: data ?? [] });
+  // Compromissos pessoais do Google que tocam a janela (read-only no calendário).
+  const { data: googleBusy } = await supabase
+    .from('google_busy_events')
+    .select('id, google_event_id, summary, starts_at, ends_at, all_day')
+    .eq('professional_id', professionalId)
+    .lt('starts_at', toTs)
+    .gt('ends_at', fromTs)
+    .order('starts_at');
+
+  return NextResponse.json({
+    appointments: data ?? [],
+    googleBusy: googleBusy ?? [],
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -159,6 +172,9 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
+
+  // Espelha no Google Calendar (best-effort — grava google_event_id na linha).
+  await syncAppointmentToGoogle(data);
 
   return NextResponse.json({ ok: true, appointment: data });
 }

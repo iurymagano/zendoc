@@ -76,6 +76,15 @@ export async function getAvailableSlots(
     .gte('starts_at', now.toISOString())
     .in('status', ['scheduled', 'confirmed', 'pending_approval']);
 
+  // Eventos pessoais sincronizados do Google Calendar também bloqueiam slots.
+  const { data: googleBusy } = await supabase
+    .from('google_busy_events')
+    .select('starts_at, ends_at')
+    .eq('professional_id', professionalId)
+    .gte('ends_at', now.toISOString());
+
+  const busy = [...(existing ?? []), ...(googleBusy ?? [])];
+
   for (let i = 1; i <= days; i++) {
     const date = addDays(now, i);
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -96,7 +105,7 @@ export async function getAvailableSlots(
           isBefore(slotEnd, blockEnd) || slotEnd.getTime() === blockEnd.getTime();
         if (!fitsInBlock) break;
 
-        const hasConflict = (existing ?? []).some((a) => {
+        const hasConflict = busy.some((a) => {
           const s = new Date(a.starts_at);
           const e = new Date(a.ends_at);
           return slot < e && slotEnd > s;
