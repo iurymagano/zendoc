@@ -29,6 +29,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { Skeleton } from '@/components/ui/skeleton';
 import { CalendarMonth } from '@/components/agenda/CalendarMonth';
 import { CalendarWeek } from '@/components/agenda/CalendarWeek';
 import {
@@ -818,11 +819,13 @@ export default function AgendaPage() {
       )}
 
       {loading ? (
-        <Card>
-          <CardContent className="text-sm text-muted-foreground py-6">
-            Carregando agenda…
-          </CardContent>
-        </Card>
+        <div className="overflow-hidden rounded-xl border border-border bg-card p-4">
+          <div className="grid grid-cols-7 gap-2">
+            {Array.from({ length: 28 }).map((_, i) => (
+              <Skeleton key={i} className="h-16" />
+            ))}
+          </div>
+        </div>
       ) : view === 'month' ? (
         <CalendarMonth
           monthCursor={cursor}

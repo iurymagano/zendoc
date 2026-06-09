@@ -28,9 +28,22 @@ Testar IA, Assinatura). Rodapé com "Sair".
 **Depende de:** `next/link`, `next/navigation`, `next-auth/react` (`signOut`),
 `lucide-react` (ícones), `@/components/brand/Logo`, `@/lib/utils`.
 
+- **Rodapé com perfil:** avatar com iniciais (gradiente azul→violeta) + nome e
+  especialidade (`GET /api/professionals`), acima do "Sair".
+
 **Notas:** renderizada pelo `app/(dashboard)/layout.tsx` (que aplica `md:pl-64`
 no conteúdo para liberar a largura da sidebar fixa). Ao adicionar uma tela, basta
 incluí-la em `PRIMARY` ou `SETTINGS`. Usa os tokens `--sidebar-*` do tema.
+
+---
+
+## EmptyState.tsx
+
+**O que faz:** estado vazio padronizado — ícone num círculo, título, descrição
+opcional e slot de ação (`children`). Usado em listas sem itens (conversas,
+serviços, …).
+
+**Exporta:** `<EmptyState icon title description? children? />`.
 
 ---
 

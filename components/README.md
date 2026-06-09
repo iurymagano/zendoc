@@ -9,6 +9,9 @@ Componentes React. Organizado por domínio:
 - [availability/](./availability/) — componentes da tela de disponibilidade
 - [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) da página /agenda
 - [documents/](./documents/) — apoio a documentos imprimíveis (declaração de comparecimento)
+
+Componentes de UI transversais: `ui/skeleton.tsx` (placeholder de carregamento)
+e `dashboard/EmptyState.tsx` (estado vazio padronizado: ícone + título + ação).
 - [billing/](./billing/) — banner de status do plano (e futuros componentes
   de Stripe)
 

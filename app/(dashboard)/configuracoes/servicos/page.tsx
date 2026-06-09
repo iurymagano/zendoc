@@ -11,7 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Tag } from 'lucide-react';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 import type { Service } from '@/types/database';
 
 function formatPrice(cents: number | null): string {
@@ -236,9 +238,11 @@ export default function ServicesPage() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : services.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhum serviço ainda. Adicione o primeiro acima.
-            </p>
+            <EmptyState
+              icon={Tag}
+              title="Nenhum serviço ainda"
+              description="Cadastre seus tipos de atendimento (ex.: Avaliação, Retorno) com duração e preço — eles aparecem ao agendar e a IA usa para responder valores."
+            />
           ) : (
             <ul className="flex flex-col divide-y">
               {services.map((s) => (

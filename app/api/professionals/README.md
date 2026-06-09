@@ -4,7 +4,8 @@ Atualização parcial do perfil do profissional logado (whitelist de campos).
 
 ## route.ts
 
-- **`GET /api/professionals`** — devolve `{ professional: { id, buffer_min } }`.
+- **`GET /api/professionals`** — devolve `{ professional: { id, name, specialty,
+  buffer_min } }` (nome/especialidade usados no avatar da sidebar).
 - **`PATCH /api/professionals`** — atualiza campos permitidos. Hoje só
   `buffer_min` (0–240, intervalo entre atendimentos respeitado nos slots da IA).
   Extensível para outros campos de configuração.

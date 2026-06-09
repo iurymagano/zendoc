@@ -33,6 +33,13 @@ para padronizar os formulários do IAzen.
 **Notas:** não injeta `id` no `children`; o consumidor define `id` no input e
 `htmlFor` no `FormField` para ligar o label.
 
+## skeleton.tsx
+
+**O que faz:** placeholder de carregamento (`Skeleton`) — bloco com `animate-pulse`.
+Usado nos estados de carregando (agenda, conversas).
+
+**Exporta:** `Skeleton({ className })` — dimensione via className (ex.: `h-4 w-2/3`).
+
 ## Convenção
 
 **Sempre use componentes shadcn antes de escrever HTML puro.** Para novas

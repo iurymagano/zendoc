@@ -3,8 +3,11 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { MessagesSquare } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 type Conversation = {
   phone: string;
@@ -151,11 +154,20 @@ export default function ConversasPage() {
         <Card className="flex h-full flex-col overflow-hidden">
           <CardContent className="min-h-0 flex-1 overflow-auto p-0">
             {loadingList ? (
-              <p className="p-4 text-sm text-muted-foreground">Carregando…</p>
+              <div className="flex flex-col gap-3 p-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="flex flex-col gap-1.5">
+                    <Skeleton className="h-3.5 w-2/3" />
+                    <Skeleton className="h-3 w-full" />
+                  </div>
+                ))}
+              </div>
             ) : conversations.length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground">
-                Nenhuma conversa ainda.
-              </p>
+              <EmptyState
+                icon={MessagesSquare}
+                title="Nenhuma conversa ainda"
+                description="Quando um paciente mandar mensagem no WhatsApp, a conversa aparece aqui."
+              />
             ) : (
               <ul className="divide-y">
                 {conversations.map((c) => (
