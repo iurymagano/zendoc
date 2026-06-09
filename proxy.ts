@@ -10,7 +10,8 @@ export default auth((req) => {
     path.startsWith('/agenda') ||
     path.startsWith('/pacientes') ||
     path.startsWith('/configuracoes') ||
-    path.startsWith('/onboarding');
+    path.startsWith('/onboarding') ||
+    path.startsWith('/documentos');
 
   const isAuth = path.startsWith('/login') || path.startsWith('/register');
 

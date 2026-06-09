@@ -40,6 +40,10 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
 **Cancelamento:** `window.confirm` + `window.prompt` (motivo) →
 `POST /api/appointments/:id/cancel`.
 
+**Declaração de comparecimento:** no form de edição (consulta não cancelada),
+o botão "Declaração" abre `/documentos/declaracao/[id]` em nova aba (documento
+imprimível). Ver `app/documentos/`.
+
 **Depende de:**
 
 - `@/components/agenda/{CalendarMonth,CalendarWeek,calendar-utils}`

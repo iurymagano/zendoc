@@ -264,10 +264,12 @@ Legenda:
   - [x] Prompt: paciente "sim/confirmo" → `confirm`; "não vou poder" → `cancel`;
     `appointment_id` deixou de ser exigido (few-shot incluído)
   - [x] Chat de teste mostra a ação `confirm` (`ACTION_LABEL`)
-- [ ] **Recibo e declaração de comparecimento** (PDF)
-  - [ ] Recibo de pagamento por consulta (dados do profissional + paciente + valor)
-  - [ ] Declaração de comparecimento
-  - [ ] Gerar a partir do appointment; baixar/enviar pelo WhatsApp
+- [x] **Declaração de comparecimento** (documento imprimível / PDF via navegador)
+  - [x] Página `/documentos/declaracao/[id]` (server, fora do grupo dashboard)
+    + `PrintButton`; botão "Declaração" no form da `/agenda`
+  - [ ] Enviar a declaração direto pelo WhatsApp (depende de envio de mídia)
+- [ ] **Recibo de pagamento** (depende do valor da consulta → módulo financeiro)
+  - [ ] Recibo por consulta (dados do profissional + paciente + valor)
 - [ ] **Consultas recorrentes** (mesmo horário toda semana — caso do psicólogo)
   - [ ] Modelo de recorrência (semanal/quinzenal) + materialização dos appointments
   - [ ] Editar/cancelar "esta" vs "todas as futuras"

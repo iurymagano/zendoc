@@ -454,6 +454,21 @@ export default function AgendaPage() {
                   {STATUS_LABEL[editing.status]}
                 </span>
                 {statusActions(editing)}
+                {editing.status !== 'cancelled' && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      window.open(
+                        `/documentos/declaracao/${editing.id}`,
+                        '_blank',
+                      )
+                    }
+                  >
+                    Declaração
+                  </Button>
+                )}
               </div>
             )}
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
