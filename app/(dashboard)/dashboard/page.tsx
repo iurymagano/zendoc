@@ -1,6 +1,8 @@
+import type { ComponentType } from 'react';
 import Link from 'next/link';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import { CalendarDays, Clock, MessageSquare, Users } from 'lucide-react';
 import { createServerClient } from '@/lib/supabase';
 import {
   Card,
@@ -100,16 +102,19 @@ export default async function DashboardPage() {
           label="Próximas consultas"
           value={(upcomingCount ?? 0).toString()}
           hint="agendadas daqui pra frente"
+          icon={CalendarDays}
         />
         <StatCard
           label="Pacientes cadastrados"
           value={(patientsCount ?? 0).toString()}
           hint="no seu cadastro central"
+          icon={Users}
         />
         <StatCard
           label="Blocos semanais ativos"
           value={(weeklyBlocks ?? 0).toString()}
           hint="horários que a IA pode oferecer"
+          icon={Clock}
         />
       </section>
 
@@ -143,6 +148,7 @@ export default async function DashboardPage() {
           description="Visualize todos os agendamentos, incluindo os criados pela IA no WhatsApp."
           href="/agenda"
           cta="Abrir agenda"
+          icon={CalendarDays}
         />
         <ActionCard
           eyebrow="Pacientes"
@@ -150,6 +156,7 @@ export default async function DashboardPage() {
           description="Cadastro central usado nos agendamentos manuais e no fluxo da IA."
           href="/pacientes"
           cta="Ver pacientes"
+          icon={Users}
         />
         <ActionCard
           eyebrow="Configuração"
@@ -157,6 +164,7 @@ export default async function DashboardPage() {
           description="Ajuste sua rotina semanal e bloqueie feriados ou dias atípicos."
           href="/configuracoes/disponibilidade"
           cta="Editar disponibilidade"
+          icon={Clock}
           secondary={{
             href: '/configuracoes/excecoes',
             label: 'Exceções',
@@ -165,6 +173,7 @@ export default async function DashboardPage() {
         <ActionCard
           eyebrow={professional.whatsapp_connected ? 'Conectado' : 'Ainda não conectado'}
           eyebrowTone={professional.whatsapp_connected ? 'success' : 'warning'}
+          icon={MessageSquare}
           title="WhatsApp"
           description={
             professional.whatsapp_connected
@@ -187,16 +196,23 @@ function StatCard({
   label,
   value,
   hint,
+  icon: Icon,
 }: {
   label: string;
   value: string;
   hint?: string;
+  icon: ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border/70 bg-card p-5 ring-1 ring-foreground/5">
-      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </span>
+    <div className="flex flex-col gap-2 rounded-xl bg-card p-5 shadow-sm shadow-foreground/[0.03] ring-1 ring-foreground/[0.07] transition-shadow hover:shadow-md">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          {label}
+        </span>
+        <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-4" />
+        </span>
+      </div>
       <span
         className="font-display text-3xl font-semibold tracking-tight"
         style={{ letterSpacing: '-0.03em' }}
@@ -211,6 +227,7 @@ function StatCard({
 function ActionCard({
   eyebrow,
   eyebrowTone = 'default',
+  icon: Icon,
   title,
   description,
   href,
@@ -219,6 +236,7 @@ function ActionCard({
 }: {
   eyebrow: string;
   eyebrowTone?: 'default' | 'success' | 'warning';
+  icon: ComponentType<{ className?: string }>;
   title: string;
   description: string;
   href: string;
@@ -231,10 +249,21 @@ function ActionCard({
       : eyebrowTone === 'warning'
         ? 'text-amber-600 dark:text-amber-300'
         : 'text-primary';
+  const chipClass =
+    eyebrowTone === 'success'
+      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+      : eyebrowTone === 'warning'
+        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300'
+        : 'bg-primary/10 text-primary';
 
   return (
-    <Card className="group transition-colors hover:border-primary/30">
+    <Card className="group transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/20">
       <CardHeader>
+        <span
+          className={`mb-1 flex size-9 items-center justify-center rounded-lg ${chipClass}`}
+        >
+          <Icon className="size-[18px]" />
+        </span>
         <span
           className={`font-mono text-[11px] uppercase tracking-[0.18em] ${toneClass}`}
         >

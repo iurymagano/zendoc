@@ -11,6 +11,7 @@ export function PageHeader({ eyebrow, title, description, actions }: Props) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-4">
       <div className="flex flex-col gap-1.5">
+        <span className="mb-1 h-1 w-10 rounded-full bg-gradient-to-r from-[#4f6ef7] to-[#7c3aed]" />
         {eyebrow && (
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {eyebrow}
