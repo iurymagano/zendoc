@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { buildSystemPrompt } from './prompt-builder';
 import { executeAction } from './executor';
+import { setNeedsAttention } from '@/lib/conversations/state';
 import { createServerClient } from '@/lib/supabase';
 import { getAvailableSlots } from '@/lib/availability/slots';
 import type {
@@ -209,6 +210,12 @@ export async function processWhatsAppMessage(
     await executeAction(professional, patientPhone, aiResponse);
   } catch (err) {
     console.error('Falha ao executar ação da IA:', err);
+  }
+
+  // Sinaliza que a conversa precisa de resposta humana quando a IA escalou
+  // (action "handoff") ou caiu no fallback genérico (não entendeu).
+  if (aiResponse === FALLBACK_REPLY || aiResponse.action === 'handoff') {
+    await setNeedsAttention(supabase, professional.id, patientPhone, true);
   }
 
   await supabase.from('conversation_history').insert([

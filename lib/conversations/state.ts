@@ -41,3 +41,26 @@ export async function setConversationPaused(
   // fingir sucesso e a pausa nunca valer.
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Marca/limpa que a conversa precisa de resposta humana (a IA não soube
+ * responder ou escalou). Upsert que não mexe em `ai_paused`. Best-effort —
+ * loga e segue, para não derrubar o fluxo do WhatsApp.
+ */
+export async function setNeedsAttention(
+  supabase: Supabase,
+  professionalId: string,
+  patientPhone: string,
+  value: boolean,
+): Promise<void> {
+  const { error } = await supabase.from('conversation_state').upsert(
+    {
+      professional_id: professionalId,
+      patient_phone: patientPhone,
+      needs_attention: value,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'professional_id,patient_phone' },
+  );
+  if (error) console.error('setNeedsAttention falhou:', error.message);
+}

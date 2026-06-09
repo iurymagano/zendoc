@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -22,12 +23,44 @@ const NAV_ITEMS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const [attention, setAttention] = useState(0);
+
+  // Notificação de conversas que precisam de resposta — atualiza a cada 30s e
+  // ao navegar entre páginas do dashboard.
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch('/api/conversations/attention-count');
+        if (!res.ok || cancelled) return;
+        const body = await res.json();
+        if (!cancelled) setAttention(body.count ?? 0);
+      } catch {
+        /* silencioso */
+      }
+    }
+    void load();
+    const interval = setInterval(load, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [pathname]);
 
   function isActive(href: string) {
     if (href === '/dashboard') return pathname === '/dashboard';
     if (href.startsWith('/configuracoes/'))
       return pathname?.startsWith(href);
     return pathname?.startsWith(href);
+  }
+
+  function Badge() {
+    if (attention <= 0) return null;
+    return (
+      <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+        {attention}
+      </span>
+    );
   }
 
   return (
@@ -48,6 +81,7 @@ export function Navbar() {
                 )}
               >
                 {item.label}
+                {item.href === '/conversas' && <Badge />}
               </Link>
             ))}
           </nav>
@@ -76,6 +110,7 @@ export function Navbar() {
             )}
           >
             {item.label}
+            {item.href === '/conversas' && <Badge />}
           </Link>
         ))}
       </nav>

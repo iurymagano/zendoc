@@ -19,7 +19,8 @@ export type AIAction =
   | 'reschedule'
   | 'offer_slots'
   | 'reply'
-  | 'approval_needed';
+  | 'approval_needed'
+  | 'handoff'; // a IA não soube/não deve responder → precisa de humano
 
 export interface Professional {
   id: string;

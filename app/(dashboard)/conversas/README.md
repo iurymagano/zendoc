@@ -18,6 +18,15 @@ pausar a IA num contato para o profissional assumir.
 **Depende de:** `@/components/ui/{button,textarea,card}`,
 `@/components/dashboard/PageHeader`, `/api/conversations/*`.
 
+**Layout:** altura fixa (`h-[72vh]`) com as duas colunas rolando internamente
+(`min-h-0` + `overflow-auto`); auto-scroll para a última mensagem.
+
+**Precisa de resposta:** quando a IA escala (`handoff`) ou não entende, a
+conversa é marcada (`needs_attention`) — aparece com badge vermelho na inbox
+(no topo da lista), um contador no cabeçalho e um aviso na thread. O badge de
+total também aparece no item "Conversas" do Navbar (poll 30s,
+`/api/conversations/attention-count`). Enviar uma resposta limpa a marcação.
+
 **Notas:** mensagens `assistant` (IA ou profissional) alinhadas à direita; do
 paciente à esquerda. Enquanto a IA está ativa, o profissional ainda pode
 responder — pausar só impede a resposta automática.

@@ -37,6 +37,7 @@ const ACTION_LABEL: Record<AIAction, string> = {
   offer_slots: '📅 ofereceu horários',
   reply: '💬 respondeu',
   approval_needed: '⏳ aguardando aprovação',
+  handoff: '🙋 precisa de você',
 };
 
 const SUGGESTIONS = [

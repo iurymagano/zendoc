@@ -53,6 +53,9 @@ secretária do consultório.
 - `cancel` — marca o appointment como `cancelled` com `cancelled_by = 'patient'`,
   filtrando por `professional_id` como defesa em profundidade.
 - `reschedule` — faz `cancel` e depois chama recursivamente com `action = book`.
+- `handoff` — a IA não soube/não deve responder (fora do escopo). Não mexe no
+  banco; o `processor` marca a conversa como "precisa de resposta"
+  (`setNeedsAttention`). O fallback genérico (parse falhou) também marca.
 - Outras ações (`offer_slots`, `reply`, `approval_needed`) não mexem no banco.
 
 `confirm`/`cancel`/`reschedule` **não dependem de id**: a IA não conhece o uuid

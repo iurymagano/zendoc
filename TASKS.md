@@ -292,6 +292,15 @@ Legenda:
   - [x] Caixa de conversas `/conversas` (inbox + thread, poll de 10s) +
     `GET|POST /api/conversations[...]` (listar, abrir, pausar, enviar manual)
   - [x] Botão "Assumir conversa"/"Retomar IA" + envio manual pelo WhatsApp
+  - [x] Pausa respeitada também no simulador (`/api/ai/test`), não só no webhook
+- [x] **Sinalização "precisa de resposta"** (IA com dúvida → notifica o profissional)
+  - [x] Migration `0006_conversation_needs_attention.sql` (`needs_attention`)
+    **(rodar no Supabase SQL Editor)**
+  - [x] Ação `handoff` da IA (escala quando foge do escopo) + fallback → marcam
+    `needs_attention` no `processor`; envio manual limpa
+  - [x] Inbox: badge vermelho + ordenação por prioridade; aviso na thread;
+    contador no header; badge no Navbar (`/api/conversations/attention-count`)
+- [x] **Fix de layout** do chat (rolagem interna + auto-scroll, não estica a página)
 
 ### 🟡 Alto impacto — vira "gestão" e justifica o preço
 

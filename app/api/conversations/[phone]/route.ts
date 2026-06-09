@@ -50,7 +50,7 @@ export async function GET(
         .maybeSingle(),
       supabase
         .from('conversation_state')
-        .select('ai_paused')
+        .select('ai_paused, needs_attention')
         .eq('professional_id', professionalId)
         .eq('patient_phone', phone)
         .maybeSingle(),
@@ -60,6 +60,7 @@ export async function GET(
     phone,
     name: patient?.name ?? null,
     ai_paused: state?.ai_paused ?? false,
+    needs_attention: state?.needs_attention ?? false,
     messages: messages ?? [],
   });
 }

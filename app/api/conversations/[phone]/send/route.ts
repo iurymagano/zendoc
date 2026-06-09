@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { sendWhatsAppMessage } from '@/lib/zapi/client';
+import { setNeedsAttention } from '@/lib/conversations/state';
 import type { Professional } from '@/types/database';
 
 const bodySchema = z.object({ message: z.string().trim().min(1).max(2000) });
@@ -66,6 +67,9 @@ export async function POST(
     })
     .select()
     .single();
+
+  // O profissional respondeu → a conversa não precisa mais de atenção.
+  await setNeedsAttention(supabase, professional.id, phone, false);
 
   return NextResponse.json({ ok: true, message: inserted });
 }

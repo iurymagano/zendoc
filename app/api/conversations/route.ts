@@ -61,23 +61,30 @@ export async function GET() {
       .in('phone', phones.length ? phones : ['']),
     supabase
       .from('conversation_state')
-      .select('patient_phone, ai_paused')
+      .select('patient_phone, ai_paused, needs_attention')
       .eq('professional_id', professionalId)
       .in('patient_phone', phones.length ? phones : ['']),
   ]);
 
   const nameByPhone = new Map((patients ?? []).map((p) => [p.phone, p.name]));
-  const pausedByPhone = new Map(
-    (states ?? []).map((s) => [s.patient_phone, s.ai_paused]),
+  const stateByPhone = new Map(
+    (states ?? []).map((s) => [s.patient_phone, s]),
   );
 
   const conversations = [...byPhone.values()]
     .map((c) => ({
       ...c,
       name: nameByPhone.get(c.phone) ?? null,
-      ai_paused: pausedByPhone.get(c.phone) ?? false,
+      ai_paused: stateByPhone.get(c.phone)?.ai_paused ?? false,
+      needs_attention: stateByPhone.get(c.phone)?.needs_attention ?? false,
     }))
-    .sort((a, b) => b.last_at.localeCompare(a.last_at));
+    .sort((a, b) => {
+      // Conversas que precisam de resposta primeiro; depois por mais recente.
+      if (a.needs_attention !== b.needs_attention) {
+        return a.needs_attention ? -1 : 1;
+      }
+      return b.last_at.localeCompare(a.last_at);
+    });
 
   return NextResponse.json({ conversations });
 }

@@ -14,7 +14,11 @@ Estado das conversas do WhatsApp — hoje, o handoff (pausar a IA por contato).
 - `isConversationPaused(supabase, professionalId, patientPhone): Promise<boolean>`
   — usado pelo webhook do WhatsApp para decidir se a IA responde.
 - `setConversationPaused(supabase, professionalId, patientPhone, paused)` — upsert
-  do estado, usado por `POST /api/conversations/[phone]/pause`.
+  do estado, usado por `POST /api/conversations/[phone]/pause`. Lança em erro
+  (ex.: tabela ausente) para não fingir sucesso.
+- `setNeedsAttention(supabase, professionalId, patientPhone, value)` — marca/limpa
+  que a conversa precisa de resposta humana. Setado pelo `processor` quando a IA
+  escala (`handoff`) ou cai no fallback; limpo quando o profissional envia.
 
 **Depende de:** `@/lib/supabase`.
 
