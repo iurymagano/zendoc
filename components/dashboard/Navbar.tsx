@@ -57,8 +57,8 @@ export function Navbar() {
   function Badge() {
     if (attention <= 0) return null;
     return (
-      <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
-        {attention}
+      <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-2 ring-background">
+        {attention > 9 ? '9+' : attention}
       </span>
     );
   }
@@ -74,7 +74,7 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                  'relative rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                   isActive(item.href)
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -103,7 +103,7 @@ export function Navbar() {
             key={item.href}
             href={item.href}
             className={cn(
-              'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+              'relative rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
               isActive(item.href)
                 ? 'bg-primary/10 text-primary'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
