@@ -13,6 +13,7 @@ export type ReminderStatus = 'pending' | 'sent' | 'failed' | 'cancelled';
 export type ConversationRole = 'user' | 'assistant';
 export type AIAction =
   | 'book'
+  | 'confirm'
   | 'cancel'
   | 'reschedule'
   | 'offer_slots'
@@ -148,8 +149,10 @@ export interface AIResponse {
     ends_at: string;
     patient_name?: string;
   };
+  // appointment_id é opcional: a IA não conhece o uuid; o executor resolve a
+  // próxima consulta do paciente pelo telefone quando não vier.
   cancel?: {
-    appointment_id: string;
+    appointment_id?: string;
   };
   slots?: string[];
 }

@@ -47,10 +47,18 @@ secretária do consultório.
   `booking.patient_name` (a IA é instruída a sempre enviá-lo); se ausente,
   preserva o nome já cadastrado e só cai em `'Paciente'` se não houver nenhum —
   nunca reescreve um nome real com o placeholder.
+- `confirm` — paciente confirmou presença (resposta ao lembrete): a próxima
+  consulta `scheduled` do paciente vira `confirmed`. Não confirma
+  `pending_approval` (isso depende do profissional aprovar).
 - `cancel` — marca o appointment como `cancelled` com `cancelled_by = 'patient'`,
   filtrando por `professional_id` como defesa em profundidade.
 - `reschedule` — faz `cancel` e depois chama recursivamente com `action = book`.
 - Outras ações (`offer_slots`, `reply`, `approval_needed`) não mexem no banco.
+
+`confirm`/`cancel`/`reschedule` **não dependem de id**: a IA não conhece o uuid
+do appointment, então `findUpcomingAppointment` resolve a **próxima consulta ativa
+do paciente pelo telefone** (ou pelo `cancel.appointment_id`, se informado). Isso
+conserta o loop do lembrete "podemos confirmar?", que antes ficava sem efeito.
 
 Após cada escrita, reflete o appointment no Google Calendar via
 `syncAppointmentToGoogle` (best-effort) — `book` cria o evento, `cancel`/`no_show`

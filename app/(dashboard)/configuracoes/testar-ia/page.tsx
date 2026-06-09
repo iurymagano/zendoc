@@ -31,6 +31,7 @@ type Conversation = {
 
 const ACTION_LABEL: Record<AIAction, string> = {
   book: '✅ agendou',
+  confirm: '👍 confirmou presença',
   cancel: '🗑️ cancelou',
   reschedule: '🔄 remarcou',
   offer_slots: '📅 ofereceu horários',

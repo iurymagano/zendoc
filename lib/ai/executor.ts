@@ -1,6 +1,39 @@
 import { createServerClient } from '@/lib/supabase';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
-import type { AIResponse, Professional } from '@/types/database';
+import type { Appointment, AIResponse, Professional } from '@/types/database';
+
+type Supabase = ReturnType<typeof createServerClient>;
+
+/**
+ * Localiza a próxima consulta ativa do paciente (pelo telefone). A IA não
+ * conhece o uuid do appointment — então confirm/cancel/reschedule resolvem o
+ * alvo por aqui. Se `appointmentId` vier preenchido, busca por ele.
+ */
+async function findUpcomingAppointment(
+  supabase: Supabase,
+  professionalId: string,
+  patientPhone: string,
+  appointmentId?: string,
+): Promise<Appointment | null> {
+  let query = supabase
+    .from('appointments')
+    .select('*')
+    .eq('professional_id', professionalId)
+    .in('status', ['scheduled', 'confirmed', 'pending_approval']);
+
+  if (appointmentId) {
+    query = query.eq('id', appointmentId);
+  } else {
+    query = query
+      .eq('patient_phone', patientPhone)
+      .gte('starts_at', new Date().toISOString())
+      .order('starts_at', { ascending: true })
+      .limit(1);
+  }
+
+  const { data } = await query.maybeSingle();
+  return (data as Appointment) ?? null;
+}
 
 export async function executeAction(
   professional: Professional,
@@ -57,29 +90,65 @@ export async function executeAction(
     return;
   }
 
-  if (response.action === 'cancel' && response.cancel) {
-    const { data: cancelled } = await supabase
-      .from('appointments')
-      .update({ status: 'cancelled', cancelled_by: 'patient' })
-      .eq('id', response.cancel.appointment_id)
-      .eq('professional_id', professional.id)
-      .select()
-      .maybeSingle();
-
-    if (cancelled) await syncAppointmentToGoogle(cancelled);
+  // Paciente confirmou presença (resposta ao lembrete): scheduled → confirmed.
+  // Não confirma pending_approval (isso depende do profissional aprovar).
+  if (response.action === 'confirm') {
+    const target = await findUpcomingAppointment(
+      supabase,
+      professional.id,
+      patientPhone,
+      response.cancel?.appointment_id,
+    );
+    if (target && target.status === 'scheduled') {
+      const { data: confirmed } = await supabase
+        .from('appointments')
+        .update({ status: 'confirmed' })
+        .eq('id', target.id)
+        .eq('professional_id', professional.id)
+        .select()
+        .maybeSingle();
+      if (confirmed) await syncAppointmentToGoogle(confirmed);
+    }
     return;
   }
 
-  if (response.action === 'reschedule' && response.cancel && response.booking) {
-    const { data: cancelled } = await supabase
-      .from('appointments')
-      .update({ status: 'cancelled', cancelled_by: 'patient' })
-      .eq('id', response.cancel.appointment_id)
-      .eq('professional_id', professional.id)
-      .select()
-      .maybeSingle();
+  if (response.action === 'cancel') {
+    const target = await findUpcomingAppointment(
+      supabase,
+      professional.id,
+      patientPhone,
+      response.cancel?.appointment_id,
+    );
+    if (target) {
+      const { data: cancelled } = await supabase
+        .from('appointments')
+        .update({ status: 'cancelled', cancelled_by: 'patient' })
+        .eq('id', target.id)
+        .eq('professional_id', professional.id)
+        .select()
+        .maybeSingle();
+      if (cancelled) await syncAppointmentToGoogle(cancelled);
+    }
+    return;
+  }
 
-    if (cancelled) await syncAppointmentToGoogle(cancelled);
+  if (response.action === 'reschedule' && response.booking) {
+    const target = await findUpcomingAppointment(
+      supabase,
+      professional.id,
+      patientPhone,
+      response.cancel?.appointment_id,
+    );
+    if (target) {
+      const { data: cancelled } = await supabase
+        .from('appointments')
+        .update({ status: 'cancelled', cancelled_by: 'patient' })
+        .eq('id', target.id)
+        .eq('professional_id', professional.id)
+        .select()
+        .maybeSingle();
+      if (cancelled) await syncAppointmentToGoogle(cancelled);
+    }
 
     await executeAction(professional, patientPhone, {
       ...response,

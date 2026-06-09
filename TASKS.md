@@ -246,6 +246,67 @@ Legenda:
 
 ---
 
+## Sprint 6 — Gestão do consultório (pendente)
+
+> Análise de produto (2026-06-08): o IAzen sabe **marcar** consulta, mas
+> "agendar é metade da dor" do profissional autônomo. Este sprint fecha o que
+> falta pra virar **gestão do consultório** e segurar o profissional. Itens em
+> ordem de alavancagem (retorno ÷ esforço).
+
+### 🔴 Crítico — table stakes / confiança (pré-lançamento)
+
+- [x] **Confirmação via WhatsApp fecha o ciclo** (loop do lembrete está aberto)
+  - [x] Adicionar ação `confirm` em `AIAction` (`types/database.ts`)
+  - [x] Tratar `confirm` no `lib/ai/executor.ts` → `status=confirmed` na próxima
+    consulta `scheduled` do paciente (defesa por `professional_id`)
+  - [x] `findUpcomingAppointment` resolve confirm/cancel/reschedule **pelo
+    telefone** (a IA não conhece o uuid) — conserta também cancel/remarcar
+  - [x] Prompt: paciente "sim/confirmo" → `confirm`; "não vou poder" → `cancel`;
+    `appointment_id` deixou de ser exigido (few-shot incluído)
+  - [x] Chat de teste mostra a ação `confirm` (`ACTION_LABEL`)
+- [ ] **Recibo e declaração de comparecimento** (PDF)
+  - [ ] Recibo de pagamento por consulta (dados do profissional + paciente + valor)
+  - [ ] Declaração de comparecimento
+  - [ ] Gerar a partir do appointment; baixar/enviar pelo WhatsApp
+- [ ] **Consultas recorrentes** (mesmo horário toda semana — caso do psicólogo)
+  - [ ] Modelo de recorrência (semanal/quinzenal) + materialização dos appointments
+  - [ ] Editar/cancelar "esta" vs "todas as futuras"
+  - [ ] Sincronizar a recorrência com o Google Calendar
+- [ ] **LGPD** (dado sensível de saúde + pré-requisito da verificação OAuth Google)
+  - [ ] Consentimento do paciente para receber mensagens (opt-in/opt-out)
+  - [ ] Política de privacidade publicada (também exigida pela verificação Google)
+  - [ ] Exportar e excluir dados do paciente
+- [ ] **Pausar a IA / assumir a conversa** (human handoff por contato)
+  - [ ] Flag de "IA pausada" por `patient_phone` (não só o `ai_enabled` global)
+  - [ ] Botão na conversa para o profissional assumir/retomar
+
+### 🟡 Alto impacto — vira "gestão" e justifica o preço
+
+- [ ] **Financeiro do paciente** (cobrar o paciente — não confundir com o Stripe da assinatura)
+  - [ ] Link de pagamento / PIX por consulta
+  - [ ] Marcar pago/pendente; faturamento do mês; inadimplência
+- [ ] **Tipos de serviço** com duração e preço próprios + intervalo (buffer)
+  - [ ] Ex.: avaliação 90min, retorno 30min; buffer entre atendimentos
+  - [ ] `getAvailableSlots` e o booking passam a considerar o tipo escolhido
+- [ ] **Métricas pro profissional** (relatório semanal — ocupação, no-show, novos × retornos, faturamento)
+- [ ] **Reativação de pacientes inativos** (mensagem automática de retorno via IA)
+
+### 🟢 Vai fazer falta logo depois
+
+- [ ] **Áudio do WhatsApp** — transcrever notas de voz (webhook hoje só lê texto)
+- [ ] **Fila de espera / encaixe** — oferecer horário liberado por cancelamento
+- [ ] **Teleconsulta** — link automático na consulta (fisio/nutri online)
+- [ ] **Importar pacientes** (CSV / Google Contatos) — reduz atrito do onboarding
+- [ ] **Prontuário / evolução por sessão** (hoje só `patient.notes` livre)
+
+### ⚠️ Riscos a mitigar
+
+- [ ] **Ban do número (Evolution não-oficial)** — monitorar conexão e alertar
+  ativamente + fluxo de reconectar visível (não perder agendamentos calado)
+- [ ] **Custo de IA** com áudio/imagem — medir antes de prometer "ilimitado"
+
+---
+
 ## Backlog lateral (não priorizado)
 
 ### Integração Z-API (migração Evolution → Z-API)
