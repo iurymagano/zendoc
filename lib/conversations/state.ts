@@ -28,7 +28,7 @@ export async function setConversationPaused(
   patientPhone: string,
   paused: boolean,
 ): Promise<void> {
-  await supabase.from('conversation_state').upsert(
+  const { error } = await supabase.from('conversation_state').upsert(
     {
       professional_id: professionalId,
       patient_phone: patientPhone,
@@ -37,4 +37,7 @@ export async function setConversationPaused(
     },
     { onConflict: 'professional_id,patient_phone' },
   );
+  // Surfaça o erro (ex.: tabela ausente → migration 0005 não rodada) em vez de
+  // fingir sucesso e a pausa nunca valer.
+  if (error) throw new Error(error.message);
 }

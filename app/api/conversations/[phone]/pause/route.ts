@@ -40,6 +40,14 @@ export async function POST(
 
   const { phone } = await params;
   const supabase = createServerClient();
-  await setConversationPaused(supabase, professionalId, phone, parsed.data.paused);
+  try {
+    await setConversationPaused(supabase, professionalId, phone, parsed.data.paused);
+  } catch (err) {
+    console.error('Erro ao pausar conversa:', err);
+    return NextResponse.json(
+      { error: 'Não foi possível salvar o estado da conversa. A tabela conversation_state existe? (migration 0005)' },
+      { status: 500 },
+    );
+  }
   return NextResponse.json({ ok: true, ai_paused: parsed.data.paused });
 }

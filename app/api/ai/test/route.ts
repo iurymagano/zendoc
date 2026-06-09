@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { processWhatsAppMessage } from '@/lib/ai/processor';
+import { isConversationPaused } from '@/lib/conversations/state';
 import type { Professional } from '@/types/database';
 
 const phoneRegex = /^\d{11,13}$/;
@@ -93,6 +94,23 @@ export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json({ error: 'Dados inválidos.' }, { status: 400 });
+  }
+
+  // Handoff: respeita a pausa também no simulador (igual ao webhook real) —
+  // guarda a mensagem e não aciona a IA.
+  const supabase = createServerClient();
+  if (await isConversationPaused(supabase, professional.id, parsed.data.phone)) {
+    await supabase.from('conversation_history').insert({
+      professional_id: professional.id,
+      patient_phone: parsed.data.phone,
+      role: 'user',
+      content: parsed.data.message,
+    });
+    return NextResponse.json({
+      reply:
+        '⏸️ IA pausada nesta conversa (você assumiu em "Conversas"). A mensagem foi registrada; responda manualmente.',
+      paused: true,
+    });
   }
 
   try {

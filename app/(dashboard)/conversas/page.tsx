@@ -91,6 +91,9 @@ export default function ConversasPage() {
     if (res.ok) {
       setThread((t) => (t ? { ...t, ai_paused: next } : t));
       await loadList();
+    } else {
+      const body = await res.json().catch(() => ({}));
+      window.alert(body.error ?? 'Não foi possível alterar o estado da conversa.');
     }
   }
 
