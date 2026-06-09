@@ -10,6 +10,7 @@ import type {
   AIResponse,
   ConversationRole,
   Professional,
+  Service,
 } from '@/types/database';
 
 type Supabase = ReturnType<typeof createServerClient>;
@@ -148,11 +149,23 @@ export async function processWhatsAppMessage(
       content: m.content,
     }));
 
-  const [slots, patientContext] = await Promise.all([
+  const [slots, patientContext, servicesRes] = await Promise.all([
     getAvailableSlots(professional.id, 14),
     buildPatientContext(supabase, professional.id, patientPhone),
+    supabase
+      .from('services')
+      .select('*')
+      .eq('professional_id', professional.id)
+      .eq('active', true)
+      .order('name'),
   ]);
-  const systemPrompt = buildSystemPrompt(professional, slots, patientContext);
+  const services = (servicesRes.data ?? []) as Service[];
+  const systemPrompt = buildSystemPrompt(
+    professional,
+    slots,
+    patientContext,
+    services,
+  );
 
   let aiResponse: AIResponse;
   try {

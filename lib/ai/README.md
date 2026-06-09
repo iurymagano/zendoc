@@ -15,11 +15,13 @@ secretária do consultório.
 
 **Exporta:**
 
-- `buildSystemPrompt(professional: Professional, availableSlots: Slot[]): string`
+- `buildSystemPrompt(professional, availableSlots, patientContext?, services?): string`
   — cada horário é listado com o **ISO exato** (`starts_at`/`ends_at`, com ano e
   offset `-03:00`) para a IA **copiar verbatim** no agendamento, em vez de
   construir a data na mão. Inclui também a data de hoje como âncora. (Sem isso a
-  IA chutava o ano errado, ex.: marcava em 2024.)
+  IA chutava o ano errado, ex.: marcava em 2024.) Quando há `services`, monta o
+  bloco **SERVIÇOS OFERECIDOS** (nome · duração · preço) para a IA responder
+  dúvidas de valor/duração sem escalar.
 
 **Depende de:** `@/types/database`, `@/lib/availability/slots` (`Slot`),
 `date-fns`, `date-fns/locale` (pt-BR).
@@ -83,10 +85,10 @@ removem. Por isso `book`/`cancel` agora fazem `.select()` da linha afetada.
 
 1. Busca as últimas 10 mensagens em `conversation_history` para
    `(professional_id, patient_phone)`.
-2. Calcula slots disponíveis via `getAvailableSlots` (14 dias) e monta o
-   **contexto do paciente** (`buildPatientContext`) — se o telefone já for
-   cadastrado: nome, consultas realizadas, faltas, próxima consulta marcada e
-   notas. Injetado no system prompt p/ a IA personalizar (e não marcar duplicado).
+2. Calcula slots disponíveis via `getAvailableSlots` (14 dias), monta o
+   **contexto do paciente** (`buildPatientContext`) e busca os **serviços ativos**
+   do profissional — todos injetados no system prompt (a IA personaliza, não
+   marca duplicado e responde preço/duração dos serviços).
 3. Monta system prompt via `buildSystemPrompt(professional, slots, patientContext)`.
 4. Chama `anthropic.messages.create` — se falhar o parse do JSON, usa
    `FALLBACK_REPLY`.

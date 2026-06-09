@@ -1,7 +1,12 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import type { Professional } from '@/types/database';
+import type { Professional, Service } from '@/types/database';
 import type { Slot } from '@/lib/availability/slots';
+
+function formatPrice(cents: number | null): string {
+  if (cents == null) return 'valor a confirmar';
+  return `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
+}
 
 // O sistema assume horário de Brasília (-03:00) — mesma premissa do resto do app
 // (agenda e cálculo de slots). Formata o ISO com esse offset fixo.
@@ -13,6 +18,7 @@ export function buildSystemPrompt(
   professional: Professional,
   availableSlots: Slot[],
   patientContext?: string | null,
+  services?: Service[],
 ): string {
   const slotList = availableSlots
     .map((s) => {
@@ -44,11 +50,19 @@ export function buildSystemPrompt(
 
   const patientBlock = patientContext ? `\n${patientContext}\n` : '';
 
+  const serviceLines = (services ?? [])
+    .map((s) => `- ${s.name} — ${s.duration_min} min — ${formatPrice(s.price_cents)}`)
+    .join('\n');
+  const servicesBlock = serviceLines
+    ? `\nSERVIÇOS OFERECIDOS (responda dúvidas de preço e duração com base nesta lista):\n${serviceLines}\n`
+    : '';
+
   return `Você é a secretária virtual do consultório de ${professional.name}${specialty}.
 Nunca se apresente como IA — você é a secretária do consultório.
 ${tone}
 ${address}
 ${custom}
+${servicesBlock}
 ${patientBlock}
 Hoje é ${hoje}.
 
@@ -68,11 +82,13 @@ COMO ATENDER:
   "estarei lá", respondendo a um lembrete) → use action "confirm".
 - Se o paciente disser que NÃO poderá ir ou quiser desmarcar → use action "cancel".
 - Para remarcar: action "reschedule" (ofereça os novos horários antes de fechar).
-- Se o paciente perguntar algo FORA do seu escopo de secretária (dúvida clínica,
-  orientação médica, valores/convênios que você não sabe, reclamação, urgência,
-  ou qualquer coisa que você não possa responder com segurança) → NÃO invente.
-  Use action "handoff" com uma mensagem curta dizendo que vai verificar e logo
-  respondem. A conversa será sinalizada para o profissional responder.
+- Preço e duração: responda com base em SERVIÇOS OFERECIDOS acima. Se o serviço
+  perguntado estiver na lista, informe o valor/duração — NÃO escale.
+- Só use action "handoff" para o que realmente foge do seu escopo de secretária
+  ou não está nas informações acima: dúvida clínica/orientação médica,
+  reclamação, urgência, ou um serviço/valor que NÃO consta na lista. Nesse caso
+  não invente — mande uma mensagem curta dizendo que vai verificar e logo
+  respondem; a conversa será sinalizada para o profissional.
 - Em confirm/cancel/reschedule você NÃO precisa de id nem de data — o sistema
   localiza automaticamente a próxima consulta do paciente. Só responda quando
   houver uma consulta marcada (veja o CONTEXTO DO PACIENTE).
