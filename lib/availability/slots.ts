@@ -52,6 +52,13 @@ export async function getAvailableSlots(
   const now = new Date();
   const slots: Slot[] = [];
 
+  const { data: prof } = await supabase
+    .from('professionals')
+    .select('buffer_min')
+    .eq('id', professionalId)
+    .maybeSingle();
+  const bufferMs = (prof?.buffer_min ?? 0) * 60_000;
+
   const { data: weekly } = await supabase
     .from('availability_weekly')
     .select('*')
@@ -105,10 +112,12 @@ export async function getAvailableSlots(
           isBefore(slotEnd, blockEnd) || slotEnd.getTime() === blockEnd.getTime();
         if (!fitsInBlock) break;
 
+        // Buffer: expande cada compromisso por `buffer_min` dos dois lados,
+        // garantindo o intervalo mínimo entre atendimentos nos slots oferecidos.
         const hasConflict = busy.some((a) => {
-          const s = new Date(a.starts_at);
-          const e = new Date(a.ends_at);
-          return slot < e && slotEnd > s;
+          const s = new Date(a.starts_at).getTime() - bufferMs;
+          const e = new Date(a.ends_at).getTime() + bufferMs;
+          return slot.getTime() < e && slotEnd.getTime() > s;
         });
 
         if (!hasConflict && slot > now) {

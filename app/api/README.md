@@ -121,6 +121,17 @@ materializa as ocorrências; `POST /recurrences/:id/stop` encerra (cancela as
 futuras); `materialize` é o cron (`CRON_SECRET`) que mantém ~8 semanas à frente.
 Detalhes em [recurrences/README.md](./recurrences/README.md).
 
+### Serviços e perfil — `/api/services/*`, `/api/professionals`
+
+Arquivos: [services/route.ts](./services/route.ts),
+[services/[id]/route.ts](./services/[id]/route.ts),
+[professionals/route.ts](./professionals/route.ts)
+
+CRUD dos tipos de serviço (duração + preço) usados no booking; `PATCH
+/api/professionals` ajusta o `buffer_min` (intervalo entre atendimentos
+respeitado nos slots). Detalhes em [services/README.md](./services/README.md) e
+[professionals/README.md](./professionals/README.md).
+
 ### Billing (Stripe) — `/api/billing/*` e `/api/webhooks/stripe`
 
 Arquivos: [billing/checkout/route.ts](./billing/checkout/route.ts),

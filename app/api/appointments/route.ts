@@ -22,6 +22,7 @@ const createSchema = z
     starts_at: z.string().datetime({ offset: true }),
     ends_at: z.string().datetime({ offset: true }),
     notes: z.string().max(2000).nullable().optional(),
+    service_id: z.string().uuid().nullable().optional(),
   })
   .refine((d) => new Date(d.ends_at) > new Date(d.starts_at), {
     message: 'ends_at precisa ser maior que starts_at.',
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Dados inválidos.' }, { status: 400 });
   }
 
-  const { patient_name, patient_phone, cpf, starts_at, ends_at, notes } =
+  const { patient_name, patient_phone, cpf, starts_at, ends_at, notes, service_id } =
     parsed.data;
 
   let normalizedCpf: string | null = null;
@@ -134,6 +135,22 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createServerClient();
+
+  // Valida que o serviço (se informado) pertence ao profissional.
+  let validServiceId: string | null = null;
+  if (service_id) {
+    const { data: svc } = await supabase
+      .from('services')
+      .select('id')
+      .eq('id', service_id)
+      .eq('professional_id', professionalId)
+      .maybeSingle();
+    if (!svc) {
+      return NextResponse.json({ error: 'Serviço inválido.' }, { status: 400 });
+    }
+    validServiceId = svc.id;
+  }
+
   const { data: patient } = await supabase
     .from('patients')
     .upsert(
@@ -161,6 +178,7 @@ export async function POST(req: NextRequest) {
       status: 'scheduled',
       booked_via: 'manual',
       notes: notes?.trim() || null,
+      service_id: validServiceId,
     })
     .select()
     .single();

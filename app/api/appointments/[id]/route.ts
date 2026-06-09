@@ -17,6 +17,7 @@ const patchSchema = z
     patient_name: z.string().trim().min(1).max(120).optional(),
     patient_phone: z.string().regex(phoneRegex).optional(),
     notes: z.string().max(2000).nullable().optional(),
+    service_id: z.string().uuid().nullable().optional(),
   })
   .refine(
     (d) =>
@@ -127,6 +128,22 @@ export async function PATCH(
   if (parsed.data.patient_name !== undefined) patch.patient_name = parsed.data.patient_name;
   if (parsed.data.patient_phone !== undefined) patch.patient_phone = parsed.data.patient_phone;
   if (parsed.data.notes !== undefined) patch.notes = parsed.data.notes?.trim() || null;
+  if (parsed.data.service_id !== undefined) {
+    // valida que o serviço pertence ao profissional (ou limpa com null)
+    if (parsed.data.service_id) {
+      const supabase = createServerClient();
+      const { data: svc } = await supabase
+        .from('services')
+        .select('id')
+        .eq('id', parsed.data.service_id)
+        .eq('professional_id', professionalId)
+        .maybeSingle();
+      if (!svc) {
+        return NextResponse.json({ error: 'Serviço inválido.' }, { status: 400 });
+      }
+    }
+    patch.service_id = parsed.data.service_id;
+  }
 
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 });

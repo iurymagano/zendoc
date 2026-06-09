@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/agenda', label: 'Agenda' },
   { href: '/pacientes', label: 'Pacientes' },
   { href: '/configuracoes/disponibilidade', label: 'Disponibilidade' },
+  { href: '/configuracoes/servicos', label: 'Serviços' },
   { href: '/configuracoes/google', label: 'Google Agenda' },
   { href: '/configuracoes/whatsapp', label: 'WhatsApp' },
   { href: '/configuracoes/testar-ia', label: 'Testar IA' },

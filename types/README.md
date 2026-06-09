@@ -12,9 +12,10 @@ usados em toda a aplicação.
 - Unions: `PlanStatus`, `AppointmentStatus`, `BookedVia`, `BlockType`,
   `ExceptionType`, `ReminderType`, `ReminderStatus`, `ConversationRole`,
   `AIAction` (inclui `confirm`), `RecurrenceFrequency`
-- Interfaces: `Professional`, `Appointment` (com `recurrence_id`),
-  `AvailabilityWeekly`, `AvailabilityException`, `Patient`, `Reminder`,
-  `ConversationMessage`, `AIResponse`, `GoogleBusyEvent`, `Recurrence`
+- Interfaces: `Professional` (com `buffer_min`), `Appointment` (com
+  `recurrence_id` e `service_id`), `AvailabilityWeekly`, `AvailabilityException`,
+  `Patient`, `Reminder`, `ConversationMessage`, `AIResponse`, `GoogleBusyEvent`,
+  `Recurrence`, `Service`
 
 **Notas:** mantém paridade com o SQL em `CLAUDE.md`. Atualizar os dois lados em
 conjunto quando o schema mudar. `Patient.cpf` é `string | null` (dígitos puros,

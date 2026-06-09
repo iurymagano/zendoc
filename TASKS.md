@@ -293,9 +293,16 @@ Legenda:
 - [ ] **Financeiro do paciente** (cobrar o paciente — não confundir com o Stripe da assinatura)
   - [ ] Link de pagamento / PIX por consulta
   - [ ] Marcar pago/pendente; faturamento do mês; inadimplência
-- [ ] **Tipos de serviço** com duração e preço próprios + intervalo (buffer)
-  - [ ] Ex.: avaliação 90min, retorno 30min; buffer entre atendimentos
-  - [ ] `getAvailableSlots` e o booking passam a considerar o tipo escolhido
+- [x] **Tipos de serviço** com duração e preço próprios + intervalo (buffer)
+  - [x] Migration `0004_services.sql` (tabela `services` + `appointments.service_id`
+    + `professionals.buffer_min`) **(rodar no Supabase SQL Editor)**
+  - [x] CRUD `GET|POST /api/services`, `PATCH|DELETE /api/services/[id]`,
+    `GET|PATCH /api/professionals` (buffer)
+  - [x] Tela `/configuracoes/servicos` (CRUD + intervalo entre atendimentos)
+  - [x] Seletor "Serviço" na `/agenda` → fim calculado pela duração; `service_id`
+    gravado no appointment
+  - [x] `getAvailableSlots` aplica o buffer (expande os compromissos)
+  - [ ] Levar serviço/duração para as consultas recorrentes e para a IA (futuro)
 - [ ] **Métricas pro profissional** (relatório semanal — ocupação, no-show, novos × retornos, faturamento)
 - [ ] **Reativação de pacientes inativos** (mensagem automática de retorno via IA)
 

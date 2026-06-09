@@ -38,7 +38,7 @@ import {
   formatTime,
 } from '@/components/agenda/calendar-utils';
 import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
-import type { Appointment, AppointmentStatus, Patient } from '@/types/database';
+import type { Appointment, AppointmentStatus, Patient, Service } from '@/types/database';
 
 const DEFAULT_DURATION_MIN = 50;
 type View = 'month' | 'week';
@@ -61,6 +61,7 @@ type FormState = {
   notes: string;
   repeat: Repeat;
   until: string;
+  service_id: string; // '' = nenhum
 };
 
 const EMPTY_FORM: FormState = {
@@ -72,6 +73,7 @@ const EMPTY_FORM: FormState = {
   notes: '',
   repeat: 'none',
   until: '',
+  service_id: '',
 };
 
 function localToISO(local: string): string {
@@ -125,6 +127,7 @@ export default function AgendaPage() {
 
   const [patientsList, setPatientsList] = useState<Patient[]>([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [servicesList, setServicesList] = useState<Service[]>([]);
 
   const { from, to } = useMemo(() => rangeFor(view, cursor), [view, cursor]);
 
@@ -158,6 +161,13 @@ export default function AgendaPage() {
   useEffect(() => {
     void (async () => {
       await loadPatients();
+      const res = await fetch('/api/services');
+      if (res.ok) {
+        const body = await res.json();
+        setServicesList(
+          ((body.services ?? []) as Service[]).filter((s) => s.active),
+        );
+      }
     })();
   }, []);
 
@@ -261,6 +271,7 @@ export default function AgendaPage() {
       notes: a.notes ?? '',
       repeat: 'none',
       until: '',
+      service_id: a.service_id ?? '',
     });
     setFormError(null);
     setSuggestionsOpen(false);
@@ -349,6 +360,7 @@ export default function AgendaPage() {
       starts_at: localToISO(form.starts_local),
       ends_at: localToISO(form.ends_local),
       notes: form.notes.trim() || null,
+      service_id: form.service_id || null,
     };
     const url = editing ? `/api/appointments/${editing.id}` : '/api/appointments';
     const method = editing ? 'PATCH' : 'POST';
@@ -628,6 +640,50 @@ export default function AgendaPage() {
                 </FormField>
               </div>
 
+              {servicesList.length > 0 && (
+                <FormField label="Serviço (opcional)" htmlFor="ap_service">
+                  <Select
+                    items={{
+                      none: 'Nenhum',
+                      ...Object.fromEntries(
+                        servicesList.map((s) => [
+                          s.id,
+                          `${s.name} · ${s.duration_min}min`,
+                        ]),
+                      ),
+                    }}
+                    value={form.service_id || 'none'}
+                    onValueChange={(v) =>
+                      setForm((p) => {
+                        const id = v === 'none' ? '' : ((v as string) ?? '');
+                        const dur =
+                          servicesList.find((s) => s.id === id)?.duration_min ??
+                          DEFAULT_DURATION_MIN;
+                        const ends_local = p.starts_local
+                          ? addMinutesToLocal(p.starts_local, dur)
+                          : p.ends_local;
+                        return { ...p, service_id: id, ends_local };
+                      })
+                    }
+                  >
+                    <SelectTrigger id="ap_service" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhum</SelectItem>
+                      {servicesList.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} · {s.duration_min}min
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Ao escolher, o fim é calculado pela duração do serviço.
+                  </p>
+                </FormField>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField label="Início" htmlFor="ap_start">
                   <Input
@@ -636,14 +692,19 @@ export default function AgendaPage() {
                     value={form.starts_local}
                     onChange={(e) => {
                       const starts = e.target.value;
-                      setForm((p) => ({
-                        ...p,
-                        starts_local: starts,
-                        ends_local:
-                          !p.ends_local || p.ends_local <= starts
-                            ? addMinutesToLocal(starts, DEFAULT_DURATION_MIN)
-                            : p.ends_local,
-                      }));
+                      setForm((p) => {
+                        const dur =
+                          servicesList.find((s) => s.id === p.service_id)
+                            ?.duration_min ?? DEFAULT_DURATION_MIN;
+                        return {
+                          ...p,
+                          starts_local: starts,
+                          ends_local:
+                            !p.ends_local || p.ends_local <= starts
+                              ? addMinutesToLocal(starts, dur)
+                              : p.ends_local,
+                        };
+                      });
                     }}
                     required
                   />

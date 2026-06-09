@@ -41,6 +41,7 @@ export interface Professional {
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   trial_ends_at: string | null;
+  buffer_min: number; // intervalo entre atendimentos (min), respeitado nos slots
   // Google Calendar (integração mão-dupla — ver lib/google/)
   google_calendar_connected: boolean;
   google_email: string | null;
@@ -71,8 +72,20 @@ export interface Appointment {
   notes: string | null;
   google_event_id: string | null;
   recurrence_id: string | null;
+  service_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Tipo de serviço (avaliação, retorno…) com duração e preço próprios. */
+export interface Service {
+  id: string;
+  professional_id: string;
+  name: string;
+  duration_min: number;
+  price_cents: number | null;
+  active: boolean;
+  created_at: string;
 }
 
 /** Regra de uma série de consultas recorrentes (os appointments são materializados). */

@@ -44,6 +44,11 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
 o botão "Declaração" abre `/documentos/declaracao/[id]` em nova aba (documento
 imprimível). Ver `app/documentos/`.
 
+**Serviço:** o seletor "Serviço (opcional)" lista os serviços ativos
+(`GET /api/services`); ao escolher, o **Fim** é calculado pela duração do serviço
+e o `service_id` vai no payload do appointment. Cadastro em
+`/configuracoes/servicos`.
+
 **Consultas recorrentes:** no form de criação, o campo "Repetir" (Não repete /
 Toda semana / A cada 2 semanas) + "Repetir até" opcional cria uma série via
 `POST /api/recurrences` (materializa as ocorrências) em vez de um único
