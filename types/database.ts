@@ -11,6 +11,7 @@ export type ExceptionType = 'day_off' | 'custom_hours' | 'extra_day';
 export type ReminderType = '24h' | '2h';
 export type ReminderStatus = 'pending' | 'sent' | 'failed' | 'cancelled';
 export type ConversationRole = 'user' | 'assistant';
+export type RecurrenceFrequency = 'weekly' | 'biweekly';
 export type AIAction =
   | 'book'
   | 'confirm'
@@ -69,8 +70,27 @@ export interface Appointment {
   cancellation_note: string | null;
   notes: string | null;
   google_event_id: string | null;
+  recurrence_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Regra de uma série de consultas recorrentes (os appointments são materializados). */
+export interface Recurrence {
+  id: string;
+  professional_id: string;
+  patient_id: string | null;
+  patient_name: string;
+  patient_phone: string;
+  start_date: string; // 'yyyy-MM-dd' — 1ª sessão (âncora da cadência)
+  weekday: number;
+  start_time: string; // 'HH:mm:ss'
+  end_time: string;
+  interval_weeks: number; // 1=semanal, 2=quinzenal
+  until: string | null; // término opcional (inclusive)
+  active: boolean;
+  notes: string | null;
+  created_at: string;
 }
 
 /** Evento pessoal puxado do Google que bloqueia disponibilidade (read-only no IAzen). */

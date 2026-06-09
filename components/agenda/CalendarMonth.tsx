@@ -111,6 +111,7 @@ export function CalendarMonth({
                     className={`block truncate rounded px-1 py-0.5 text-[11px] font-medium ${STATUS_BLOCK[a.status]}`}
                     title={`${formatTime(a.starts_at)} ${a.patient_name}`}
                   >
+                    {a.recurrence_id ? '🔁 ' : ''}
                     {formatTime(a.starts_at)} {a.patient_name}
                   </span>
                 ))}

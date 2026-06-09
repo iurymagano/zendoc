@@ -53,3 +53,5 @@ mapeamento de status.
   funções entram quando a conexão WhatsApp for implementada).
 - [google/](./google/) — integração Google Calendar mão-dupla (OAuth + push/pull
   de eventos; `syncAppointmentToGoogle` é o gancho chamado pelos endpoints).
+- [recurrences/](./recurrences/) — consultas recorrentes (materialização das
+  ocorrências como appointments reais + encerrar série).

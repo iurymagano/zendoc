@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase
     .from('appointments')
     .select(
-      'id, patient_id, patient_name, patient_phone, starts_at, ends_at, status, booked_via, cancelled_by, cancellation_note, notes, created_at, updated_at, professional_id',
+      'id, patient_id, patient_name, patient_phone, starts_at, ends_at, status, booked_via, cancelled_by, cancellation_note, notes, recurrence_id, created_at, updated_at, professional_id',
     )
     .eq('professional_id', professionalId)
     .gte('starts_at', fromTs)

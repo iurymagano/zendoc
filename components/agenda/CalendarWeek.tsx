@@ -151,6 +151,7 @@ export function CalendarWeek({
                   title={`${formatTime(a.starts_at)}–${formatTime(a.ends_at)} ${a.patient_name}`}
                 >
                   <span className="block truncate tabular-nums">
+                    {a.recurrence_id ? '🔁 ' : ''}
                     {formatTime(a.starts_at)} {a.patient_name}
                   </span>
                 </button>

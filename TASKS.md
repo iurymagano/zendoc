@@ -270,10 +270,16 @@ Legenda:
   - [ ] Enviar a declaração direto pelo WhatsApp (depende de envio de mídia)
 - [ ] **Recibo de pagamento** (depende do valor da consulta → módulo financeiro)
   - [ ] Recibo por consulta (dados do profissional + paciente + valor)
-- [ ] **Consultas recorrentes** (mesmo horário toda semana — caso do psicólogo)
-  - [ ] Modelo de recorrência (semanal/quinzenal) + materialização dos appointments
-  - [ ] Editar/cancelar "esta" vs "todas as futuras"
-  - [ ] Sincronizar a recorrência com o Google Calendar
+- [x] **Consultas recorrentes** (mesmo horário toda semana — caso do psicólogo)
+  - [x] Migration `0003_recurrences.sql` (tabela `recurrences` + `appointments.recurrence_id`)
+    **(rodar manualmente no Supabase SQL Editor)**
+  - [x] `lib/recurrences/service.ts` — materializa ocorrências (8 semanas à
+    frente, idempotente, respeita conflito) e `stopRecurrence`
+  - [x] Rotas `POST /api/recurrences`, `POST /api/recurrences/[id]/stop`,
+    cron `GET|POST /api/recurrences/materialize` (diário em `vercel.json`)
+  - [x] Editar/cancelar "esta" (endpoints atuais) vs "todas as futuras" (Encerrar série)
+  - [x] Sincroniza com o Google (cada ocorrência é appointment real → push automático)
+  - [x] UI: campo "Repetir" + "até" no form; marcador 🔁; "Encerrar série"
 - [ ] **LGPD** (dado sensível de saúde + pré-requisito da verificação OAuth Google)
   - [ ] Consentimento do paciente para receber mensagens (opt-in/opt-out)
   - [ ] Política de privacidade publicada (também exigida pela verificação Google)

@@ -15,6 +15,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Card,
   CardContent,
   CardDescription,
@@ -36,6 +43,8 @@ import type { Appointment, AppointmentStatus, Patient } from '@/types/database';
 const DEFAULT_DURATION_MIN = 50;
 type View = 'month' | 'week';
 
+type Repeat = 'none' | 'weekly' | 'biweekly';
+
 type FormState = {
   patient_name: string;
   patient_phone: string;
@@ -43,6 +52,8 @@ type FormState = {
   starts_local: string;
   ends_local: string;
   notes: string;
+  repeat: Repeat;
+  until: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -52,6 +63,8 @@ const EMPTY_FORM: FormState = {
   starts_local: '',
   ends_local: '',
   notes: '',
+  repeat: 'none',
+  until: '',
 };
 
 function localToISO(local: string): string {
@@ -239,6 +252,8 @@ export default function AgendaPage() {
       starts_local: isoToLocal(a.starts_at),
       ends_local: isoToLocal(a.ends_at),
       notes: a.notes ?? '',
+      repeat: 'none',
+      until: '',
     });
     setFormError(null);
     setSuggestionsOpen(false);
@@ -281,6 +296,35 @@ export default function AgendaPage() {
     }
 
     setSaving(true);
+
+    // Consulta recorrente (só na criação): cria a série e materializa as
+    // ocorrências; senão, fluxo normal de appointment único.
+    if (!editing && form.repeat !== 'none') {
+      const res = await fetch('/api/recurrences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patient_name: form.patient_name.trim(),
+          patient_phone: phone,
+          cpf: cpf || null,
+          starts_at: localToISO(form.starts_local),
+          ends_at: localToISO(form.ends_local),
+          frequency: form.repeat,
+          until: form.until || null,
+          notes: form.notes.trim() || null,
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      setSaving(false);
+      if (!res.ok) {
+        setFormError(body.error ?? 'Erro ao criar a recorrência.');
+        return;
+      }
+      await Promise.all([loadData(), loadPatients()]);
+      closeForm();
+      return;
+    }
+
     const payload = {
       patient_name: form.patient_name.trim(),
       patient_phone: phone,
@@ -306,6 +350,24 @@ export default function AgendaPage() {
 
     await Promise.all([loadData(), loadPatients()]);
     closeForm();
+  }
+
+  async function stopSeries(a: Appointment) {
+    if (!a.recurrence_id) return;
+    if (
+      !window.confirm(
+        'Encerrar esta série? As consultas futuras desta recorrência serão canceladas (as passadas permanecem).',
+      )
+    ) {
+      return;
+    }
+    const res = await fetch(`/api/recurrences/${a.recurrence_id}/stop`, {
+      method: 'POST',
+    });
+    if (res.ok) {
+      await loadData();
+      closeForm();
+    }
   }
 
   async function patchStatus(id: string, status: AppointmentStatus) {
@@ -469,7 +531,24 @@ export default function AgendaPage() {
                     Declaração
                   </Button>
                 )}
+                {editing.recurrence_id && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => stopSeries(editing)}
+                  >
+                    Encerrar série 🔁
+                  </Button>
+                )}
               </div>
+            )}
+            {editing?.recurrence_id && (
+              <p className="mb-4 -mt-2 text-xs text-muted-foreground">
+                🔁 Esta consulta faz parte de uma série recorrente. Editar ou
+                cancelar aqui afeta só esta ocorrência; use “Encerrar série” para
+                cancelar as futuras.
+              </p>
             )}
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -562,6 +641,40 @@ export default function AgendaPage() {
                   />
                 </FormField>
               </div>
+
+              {!editing && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField label="Repetir" htmlFor="ap_repeat">
+                    <Select
+                      value={form.repeat}
+                      onValueChange={(v) =>
+                        setForm((p) => ({ ...p, repeat: v as Repeat }))
+                      }
+                    >
+                      <SelectTrigger id="ap_repeat">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Não repete</SelectItem>
+                        <SelectItem value="weekly">Toda semana</SelectItem>
+                        <SelectItem value="biweekly">A cada 2 semanas</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormField>
+                  {form.repeat !== 'none' && (
+                    <FormField label="Repetir até (opcional)" htmlFor="ap_until">
+                      <Input
+                        id="ap_until"
+                        type="date"
+                        value={form.until}
+                        onChange={(e) =>
+                          setForm((p) => ({ ...p, until: e.target.value }))
+                        }
+                      />
+                    </FormField>
+                  )}
+                </div>
+              )}
 
               <FormField label="Anotações (opcional)" htmlFor="ap_notes">
                 <Textarea

@@ -44,6 +44,13 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
 o botão "Declaração" abre `/documentos/declaracao/[id]` em nova aba (documento
 imprimível). Ver `app/documentos/`.
 
+**Consultas recorrentes:** no form de criação, o campo "Repetir" (Não repete /
+Toda semana / A cada 2 semanas) + "Repetir até" opcional cria uma série via
+`POST /api/recurrences` (materializa as ocorrências) em vez de um único
+appointment. Ocorrências recorrentes mostram 🔁 no calendário; no form de edição
+de uma delas há o aviso da série e o botão "Encerrar série"
+(`POST /api/recurrences/:id/stop`). Editar/cancelar uma ocorrência afeta só ela.
+
 **Depende de:**
 
 - `@/components/agenda/{CalendarMonth,CalendarWeek,calendar-utils}`

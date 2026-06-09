@@ -110,6 +110,17 @@ fazem o OAuth offline; `sync` (sessão ou cron `CRON_SECRET`) e `webhook` (push 
 Google) puxam os compromissos pessoais. Detalhes em
 [google/README.md](./google/README.md).
 
+### Recorrências — `/api/recurrences/*`
+
+Arquivos: [recurrences/route.ts](./recurrences/route.ts),
+[recurrences/[id]/stop/route.ts](./recurrences/[id]/stop/route.ts),
+[recurrences/materialize/route.ts](./recurrences/materialize/route.ts)
+
+Consultas recorrentes (semanal/quinzenal). `POST /recurrences` cria a série e
+materializa as ocorrências; `POST /recurrences/:id/stop` encerra (cancela as
+futuras); `materialize` é o cron (`CRON_SECRET`) que mantém ~8 semanas à frente.
+Detalhes em [recurrences/README.md](./recurrences/README.md).
+
 ### Billing (Stripe) — `/api/billing/*` e `/api/webhooks/stripe`
 
 Arquivos: [billing/checkout/route.ts](./billing/checkout/route.ts),
