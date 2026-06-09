@@ -4,33 +4,33 @@ Shell compartilhado pelas páginas autenticadas (grupo `app/(dashboard)/`).
 
 ---
 
-## Navbar.tsx
+## Sidebar.tsx
 
-**O que faz:** navbar sticky com logo IAzen, navegação e botão de sair. As áreas
-do dia a dia (Visão geral, Agenda, Conversas, Pacientes) ficam no topo; as
-configurações (Disponibilidade, Serviços, Google Agenda, WhatsApp, Testar IA,
-Assinatura) ficam num dropdown **"Configurações ▾"** — evita poluir a barra
-conforme o produto cresce. No mobile, vira duas faixas (áreas + Config).
+**O que faz:** navegação lateral (estilo app) da área interna — sidebar fixa à
+esquerda no desktop e drawer (gaveta) no mobile. Itens com ícone (lucide),
+divididos em **áreas do dia a dia** (Visão geral, Agenda, Conversas, Pacientes)
+e o grupo **Configurações** (Disponibilidade, Serviços, Google Agenda, WhatsApp,
+Testar IA, Assinatura). Rodapé com "Sair".
 
 **Exporta:**
 
-- `<Navbar />` — client component, lê `usePathname()` para destacar o item ativo.
+- `<Sidebar />` — client component, lê `usePathname()` para destacar o item ativo
+  (barra de acento à esquerda + fundo `bg-primary/10`).
 
 **Comportamentos:**
 
 - **Badge de notificação** no item "Conversas" — total de conversas que precisam
-  de resposta (`GET /api/conversations/attention-count`, poll 30s), posicionado
-  em `absolute` no canto.
-- **Dropdown de Configurações** — abre/fecha por clique, fecha ao clicar fora
-  (listener de `mousedown`) e ao escolher um item; o gatilho fica destacado em
-  qualquer rota `/configuracoes/*`.
+  de resposta (`GET /api/conversations/attention-count`, poll 30s). No mobile, um
+  ponto vermelho aparece no ícone do menu (hambúrguer).
+- **Mobile:** barra superior com logo + hambúrguer abre o drawer; fecha ao clicar
+  fora, no X, ou ao escolher um item.
 
 **Depende de:** `next/link`, `next/navigation`, `next-auth/react` (`signOut`),
-`lucide-react` (`ChevronDown`), `@/components/brand/Logo`,
-`@/components/ui/button`, `@/lib/utils`.
+`lucide-react` (ícones), `@/components/brand/Logo`, `@/lib/utils`.
 
-**Notas:** renderizado pelo `app/(dashboard)/layout.tsx`. Ao adicionar uma tela
-de configuração, basta incluí-la em `SETTINGS` (não precisa mexer no layout).
+**Notas:** renderizada pelo `app/(dashboard)/layout.tsx` (que aplica `md:pl-64`
+no conteúdo para liberar a largura da sidebar fixa). Ao adicionar uma tela, basta
+incluí-la em `PRIMARY` ou `SETTINGS`. Usa os tokens `--sidebar-*` do tema.
 
 ---
 

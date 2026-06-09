@@ -7,13 +7,15 @@ configurações, agenda, pacientes). O `proxy.ts` (raiz) redireciona para
 ## layout.tsx
 
 **O que faz:** shell compartilhado por todas as páginas deste grupo — renderiza
-o [`<Navbar>`](../../components/dashboard/README.md) sticky no topo e um
-container `max-w-6xl` com padding para o conteúdo. Fundo `bg-muted/30`.
+a [`<Sidebar>`](../../components/dashboard/README.md) (fixa à esquerda no desktop,
+drawer no mobile) e o conteúdo num container `max-w-5xl` deslocado com `md:pl-64`.
+Fundo `bg-muted/40` (contraste com a sidebar branca).
 
-**Depende de:** `@/components/dashboard/Navbar`.
+**Depende de:** `@/components/dashboard/Sidebar`.
 
 **Notas:** cada `page.tsx` dentro de `(dashboard)/` renderiza só o conteúdo —
-não precisa repetir wrapper de `min-h-screen` nem padding.
+não precisa repetir wrapper de `min-h-screen` nem padding. A navegação ficou na
+sidebar lateral (antes era uma navbar no topo).
 
 ## Subpastas
 
