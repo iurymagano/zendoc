@@ -51,6 +51,15 @@ export const STATUS_LABEL: Record<AppointmentStatus, string> = {
   no_show: 'Não compareceu',
 };
 
+/** Swatch (quadradinho) de cor por status — usado na legenda. */
+export const STATUS_DOT: Record<AppointmentStatus, string> = {
+  scheduled: 'bg-primary/30 ring-1 ring-primary/40',
+  confirmed: 'bg-emerald-300 ring-1 ring-emerald-400',
+  pending_approval: 'bg-amber-300 ring-1 ring-amber-400',
+  cancelled: 'bg-muted ring-1 ring-border',
+  no_show: 'bg-destructive/30 ring-1 ring-destructive/40',
+};
+
 /** Cor do bloco no calendário por status (preenchido, legível). */
 export const STATUS_BLOCK: Record<AppointmentStatus, string> = {
   scheduled: 'bg-primary/15 text-primary ring-1 ring-primary/30 hover:bg-primary/25',

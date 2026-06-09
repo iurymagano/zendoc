@@ -34,6 +34,7 @@ import { CalendarMonth } from '@/components/agenda/CalendarMonth';
 import { CalendarWeek } from '@/components/agenda/CalendarWeek';
 import {
   BusyEvent,
+  STATUS_DOT,
   STATUS_LABEL,
   TZ,
   formatTime,
@@ -842,6 +843,29 @@ export default function AgendaPage() {
           onSelectAppointment={openEdit}
           onSelectSlot={(key, hour) => openCreateAt(key, hour)}
         />
+      )}
+
+      {!loading && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+          {(
+            [
+              'scheduled',
+              'confirmed',
+              'pending_approval',
+              'no_show',
+              'cancelled',
+            ] as AppointmentStatus[]
+          ).map((s) => (
+            <span key={s} className="inline-flex items-center gap-1.5">
+              <span className={`h-2.5 w-2.5 rounded-sm ${STATUS_DOT[s]}`} />
+              {STATUS_LABEL[s]}
+            </span>
+          ))}
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-sm border border-dashed border-border bg-muted" />
+            🔒 Google (pessoal)
+          </span>
+        </div>
       )}
     </div>
   );

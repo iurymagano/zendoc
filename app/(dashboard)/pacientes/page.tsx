@@ -13,7 +13,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Users } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
 import type { Patient } from '@/types/database';
 
@@ -276,14 +279,28 @@ export default function PatientsPage() {
             />
 
             {!loaded ? (
-              <div className="text-sm text-muted-foreground">
-                Carregando pacientes…
+              <div className="flex flex-col divide-y">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between gap-3 py-3">
+                    <div className="flex flex-col gap-1.5">
+                      <Skeleton className="h-3.5 w-40" />
+                      <Skeleton className="h-3 w-56" />
+                    </div>
+                    <Skeleton className="h-8 w-24" />
+                  </div>
+                ))}
               </div>
+            ) : patients.length === 0 ? (
+              <EmptyState
+                icon={Users}
+                title="Nenhum paciente cadastrado"
+                description="Cadastre seus pacientes aqui — eles também são criados automaticamente quando a IA agenda pelo WhatsApp."
+              >
+                <Button onClick={openCreate}>Novo paciente</Button>
+              </EmptyState>
             ) : filtered.length === 0 ? (
-              <div className="text-sm text-muted-foreground">
-                {patients.length === 0
-                  ? 'Nenhum paciente cadastrado ainda. Clique em "Novo paciente" para começar.'
-                  : 'Nenhum paciente encontrado para essa busca.'}
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                Nenhum paciente encontrado para essa busca.
               </div>
             ) : (
               <ul className="flex flex-col divide-y">
