@@ -161,6 +161,9 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Logo size="sm" href={null} />
             <span>© {new Date().getFullYear()}</span>
+            <a href="/privacidade" className="hover:text-foreground">
+              Privacidade
+            </a>
           </div>
           <span className="font-mono uppercase tracking-[0.14em]">
             Feito com IA · hospedado no Brasil

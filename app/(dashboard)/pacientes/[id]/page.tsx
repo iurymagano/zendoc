@@ -185,6 +185,13 @@ export default async function PatientDetailPage({
             >
               Novo agendamento
             </Link>
+            <a
+              href={`/api/patients/${patient.id}/export`}
+              className={buttonVariants({ variant: 'ghost' })}
+              title="Exportar todos os dados deste paciente (LGPD)"
+            >
+              Exportar dados
+            </a>
           </>
         }
       />
