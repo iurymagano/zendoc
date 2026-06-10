@@ -141,6 +141,22 @@ async function handle(req: NextRequest) {
       continue;
     }
 
+    // LGPD: respeita a oposição do paciente a mensagens ativas (lembretes).
+    const { data: pat } = await supabase
+      .from('patients')
+      .select('messaging_opted_out')
+      .eq('professional_id', reminder.professional_id)
+      .eq('phone', appt.patient_phone)
+      .maybeSingle();
+    if (pat?.messaging_opted_out) {
+      await supabase
+        .from('reminders')
+        .update({ status: 'cancelled', error_message: 'Paciente optou por não receber mensagens' })
+        .eq('id', reminder.id);
+      skipped++;
+      continue;
+    }
+
     const text = buildMessage(reminder.type, prof.name, appt.starts_at);
 
     try {

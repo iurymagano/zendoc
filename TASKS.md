@@ -280,10 +280,16 @@ Legenda:
   - [x] Editar/cancelar "esta" (endpoints atuais) vs "todas as futuras" (Encerrar série)
   - [x] Sincroniza com o Google (cada ocorrência é appointment real → push automático)
   - [x] UI: campo "Repetir" + "até" no form; marcador 🔁; "Encerrar série"
-- [ ] **LGPD** (dado sensível de saúde + pré-requisito da verificação OAuth Google)
-  - [ ] Consentimento do paciente para receber mensagens (opt-in/opt-out)
-  - [ ] Política de privacidade publicada (também exigida pela verificação Google)
-  - [ ] Exportar e excluir dados do paciente
+- [x] **LGPD** (dado sensível de saúde + pré-requisito da verificação OAuth Google)
+  - [x] Política de privacidade pública `/privacidade` (texto-base — **revisar com
+    advogado e preencher os campos entre colchetes**); link no footer da landing
+  - [x] Opt-out de mensagens ativas por paciente (`patients.messaging_opted_out`,
+    migration `0007`): toggle no cadastro, badge na lista; o dispatch de lembretes
+    pula quem optou por não receber (conversas iniciadas pelo paciente seguem)
+  - [x] Exportar dados do paciente (`GET /api/patients/[id]/export` → JSON com
+    cadastro + agendamentos + conversa); excluir já existia (`DELETE`)
+  - [ ] **Operacional:** preencher a política com dados legais reais + revisão
+    jurídica antes do lançamento; apontar a URL na tela de consentimento do Google
 - [x] **Pausar a IA / assumir a conversa** (human handoff por contato)
   - [x] Migration `0005_conversation_state.sql` (flag `ai_paused` por
     `professional_id + patient_phone`) **(rodar no Supabase SQL Editor)**

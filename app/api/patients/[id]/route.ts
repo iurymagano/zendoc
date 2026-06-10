@@ -11,6 +11,7 @@ const patchSchema = z.object({
   phone: z.string().regex(phoneRegex).optional(),
   cpf: z.string().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
+  messaging_opted_out: z.boolean().optional(),
 });
 
 /** Mensagem de conflito conforme o índice violado (cpf x telefone). */
@@ -105,6 +106,8 @@ export async function PATCH(
     }
   }
   if (parsed.data.notes !== undefined) patch.notes = parsed.data.notes?.trim() || null;
+  if (parsed.data.messaging_opted_out !== undefined)
+    patch.messaging_opted_out = parsed.data.messaging_opted_out;
 
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 });

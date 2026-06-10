@@ -43,4 +43,6 @@ criados automaticamente pelo fluxo da IA (upsert em
 ## Subpastas
 
 - [\[id\]/](./[id]/) — operações em um paciente específico (`GET`, `PATCH`,
-  `DELETE`).
+  `DELETE`). O `PATCH` aceita `messaging_opted_out` (LGPD — opor-se a mensagens
+  ativas). `[id]/export/` devolve um JSON com cadastro + agendamentos + conversa
+  (direito de acesso/portabilidade).

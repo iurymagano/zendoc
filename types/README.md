@@ -22,6 +22,7 @@ conjunto quando o schema mudar. `Patient.cpf` é `string | null` (dígitos puros
 sem máscara). `Professional` ganhou as colunas `google_*` (tokens + estado da
 conexão Google Calendar) e `Appointment.google_event_id` (espelho no Google) —
 ver migration `supabase/migrations/0002_google_calendar.sql`.
+`Patient.messaging_opted_out` (LGPD — opor-se a mensagens ativas, migration `0007`).
 
 ## next-auth.d.ts
 

@@ -150,6 +150,7 @@ export interface Patient {
   phone: string;
   cpf: string | null;
   notes: string | null;
+  messaging_opted_out: boolean; // LGPD: não enviar lembretes/mensagens ativas
   created_at: string;
   updated_at: string;
 }

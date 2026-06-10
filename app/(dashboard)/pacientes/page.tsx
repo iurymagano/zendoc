@@ -6,6 +6,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
+import { Switch } from '@/components/ui/switch';
 import {
   Card,
   CardContent,
@@ -25,9 +26,16 @@ type FormState = {
   phone: string;
   cpf: string;
   notes: string;
+  messaging_opted_out: boolean;
 };
 
-const EMPTY_FORM: FormState = { name: '', phone: '', cpf: '', notes: '' };
+const EMPTY_FORM: FormState = {
+  name: '',
+  phone: '',
+  cpf: '',
+  notes: '',
+  messaging_opted_out: false,
+};
 
 function formatPhone(raw: string): string {
   const d = raw.replace(/\D/g, '');
@@ -98,6 +106,7 @@ export default function PatientsPage() {
       phone: patient.phone,
       cpf: patient.cpf ? formatCpf(patient.cpf) : '',
       notes: patient.notes ?? '',
+      messaging_opted_out: patient.messaging_opted_out ?? false,
     });
     setError(null);
     setFormOpen(true);
@@ -140,6 +149,7 @@ export default function PatientsPage() {
         phone,
         cpf: cpf || null,
         notes: form.notes.trim() || null,
+        messaging_opted_out: form.messaging_opted_out,
       }),
     });
     const body = await res.json().catch(() => ({}));
@@ -236,6 +246,24 @@ export default function PatientsPage() {
                   />
                 </FormField>
 
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
+                  <div>
+                    <p className="text-sm font-medium">
+                      Não enviar mensagens ativas
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      LGPD — o paciente optou por não receber lembretes pelo
+                      WhatsApp. Conversas iniciadas por ele continuam funcionando.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={form.messaging_opted_out}
+                    onCheckedChange={(v) =>
+                      setForm((p) => ({ ...p, messaging_opted_out: v }))
+                    }
+                  />
+                </div>
+
                 {error && (
                   <div className="text-sm text-destructive">{error}</div>
                 )}
@@ -310,8 +338,13 @@ export default function PatientsPage() {
                     className="flex items-center justify-between py-3 gap-3"
                   >
                     <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-medium truncate">
-                        {p.name}
+                      <span className="flex items-center gap-2 text-sm font-medium">
+                        <span className="truncate">{p.name}</span>
+                        {p.messaging_opted_out && (
+                          <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground ring-1 ring-border">
+                            sem mensagens
+                          </span>
+                        )}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatPhone(p.phone)}
