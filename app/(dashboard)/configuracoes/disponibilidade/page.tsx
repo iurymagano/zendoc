@@ -168,14 +168,14 @@ function AvailabilityForm() {
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Duração da consulta</CardTitle>
+          <CardTitle>Duração do atendimento</CardTitle>
           <CardDescription>
             Tempo padrão de cada atendimento. A IA só oferece horários em
             múltiplos dessa duração.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FormField label="Minutos por consulta" htmlFor="slot_duration">
+          <FormField label="Minutos por atendimento" htmlFor="slot_duration">
             <Input
               id="slot_duration"
               type="number"
@@ -237,7 +237,7 @@ export default function AvailabilityPage() {
       <PageHeader
         eyebrow="Configurações"
         title="Disponibilidade semanal"
-        description="Defina os horários em que você atende em cada dia. A IA só oferece esses horários aos seus pacientes."
+        description="Defina os horários em que você atende em cada dia. A IA só oferece esses horários aos seus clientes."
       />
       <Suspense fallback={<div className="h-32" />}>
         <AvailabilityForm />

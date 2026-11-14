@@ -20,6 +20,6 @@ Componentes da tela de disponibilidade semanal.
 **Notas:**
 
 - O bloco `lunch` representa uma **pausa** — no backend tem `block_type='lunch'`
-  e é filtrado em `getAvailableSlots` (nunca oferecido aos pacientes).
+  e é filtrado em `getAvailableSlots` (nunca oferecido aos clientes).
 - Quando `day.active === false`, os blocos ficam escondidos mas o state deles é
   preservado no client para o usuário poder reativar sem reconfigurar.

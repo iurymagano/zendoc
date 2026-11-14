@@ -3,7 +3,7 @@
 ## route.ts
 
 **`GET /api/conversations/[phone]`** — mensagens da conversa (ordem cronológica,
-até 200), nome do paciente e `ai_paused`. `phone` vem `encodeURIComponent`.
+até 200), nome do cliente e `ai_paused`. `phone` vem `encodeURIComponent`.
 
 ## Subpastas
 

@@ -14,7 +14,7 @@ async function getProfessionalId(userId: string) {
 
 /**
  * GET /api/conversations/[phone]
- * Mensagens da conversa com um contato (ordem cronológica), nome do paciente e
+ * Mensagens da conversa com um contato (ordem cronológica), nome do cliente e
  * estado de pausa da IA.
  */
 export async function GET(

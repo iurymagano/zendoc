@@ -28,5 +28,5 @@ total também aparece no item "Conversas" do Navbar (poll 30s,
 `/api/conversations/attention-count`). Enviar uma resposta limpa a marcação.
 
 **Notas:** mensagens `assistant` (IA ou profissional) alinhadas à direita; do
-paciente à esquerda. Enquanto a IA está ativa, o profissional ainda pode
+cliente à esquerda. Enquanto a IA está ativa, o profissional ainda pode
 responder — pausar só impede a resposta automática.

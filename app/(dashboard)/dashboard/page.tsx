@@ -100,13 +100,13 @@ export default async function DashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard
-          label="Próximas consultas"
+          label="Próximos atendimentos"
           value={(upcomingCount ?? 0).toString()}
           hint="agendadas daqui pra frente"
           icon={CalendarDays}
         />
         <StatCard
-          label="Pacientes cadastrados"
+          label="Clientes cadastrados"
           value={(patientsCount ?? 0).toString()}
           hint="no seu cadastro central"
           icon={Users}
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
             </CardTitle>
             <CardDescription>
               Defina os horários em que você atende para que a IA possa agendar
-              consultas automaticamente.
+              atendimentos automaticamente.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -152,11 +152,11 @@ export default async function DashboardPage() {
           icon={CalendarDays}
         />
         <ActionCard
-          eyebrow="Pacientes"
-          title="Cadastro de pacientes"
+          eyebrow="Clientes"
+          title="Cadastro de clientes"
           description="Cadastro central usado nos agendamentos manuais e no fluxo da IA."
-          href="/pacientes"
-          cta="Ver pacientes"
+          href="/clientes"
+          cta="Ver clientes"
           icon={Users}
         />
         <ActionCard

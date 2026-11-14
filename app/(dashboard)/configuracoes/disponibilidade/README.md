@@ -26,4 +26,4 @@ Tela de configuração da rotina semanal de atendimento.
   `/dashboard` em vez de mostrar "salvo com sucesso". É o fluxo usado ao final
   do onboarding.
 - O bloco `lunch` aparece na UI como "Almoço (pausa)" — é apenas uma pausa,
-  nunca oferecida aos pacientes (filtro em `getAvailableSlots`).
+  nunca oferecida aos clientes (filtro em `getAvailableSlots`).

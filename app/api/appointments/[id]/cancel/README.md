@@ -9,7 +9,7 @@ Rota dedicada de cancelamento pelo profissional.
 **Payload:**
 
 ```json
-{ "cancellation_note": "paciente desmarcou por motivo médico" }
+{ "cancellation_note": "cliente desmarcou por motivo médico" }
 ```
 
 `cancellation_note` é opcional, até 500 caracteres.

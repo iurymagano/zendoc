@@ -41,9 +41,9 @@ const ACTION_LABEL: Record<AIAction, string> = {
 };
 
 const SUGGESTIONS = [
-  'Oi, queria marcar uma consulta',
+  'Oi, queria marcar um horário',
   'Quais horários você tem essa semana?',
-  'Preciso remarcar minha consulta',
+  'Preciso remarcar meu horário',
 ];
 
 const STORAGE_KEY = 'iazen:testchat:phone';
@@ -247,7 +247,7 @@ export default function TestarIaPage() {
       <PageHeader
         eyebrow="Configurações"
         title="Testar IA"
-        description="Simule conversas de paciente sem WhatsApp. Cada conversa fica salva — você pode ter várias e voltar nelas depois."
+        description="Simule conversas de cliente sem WhatsApp. Cada conversa fica salva — você pode ter várias e voltar nelas depois."
         actions={
           <Button onClick={newConversation} disabled={sending}>
             Nova conversa
@@ -312,7 +312,7 @@ export default function TestarIaPage() {
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="m-auto max-w-sm text-center text-sm text-muted-foreground">
-                    Mande uma mensagem como se fosse o paciente.
+                    Mande uma mensagem como se fosse o cliente.
                   </div>
                 ) : (
                   messages.map((m, i) => (
@@ -373,7 +373,7 @@ export default function TestarIaPage() {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Escreva como o paciente…"
+                  placeholder="Escreva como o cliente…"
                   disabled={sending || !selectedPhone}
                   autoComplete="off"
                 />
@@ -406,7 +406,7 @@ export default function TestarIaPage() {
           >
             agenda
           </Link>
-          . Use telefones fake (prefixo 5500) para não misturar com pacientes
+          . Use telefones fake (prefixo 5500) para não misturar com clientes
           reais.
         </CardContent>
       </Card>

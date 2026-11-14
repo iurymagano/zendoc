@@ -41,14 +41,19 @@ function calId(professional: Professional): string {
 function eventBody(appointment: Appointment) {
   const sourceLabel =
     appointment.booked_via === 'whatsapp_ai' ? 'IA no WhatsApp' : 'manual';
+  // Compromisso pessoal (criado no Assistente) não tem cliente: o título fica em
+  // patient_name e o telefone é vazio.
+  const isPersonal = !appointment.patient_phone;
   const lines = [
     `Agendado via IAzen (${sourceLabel}).`,
-    `Paciente: ${appointment.patient_name}`,
-    `Telefone: ${appointment.patient_phone}`,
+    isPersonal ? null : `Cliente: ${appointment.patient_name}`,
+    isPersonal ? null : `Telefone: ${appointment.patient_phone}`,
     appointment.notes ? `Notas: ${appointment.notes}` : null,
   ].filter(Boolean);
   return {
-    summary: `${appointment.patient_name} — consulta`,
+    summary: isPersonal
+      ? appointment.patient_name
+      : `${appointment.patient_name} — atendimento`,
     description: lines.join('\n'),
     start: { dateTime: appointment.starts_at, timeZone: TZ },
     end: { dateTime: appointment.ends_at, timeZone: TZ },

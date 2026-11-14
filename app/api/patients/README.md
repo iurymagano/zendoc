@@ -1,6 +1,6 @@
 # app/api/patients/
 
-CRUD de pacientes cadastrados pelo profissional logado. Pacientes também são
+CRUD de clientes cadastrados pelo profissional logado. Clientes também são
 criados automaticamente pelo fluxo da IA (upsert em
 [lib/ai/executor.ts](../../../lib/ai/executor.ts)) na ação `book`.
 
@@ -8,11 +8,11 @@ criados automaticamente pelo fluxo da IA (upsert em
 
 **Endpoints:**
 
-- `GET /api/patients?q=termo` — lista pacientes do profissional. Se `q` for
+- `GET /api/patients?q=termo` — lista clientes do profissional. Se `q` for
   passado, filtra por `name ILIKE %q%` (case-insensitive); quando `q` contém
   dígitos, também busca `phone` e `cpf` por `ILIKE %dígitos%` (telefone e CPF
-  são gravados só com dígitos, então "(11) 91111-2222" acha o paciente).
-- `POST /api/patients` — cria um paciente.
+  são gravados só com dígitos, então "(11) 91111-2222" acha o cliente).
+- `POST /api/patients` — cria um cliente.
 
 **Payload do POST:**
 
@@ -21,7 +21,7 @@ criados automaticamente pelo fluxo da IA (upsert em
   "name": "Maria Silva",
   "phone": "5511999998888",
   "cpf": "390.533.447-05",
-  "notes": "Primeira consulta em 10/05 — encaminhamento do Dr. João"
+  "notes": "Primeiro atendimento em 10/05 — encaminhamento do Dr. João"
 }
 ```
 
@@ -45,7 +45,7 @@ criados automaticamente pelo fluxo da IA (upsert em
 
 ## Subpastas
 
-- [\[id\]/](./[id]/) — operações em um paciente específico (`GET`, `PATCH`,
+- [\[id\]/](./[id]/) — operações em um cliente específico (`GET`, `PATCH`,
   `DELETE`). O `PATCH` aceita `messaging_opted_out` (LGPD — opor-se a mensagens
   ativas). `[id]/export/` devolve um JSON com cadastro + agendamentos + conversa
   (direito de acesso/portabilidade).

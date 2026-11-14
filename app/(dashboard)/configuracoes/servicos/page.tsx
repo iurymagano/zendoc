@@ -152,7 +152,7 @@ export default function ServicesPage() {
           <CardTitle>Intervalo entre atendimentos</CardTitle>
           <CardDescription>
             Folga (em minutos) que a IA respeita ao oferecer horários — evita
-            encaixar uma consulta colada na outra.
+            encaixar um atendimento colado no outro.
           </CardDescription>
         </CardHeader>
         <CardContent>

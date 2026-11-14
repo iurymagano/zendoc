@@ -166,7 +166,7 @@ export default function ConversasPage() {
               <EmptyState
                 icon={MessagesSquare}
                 title="Nenhuma conversa ainda"
-                description="Quando um paciente mandar mensagem no WhatsApp, a conversa aparece aqui."
+                description="Quando um cliente mandar mensagem no WhatsApp, a conversa aparece aqui."
               />
             ) : (
               <ul className="divide-y">

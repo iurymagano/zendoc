@@ -14,7 +14,7 @@ sincronizados do Google (`google_busy_events`, read-only).
 
 - `TZ` — `'America/Sao_Paulo'`
 - `BusyEvent` — tipo do evento pessoal do Google vindo de `GET /api/appointments`
-- `tzDateKey(iso): string` — chave de dia `yyyy-MM-dd` no fuso do consultório
+- `tzDateKey(iso): string` — chave de dia `yyyy-MM-dd` no fuso da agenda
 - `tzMinutes(iso): number` — minutos desde a meia-noite no fuso (posicionamento)
 - `formatTime(iso): string` — `HH:mm`
 - `STATUS_LABEL` / `STATUS_BLOCK` — rótulo e classes de cor do bloco por status

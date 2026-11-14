@@ -34,15 +34,15 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
   **faixa de hora** (semana) abre o form já com a data/hora pré-preenchida.
 - Clicar num **bloco de agendamento** abre o form em modo edição, com as ações
   de status no topo (Aprovar/Confirmar/Não compareceu/Cancelar conforme o status).
-- Autocomplete de pacientes (nome OU telefone), campo CPF com máscara, fim
+- Autocomplete de clientes (nome OU telefone), campo CPF com máscara, fim
   auto-preenchido em `+50min`. Salva via `POST`/`PATCH /api/appointments`.
   O telefone é normalizado (`normalizePhoneBR`: `55` + DDD + número) antes do
-  envio — o mesmo número digitado com/sem DDI cai no mesmo paciente.
+  envio — o mesmo número digitado com/sem DDI cai no mesmo cliente.
 
 **Cancelamento:** `window.confirm` + `window.prompt` (motivo) →
 `POST /api/appointments/:id/cancel`.
 
-**Declaração de comparecimento:** no form de edição (consulta não cancelada),
+**Declaração de comparecimento:** no form de edição (atendimento não cancelado),
 o botão "Declaração" abre `/documentos/declaracao/[id]` em nova aba (documento
 imprimível). Ver `app/documentos/`.
 
@@ -51,7 +51,7 @@ imprimível). Ver `app/documentos/`.
 e o `service_id` vai no payload do appointment. Cadastro em
 `/configuracoes/servicos`.
 
-**Consultas recorrentes:** no form de criação, o campo "Repetir" (Não repete /
+**Atendimentos recorrentes:** no form de criação, o campo "Repetir" (Não repete /
 Toda semana / A cada 2 semanas) + "Repetir até" opcional cria uma série via
 `POST /api/recurrences` (materializa as ocorrências) em vez de um único
 appointment. Ocorrências recorrentes mostram 🔁 no calendário; no form de edição

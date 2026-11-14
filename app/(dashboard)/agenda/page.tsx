@@ -316,7 +316,7 @@ export default function AgendaPage() {
       form.starts_local.slice(0, 10) !== form.ends_local.slice(0, 10)
     ) {
       setFormError(
-        'Para repetir, início e fim devem ser no mesmo dia — eles definem o horário de UMA consulta. Use "Repetir até" para a data em que a série termina.',
+        'Para repetir, início e fim devem ser no mesmo dia — eles definem o horário de UM atendimento. Use "Repetir até" para a data em que a série termina.',
       );
       return;
     }
@@ -328,7 +328,7 @@ export default function AgendaPage() {
 
     setSaving(true);
 
-    // Consulta recorrente (só na criação): cria a série e materializa as
+    // Atendimento recorrente (só na criação): cria a série e materializa as
     // ocorrências; senão, fluxo normal de appointment único.
     if (!editing && form.repeat !== 'none') {
       const res = await fetch('/api/recurrences', {
@@ -388,7 +388,7 @@ export default function AgendaPage() {
     if (!a.recurrence_id) return;
     if (
       !window.confirm(
-        'Encerrar esta série? As consultas futuras desta recorrência serão canceladas (as passadas permanecem).',
+        'Encerrar esta série? Os atendimentos futuros desta recorrência serão cancelados (os passados permanecem).',
       )
     ) {
       return;
@@ -537,7 +537,7 @@ export default function AgendaPage() {
           <CardHeader>
             <CardTitle>{editing ? 'Editar agendamento' : 'Novo agendamento'}</CardTitle>
             <CardDescription>
-              Horários interpretados em America/Sao_Paulo. Se o paciente já existir
+              Horários interpretados em America/Sao_Paulo. Se o cliente já existir
               (mesmo telefone), seu cadastro é reutilizado.
             </CardDescription>
           </CardHeader>
@@ -577,14 +577,14 @@ export default function AgendaPage() {
             )}
             {editing?.recurrence_id && (
               <p className="mb-4 -mt-2 text-xs text-muted-foreground">
-                🔁 Esta consulta faz parte de uma série recorrente. Editar ou
+                🔁 Este atendimento faz parte de uma série recorrente. Editar ou
                 cancelar aqui afeta só esta ocorrência; use “Encerrar série” para
                 cancelar as futuras.
               </p>
             )}
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Nome do paciente" htmlFor="ap_name">
+                <FormField label="Nome do cliente" htmlFor="ap_name">
                   <div className="relative">
                     <Input
                       id="ap_name"
@@ -734,7 +734,7 @@ export default function AgendaPage() {
                           setForm((p) => {
                             const repeat = (v ?? 'none') as Repeat;
                             // Ao ativar a repetição, garante que o fim fique no
-                            // mesmo dia do início (é o horário de UMA consulta).
+                            // mesmo dia do início (é o horário de UM atendimento).
                             const sameDay =
                               p.starts_local.slice(0, 10) ===
                               p.ends_local.slice(0, 10);
@@ -781,7 +781,7 @@ export default function AgendaPage() {
                   {form.repeat !== 'none' && (
                     <p className="-mt-1 text-xs text-muted-foreground">
                       🔁 <strong>Início</strong> e <strong>Fim</strong> acima são o
-                      horário de <strong>uma</strong> consulta (mesmo dia). Ela vai
+                      horário de <strong>um</strong> atendimento (mesmo dia). Ela vai
                       se repetir {form.repeat === 'weekly' ? 'toda semana' : 'a cada 2 semanas'} no
                       mesmo dia e horário, até a data de “Repetir até”.
                     </p>
@@ -795,7 +795,7 @@ export default function AgendaPage() {
                   value={form.notes}
                   onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
                   rows={2}
-                  placeholder="Ex.: primeira consulta, encaminhamento, etc."
+                  placeholder="Ex.: primeiro atendimento, indicação, observações, etc."
                 />
               </FormField>
 

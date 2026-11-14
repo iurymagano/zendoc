@@ -172,7 +172,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 });
   }
 
-  // Reflete a alteração no Google (atualiza horário/paciente ou remove se no_show).
+  // Reflete a alteração no Google (atualiza horário/cliente ou remove se no_show).
   await syncAppointmentToGoogle(data);
 
   return NextResponse.json({ ok: true, appointment: data });

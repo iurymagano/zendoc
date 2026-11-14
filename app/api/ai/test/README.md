@@ -15,7 +15,7 @@ Consumido pela UI de chat de teste em
 ```json
 {
   "phone": "5511999999999",
-  "message": "Oi, quero marcar uma consulta para semana que vem"
+  "message": "Oi, quero marcar um atendimento para semana que vem"
 }
 ```
 
@@ -26,7 +26,7 @@ Consumido pela UI de chat de teste em
 
 ```json
 {
-  "reply": "texto que seria enviado ao paciente",
+  "reply": "texto que seria enviado ao cliente",
   "action": "book | cancel | reschedule | offer_slots | reply | approval_needed",
   "booking": { "starts_at": "...", "ends_at": "..." },
   "cancel": { "appointment_id": "..." },

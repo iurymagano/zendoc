@@ -6,7 +6,7 @@ import { createServerClient } from '@/lib/supabase';
 const schema = z.object({
   name: z.string().min(2),
   phone: z.string().min(10).max(13),
-  specialty: z.string().min(1),
+  specialty: z.string().trim().min(1).max(60),
   address: z.string().nullable().optional(),
   tone: z.enum(['amigável', 'formal']),
   custom_instructions: z.string().nullable().optional(),

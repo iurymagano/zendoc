@@ -1,11 +1,11 @@
-# app/(dashboard)/pacientes/[id]/
+# app/(dashboard)/clientes/[id]/
 
-Página de detalhe + histórico completo de um paciente.
+Página de detalhe + histórico completo de um cliente.
 
 ## page.tsx
 
-**O que faz:** server component que busca o paciente e todos os seus
-appointments, separando em "Próximas consultas" e "Histórico".
+**O que faz:** server component que busca o cliente e todos os seus
+appointments, separando em "Próximos atendimentos" e "Histórico".
 
 **Fluxo:**
 
@@ -14,8 +14,8 @@ appointments, separando em "Próximas consultas" e "Histórico".
 3. Busca o `patient` filtrando por `id` + `professional_id` (isolamento entre
    profissionais). `notFound()` se não existir.
 4. Busca appointments com `patient_id = id` e separa:
-   - **Próximas consultas:** `starts_at >= now` e status ativo (`scheduled`,
-     `confirmed`, `pending_approval`) — ordenadas ascendentemente (próxima
+   - **Próximos atendimentos:** `starts_at >= now` e status ativo (`scheduled`,
+     `confirmed`, `pending_approval`) — ordenados ascendentemente (próximo
      primeiro).
    - **Histórico:** tudo que for passado ou `cancelled`/`no_show` — ordenado
      descendentemente (mais recente primeiro).
@@ -25,7 +25,7 @@ appointments, separando em "Próximas consultas" e "Histórico".
 - Header com nome, telefone formatado, data de cadastro e atalho para
   "Novo agendamento".
 - Card "Anotações clínicas" (só aparece se `patient.notes` tiver conteúdo).
-- Card "Próximas consultas" com items de appointment (horário, status,
+- Card "Próximos atendimentos" com items de appointment (horário, status,
   origem IA/manual, notas, motivo de cancelamento se houver).
 - Card "Histórico" com o mesmo formato, appointments cancelados/no_show com
   `opacity-60`.
@@ -38,8 +38,8 @@ appointments, separando em "Próximas consultas" e "Histórico".
 
 **Notas:**
 
-- Appointments criados antes da deleção do paciente perdem o vínculo
+- Appointments criados antes da deleção do cliente perdem o vínculo
   (`ON DELETE SET NULL` no FK) e **não aparecem aqui** — ainda ficam em
   `/agenda` com `patient_name`/`patient_phone` desnormalizados.
-- Edição de paciente e de appointment continua sendo feita em `/pacientes`
+- Edição de cliente e de appointment continua sendo feita em `/clientes`
   e `/agenda` respectivamente — esta página é read-only (view).

@@ -11,7 +11,10 @@ prosa e erra o JSON; há fallback, mas a confiabilidade cai. Em `processor.ts`.
 ## prompt-builder.ts
 
 **O que faz:** constrói o system prompt que guia a IA a se comportar como
-secretária do consultório.
+secretária virtual de `<nome>, <área de atuação>`. O texto é **genérico** — fala
+em "cliente" e "atendimento", não presume ramo de saúde e manda escalar
+(`handoff`) dúvida técnica da área, reclamação, urgência ou valor/serviço fora da
+lista. Coberto por `prompt-builder.test.ts` (sem vocabulário de saúde).
 
 **Exporta:**
 
@@ -33,6 +36,15 @@ secretária do consultório.
   parse caem no fallback em `processor.ts`.
 - Tom da resposta muda entre `amigável` e `formal` conforme `professional.tone`.
 
+## prompt-builder.test.ts
+
+**O que faz:** testes `node:test` do prompt da secretária (`npm test`): usa o
+nome e a área informados, funciona sem área e **não contém vocabulário de saúde**
+(paciente/consulta/consultório) — as chaves técnicas `message_to_patient` e
+`patient_name` do JSON são ignoradas na checagem.
+
+**Depende de:** `prompt-builder.ts`.
+
 ## executor.ts
 
 **O que faz:** aplica a ação escolhida pela IA no banco.
@@ -43,14 +55,14 @@ secretária do consultório.
 
 **Ações suportadas:**
 
-- `book` — upsert do paciente em `patients` (por `professional_id,phone`) e
+- `book` — upsert do cliente em `patients` (por `professional_id,phone`) e
   insert em `appointments`. Status vira `pending_approval` se
   `professional.requires_approval`, senão `scheduled`. O nome vem de
   `booking.patient_name` (a IA é instruída a sempre enviá-lo); se ausente,
-  preserva o nome já cadastrado e só cai em `'Paciente'` se não houver nenhum —
+  preserva o nome já cadastrado e só cai em `'Cliente'` se não houver nenhum —
   nunca reescreve um nome real com o placeholder.
-- `confirm` — paciente confirmou presença (resposta ao lembrete): a próxima
-  consulta `scheduled` do paciente vira `confirmed`. Não confirma
+- `confirm` — cliente confirmou presença (resposta ao lembrete): o próximo
+  atendimento `scheduled` do cliente vira `confirmed`. Não confirma
   `pending_approval` (isso depende do profissional aprovar).
 - `cancel` — marca o appointment como `cancelled` com `cancelled_by = 'patient'`,
   filtrando por `professional_id` como defesa em profundidade.
@@ -61,8 +73,8 @@ secretária do consultório.
 - Outras ações (`offer_slots`, `reply`, `approval_needed`) não mexem no banco.
 
 `confirm`/`cancel`/`reschedule` **não dependem de id**: a IA não conhece o uuid
-do appointment, então `findUpcomingAppointment` resolve a **próxima consulta ativa
-do paciente pelo telefone** (ou pelo `cancel.appointment_id`, se informado). Isso
+do appointment, então `findUpcomingAppointment` resolve o **próximo atendimento ativo
+do cliente pelo telefone** (ou pelo `cancel.appointment_id`, se informado). Isso
 conserta o loop do lembrete "podemos confirmar?", que antes ficava sem efeito.
 
 Após cada escrita, reflete o appointment no Google Calendar via
@@ -86,14 +98,14 @@ removem. Por isso `book`/`cancel` agora fazem `.select()` da linha afetada.
 1. Busca as últimas 10 mensagens em `conversation_history` para
    `(professional_id, patient_phone)`.
 2. Calcula slots disponíveis via `getAvailableSlots` (14 dias), monta o
-   **contexto do paciente** (`buildPatientContext`) e busca os **serviços ativos**
+   **contexto do cliente** (`buildPatientContext`) e busca os **serviços ativos**
    do profissional — todos injetados no system prompt (a IA personaliza, não
    marca duplicado e responde preço/duração dos serviços).
 3. Monta system prompt via `buildSystemPrompt(professional, slots, patientContext)`.
 4. Chama `anthropic.messages.create` — se falhar o parse do JSON, usa
    `FALLBACK_REPLY`.
 5. Executa a ação via `executeAction` (erros apenas logados — não quebra o
-   fluxo, a mensagem ao paciente já é enviada).
+   fluxo, a mensagem ao cliente já é enviada).
 6. Persiste as duas mensagens (`user` + `assistant`) em `conversation_history`.
 
 **Depende de:** `@anthropic-ai/sdk`, `./prompt-builder`, `./executor`,
@@ -110,14 +122,14 @@ removem. Por isso `book`/`cancel` agora fazem `.select()` da linha afetada.
   menores simplesmente não cacheiam, sem erro.
 - `AI_MODEL` permite usar um modelo barato (Haiku) no dev sem mexer no código.
 - Histórico limitado a 10 mensagens para controlar custo (~R$2,70 por
-  paciente/mês na estimativa inicial).
+  cliente/mês na estimativa inicial).
 - A IA é instruída a devolver **só** o JSON. O `parseAIResponse` é tolerante:
   remove cercas ```` ```json ```` e, se preciso, extrai do primeiro `{` ao último
   `}`. Fallback em camadas quando não dá pra montar um AIResponse válido:
   1. Se o modelo respondeu em **prosa** (sem JSON), usa o próprio texto como
      `reply` — melhor que "não entendi" (mas não executa ação no banco).
   2. Só cai no `FALLBACK_REPLY` genérico se vier vazio ou um JSON quebrado
-     (que não dá pra mostrar ao paciente).
+     (que não dá pra mostrar ao cliente).
   (Haiku às vezes responde em prosa/markdown; por isso o default é Sonnet 4.6.)
 - O `prompt-builder` traz exemplos (few-shot) e regras de condução: ao perguntarem
   horários → oferecer 2–4 opções (`offer_slots`), pedir o nome antes de confirmar,

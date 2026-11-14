@@ -63,12 +63,25 @@ Endpoint chamado pelo cron-job.org (a cada 1 min) para disparar os lembretes
 pendentes. Autenticado via `Authorization: Bearer ${CRON_SECRET}`. Detalhes em
 [reminders/README.md](./reminders/README.md).
 
+### Assistente pessoal — `/api/assistant/*`
+
+Arquivos: [assistant/chat/route.ts](./assistant/chat/route.ts),
+[assistant/messages/route.ts](./assistant/messages/route.ts),
+[assistant/reminders/route.ts](./assistant/reminders/route.ts),
+[assistant/reminders/[id]/cancel/route.ts](./assistant/reminders/[id]/cancel/route.ts)
+
+Chat do próprio profissional com a IA (tool use) para gerenciar a agenda e criar lembretes
+pessoais. `POST /chat` roda um turno (402 se o plano não for `trialing`/`active`),
+`GET /messages` devolve o histórico, `GET /reminders` lista os lembretes pessoais e
+`POST /reminders/:id/cancel` cancela um pendente. Detalhes em
+[assistant/README.md](./assistant/README.md).
+
 ### `GET|POST /api/patients` e `GET|PATCH|DELETE /api/patients/:id`
 
 Arquivos: [patients/route.ts](./patients/route.ts),
 [patients/[id]/route.ts](./patients/[id]/route.ts)
 
-CRUD de pacientes do profissional logado. `GET` aceita `?q=` para busca por
+CRUD de clientes do profissional logado. `GET` aceita `?q=` para busca por
 nome/telefone. Detalhes em [patients/README.md](./patients/README.md).
 
 ### WhatsApp — `/api/whatsapp/*`
@@ -116,7 +129,7 @@ Arquivos: [recurrences/route.ts](./recurrences/route.ts),
 [recurrences/[id]/stop/route.ts](./recurrences/[id]/stop/route.ts),
 [recurrences/materialize/route.ts](./recurrences/materialize/route.ts)
 
-Consultas recorrentes (semanal/quinzenal). `POST /recurrences` cria a série e
+Atendimentos recorrentes (semanal/quinzenal). `POST /recurrences` cria a série e
 materializa as ocorrências; `POST /recurrences/:id/stop` encerra (cancela as
 futuras); `materialize` é o cron (`CRON_SECRET`) que mantém ~8 semanas à frente.
 Detalhes em [recurrences/README.md](./recurrences/README.md).

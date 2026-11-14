@@ -1,6 +1,6 @@
 # lib/patients/
 
-Utilitários de domínio do paciente.
+Utilitários de domínio do cliente.
 
 ---
 
@@ -8,7 +8,7 @@ Utilitários de domínio do paciente.
 
 **O que faz:** normaliza, valida (com dígitos verificadores) e formata CPF.
 Usado nos endpoints (`/api/patients`, `/api/patients/[id]`, `/api/appointments`)
-e nos formulários de `/pacientes` e `/agenda`.
+e nos formulários de `/clientes` e `/agenda`.
 
 **Exporta:**
 

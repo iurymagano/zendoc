@@ -31,8 +31,8 @@ function parseCpf(
 /** Mensagem de conflito conforme o índice violado (cpf x telefone). */
 function uniqueConflictMessage(message?: string): string {
   return message?.includes('cpf')
-    ? 'Já existe um paciente com este CPF.'
-    : 'Já existe um paciente com este telefone.';
+    ? 'Já existe um cliente com este CPF.'
+    : 'Já existe um cliente com este telefone.';
 }
 
 async function getProfessionalId(userId: string) {
@@ -79,9 +79,9 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await query;
   if (error) {
-    console.error('Erro ao listar pacientes:', error);
+    console.error('Erro ao listar clientes:', error);
     return NextResponse.json(
-      { error: 'Erro ao listar pacientes.' },
+      { error: 'Erro ao listar clientes.' },
       { status: 500 },
     );
   }
@@ -131,9 +131,9 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
-    console.error('Erro ao criar paciente:', error);
+    console.error('Erro ao criar cliente:', error);
     return NextResponse.json(
-      { error: 'Erro ao criar paciente.' },
+      { error: 'Erro ao criar cliente.' },
       { status: 500 },
     );
   }

@@ -40,16 +40,17 @@ export default function PrivacidadePage() {
           <section>
             <p>
               Esta Política explica como a <strong>IAzen</strong> (“nós”) trata
-              dados pessoais ao oferecer uma plataforma de gestão de consultórios
-              com secretária virtual por WhatsApp. Tratamos dados em conformidade
+              dados pessoais ao oferecer uma plataforma de gestão de agenda e atendimentos
+              para profissionais e pequenos negócios, com secretária virtual por
+              WhatsApp. Tratamos dados em conformidade
               com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).
             </p>
           </section>
 
           <Section title="1. Quem é o controlador">
             <p>
-              O profissional de saúde que contrata o IAzen é o{' '}
-              <strong>controlador</strong> dos dados de seus pacientes. A IAzen
+              O profissional ou negócio que contrata o IAzen é o{' '}
+              <strong>controlador</strong> dos dados de seus clientes. A IAzen
               atua como <strong>operadora</strong>, tratando esses dados em nome e
               segundo as instruções do profissional. Para os dados de cadastro do
               próprio profissional, a IAzen é a controladora.
@@ -62,13 +63,14 @@ export default function PrivacidadePage() {
           <Section title="2. Dados que tratamos">
             <ul className="list-disc pl-5">
               <li>
-                <strong>Do profissional:</strong> nome, e-mail, especialidade,
+                <strong>Do profissional:</strong> nome, e-mail, área de atuação,
                 telefone, endereço, dados de acesso e de assinatura (pagamento via
-                Stripe).
+                Stripe), além do conteúdo das conversas com o Assistente pessoal
+                e dos lembretes pessoais que ele cria.
               </li>
               <li>
-                <strong>Dos pacientes:</strong> nome, telefone, CPF (opcional),
-                anotações do consultório, histórico de agendamentos e o conteúdo
+                <strong>Dos clientes:</strong> nome, telefone, CPF (opcional),
+                anotações do profissional, histórico de agendamentos e o conteúdo
                 das conversas trocadas com a secretária virtual.
               </li>
             </ul>
@@ -76,7 +78,7 @@ export default function PrivacidadePage() {
 
           <Section title="3. Para que usamos e a base legal">
             <ul className="list-disc pl-5">
-              <li>Agendar, confirmar, lembrar e gerenciar consultas.</li>
+              <li>Agendar, confirmar, lembrar e gerenciar atendimentos.</li>
               <li>
                 Operar a secretária virtual por WhatsApp (responder e marcar
                 automaticamente).
@@ -86,9 +88,9 @@ export default function PrivacidadePage() {
             </ul>
             <p>
               As bases legais incluem a <strong>execução de contrato</strong>, o{' '}
-              <strong>legítimo interesse</strong> (ex.: lembretes a pacientes já
+              <strong>legítimo interesse</strong> (ex.: lembretes a clientes já
               atendidos) e o <strong>consentimento</strong> quando aplicável. O
-              paciente pode pedir para não receber mensagens a qualquer momento
+              cliente pode pedir para não receber mensagens a qualquer momento
               (ver item 6).
             </p>
           </Section>
@@ -121,7 +123,7 @@ export default function PrivacidadePage() {
           <Section title="5. Uso do Google Calendar">
             <p>
               Quando o profissional conecta a conta Google, acessamos sua agenda
-              apenas para: criar/atualizar/remover os eventos das consultas e ler
+              apenas para: criar/atualizar/remover os eventos dos atendimentos e ler
               os compromissos para evitar conflitos de horário. O uso das
               informações recebidas das APIs do Google segue a{' '}
               <a
@@ -139,12 +141,12 @@ export default function PrivacidadePage() {
 
           <Section title="6. Direitos do titular">
             <p>
-              Pacientes e profissionais podem solicitar acesso, correção,
+              Clientes e profissionais podem solicitar acesso, correção,
               portabilidade, exclusão e a interrupção do tratamento de seus dados,
               além de se opor ao recebimento de mensagens. Os pedidos podem ser
               feitos diretamente ao profissional (controlador) ou pelo contato
               [email do DPO]. O profissional pode exportar ou excluir os dados de
-              um paciente na própria plataforma.
+              um cliente na própria plataforma.
             </p>
           </Section>
 

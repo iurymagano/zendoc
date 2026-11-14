@@ -18,7 +18,7 @@ type EvolutionMessage = {
 };
 
 /**
- * Identificador do remetente, usado tanto para gravar histórico/paciente quanto
+ * Identificador do remetente, usado tanto para gravar histórico/cliente quanto
  * para responder.
  * - `@s.whatsapp.net` → telefone em dígitos (`5511999999999`), mantém a
  *   convenção do app e compatibilidade com lembretes.

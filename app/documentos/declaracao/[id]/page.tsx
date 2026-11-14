@@ -91,7 +91,7 @@ export default async function DeclaracaoPage({
           <p className="text-justify leading-[1.9]">
             Declaro, para os devidos fins, que{' '}
             <strong>{appointment.patient_name}</strong> compareceu a atendimento
-            neste consultório no dia <strong>{longDate(appointment.starts_at)}</strong>
+            com <strong>{professional.name}</strong> no dia <strong>{longDate(appointment.starts_at)}</strong>
             , no horário das <strong>{time(appointment.starts_at)}</strong> às{' '}
             <strong>{time(appointment.ends_at)}</strong>.
           </p>

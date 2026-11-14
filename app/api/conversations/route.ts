@@ -15,7 +15,7 @@ async function getProfessionalId(userId: string) {
 /**
  * GET /api/conversations
  * Lista as conversas do profissional (uma por telefone), com a última mensagem,
- * nome do paciente (se cadastrado) e se a IA está pausada naquele contato.
+ * nome do cliente (se cadastrado) e se a IA está pausada naquele contato.
  */
 export async function GET() {
   const session = await auth();

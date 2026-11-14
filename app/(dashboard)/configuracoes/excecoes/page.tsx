@@ -259,7 +259,7 @@ export default function ExceptionsPage() {
                               5,
                             )}${
                               e.slot_duration
-                                ? ` · ${e.slot_duration} min/consulta`
+                                ? ` · ${e.slot_duration} min/atendimento`
                                 : ''
                             }`}
                         {e.note ? ` · ${e.note}` : ''}

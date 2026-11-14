@@ -28,7 +28,7 @@ backend — só armazena local.
 
 ## step-2/page.tsx
 
-**O que faz:** coleta especialidade, endereço (opcional), tom (`amigável|formal`)
+**O que faz:** coleta a área de atuação (lista ampla de exemplos + "Outra" com campo livre), endereço (opcional), tom (`amigável|formal`)
 e instruções especiais. Lê o step 1 do `sessionStorage`, envia tudo para
 `POST /api/onboarding/profile` e redireciona para `/dashboard`.
 

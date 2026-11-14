@@ -14,5 +14,5 @@ existir.
 **Saudação:** `Olá, {primeiro nome}` usa `firstNameSkippingTitle` — pula
 títulos ("Dra. Teste QA" → "Olá, Teste"); o título não é repetido.
 
-**Notas:** versão mínima. Agenda, lista de pacientes e conexão WhatsApp serão
+**Notas:** versão mínima. Agenda, lista de clientes e conexão WhatsApp serão
 adicionadas nas Sprints 2-3.
