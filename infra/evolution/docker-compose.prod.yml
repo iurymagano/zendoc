@@ -1,0 +1,23 @@
+# Produção: adiciona o Caddy (HTTPS automático via Let's Encrypt) na frente da
+# Evolution. Use junto com o docker-compose.yml:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# No .env: EVOLUTION_PORT=127.0.0.1:8080 (a API só fica acessível pelo Caddy),
+# SERVER_URL=https://<DOMAIN> e DOMAIN=<domínio público>.
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    depends_on: [evolution-api]
+    ports: ['80:80', '443:443']
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

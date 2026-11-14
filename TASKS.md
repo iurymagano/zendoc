@@ -424,6 +424,9 @@ Legenda:
   número externo, resposta da IA entregue e persistência** ✅
 - [ ] Produção: hospedar servidor Evolution (Railway/VPS) e setar
   `EVOLUTION_API_URL`/`EVOLUTION_API_KEY`/`WEBHOOK_SECRET` na Vercel
+  - [x] Servidor Evolution na VM e2-micro grátis do Google Cloud (Docker +
+    Caddy com HTTPS em `130-211-208-101.sslip.io`; ver `infra/evolution/README.md`)
+  - [ ] Setar as três envs na Vercel
 - [ ] Em produção, `NEXT_PUBLIC_URL` = domínio público (não `host.docker.internal`)
 
 ### Cadastro rico de paciente
