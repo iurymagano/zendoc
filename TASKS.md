@@ -135,6 +135,9 @@ Legenda:
     trial_ending ≤3 dias, trial_expired)
   - [x] Integrado no `/dashboard`
 - [x] Correções da homologação em produção
+  - [x] Login com Google: a sessão guardava o id aleatório do NextAuth em vez do
+    id do Supabase Auth, e o onboarding falhava com FK em `professionals.user_id`
+    (`auth.ts` agora resolve o id pelo e-mail, inclusive em sessões antigas)
   - [x] Paciente duplicado: telefone normalizado para 55 + DDD + número em todas
     as rotas que gravam `patients.phone`/`appointments.patient_phone`
     (helper [lib/phone.ts](lib/phone.ts), com testes via `npm test`)
