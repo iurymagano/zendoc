@@ -9,8 +9,9 @@ criados automaticamente pelo fluxo da IA (upsert em
 **Endpoints:**
 
 - `GET /api/patients?q=termo` — lista pacientes do profissional. Se `q` for
-  passado, filtra por `name ILIKE %q% OR phone ILIKE %q%` (case-insensitive);
-  quando `q` contém dígitos, também busca `cpf ILIKE %dígitos%`.
+  passado, filtra por `name ILIKE %q%` (case-insensitive); quando `q` contém
+  dígitos, também busca `phone` e `cpf` por `ILIKE %dígitos%` (telefone e CPF
+  são gravados só com dígitos, então "(11) 91111-2222" acha o paciente).
 - `POST /api/patients` — cria um paciente.
 
 **Payload do POST:**
@@ -24,7 +25,9 @@ criados automaticamente pelo fluxo da IA (upsert em
 }
 ```
 
-- `phone` — 11 a 13 dígitos (com DDI/DDD). Validação server-side.
+- `phone` — aceita qualquer formato (com/sem máscara, com/sem DDI). O servidor
+  normaliza com `normalizePhoneBR` (`lib/phone.ts`) e grava `55` + DDD + número;
+  se não resultar em 12–13 dígitos → 400. `PATCH /api/patients/[id]` idem.
 - `cpf` — opcional. Aceita com ou sem máscara; validado por checksum
   ([lib/patients/cpf.ts](../../../lib/patients/cpf.ts)) e persistido só com
   dígitos. Vazio/ausente → `null`.

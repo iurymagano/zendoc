@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
+import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import { createServerClient } from '@/lib/supabase';
 import { hasAppointmentConflict } from '@/lib/appointments/conflicts';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
 
-const phoneRegex = /^\d{11,13}$/;
+// Aceita qualquer formato digitado; grava sempre 55 + DDD + número (só dígitos).
+const phoneSchema = z.string().transform(normalizePhoneBR).refine(isValidPhoneBR);
 
 const patchSchema = z
   .object({
@@ -15,7 +17,7 @@ const patchSchema = z
     starts_at: z.string().datetime({ offset: true }).optional(),
     ends_at: z.string().datetime({ offset: true }).optional(),
     patient_name: z.string().trim().min(1).max(120).optional(),
-    patient_phone: z.string().regex(phoneRegex).optional(),
+    patient_phone: phoneSchema.optional(),
     notes: z.string().max(2000).nullable().optional(),
     service_id: z.string().uuid().nullable().optional(),
   })

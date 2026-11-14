@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/card';
 import { buttonVariants } from '@/components/ui/button';
 import { PlanStatusBanner } from '@/components/billing/PlanStatusBanner';
+import { firstNameSkippingTitle } from '@/lib/name';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import type { Professional, PlanStatus } from '@/types/database';
 
@@ -76,7 +77,7 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-8">
       <PageHeader
         eyebrow={`Plano · ${PLAN_LABEL[professional.plan_status]}`}
-        title={`Olá, ${professional.name.split(' ')[0]}`}
+        title={`Olá, ${firstNameSkippingTitle(professional.name)}`}
         description={
           professional.specialty
             ? `${professional.specialty} · gerencie sua agenda e sua secretária virtual.`

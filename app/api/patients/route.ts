@@ -3,12 +3,14 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
+import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 
-const phoneRegex = /^\d{11,13}$/;
+// Aceita qualquer formato digitado; grava sempre 55 + DDD + número (só dígitos).
+const phoneSchema = z.string().transform(normalizePhoneBR).refine(isValidPhoneBR);
 
 const bodySchema = z.object({
   name: z.string().trim().min(1).max(120),
-  phone: z.string().regex(phoneRegex),
+  phone: phoneSchema,
   cpf: z.string().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
@@ -66,8 +68,12 @@ export async function GET(req: NextRequest) {
 
   if (search) {
     const digits = search.replace(/\D/g, '');
-    const clauses = [`name.ilike.%${search}%`, `phone.ilike.%${search}%`];
-    if (digits) clauses.push(`cpf.ilike.%${digits}%`);
+    // telefone e CPF são gravados só com dígitos → busca pelos dígitos digitados
+    // (ex.: "(11) 91111-2222" acha 5511911112222).
+    const clauses = [`name.ilike.%${search}%`];
+    if (digits) {
+      clauses.push(`phone.ilike.%${digits}%`, `cpf.ilike.%${digits}%`);
+    }
     query = query.or(clauses.join(','));
   }
 

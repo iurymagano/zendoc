@@ -9,7 +9,10 @@ Página principal após o login.
 trial e conexão WhatsApp. Redireciona para `/onboarding/step-1` se o perfil não
 existir.
 
-**Depende de:** `@/auth`, `@/lib/supabase`
+**Depende de:** `@/auth`, `@/lib/supabase`, `@/lib/name`
+
+**Saudação:** `Olá, {primeiro nome}` usa `firstNameSkippingTitle` — pula
+títulos ("Dra. Teste QA" → "Olá, Teste"); o título não é repetido.
 
 **Notas:** versão mínima. Agenda, lista de pacientes e conexão WhatsApp serão
 adicionadas nas Sprints 2-3.

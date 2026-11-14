@@ -20,13 +20,14 @@ criar/editar pacientes.
 
 **Formatação:**
 
-- Telefone armazenado como dígitos puros no banco (`5511999998888`), mas
-  renderizado na lista como `(11) 99999-8888` ou `+55 (11) 99999-8888`
-  dependendo do tamanho.
+- Telefone armazenado como dígitos puros com DDI no banco (`5511999998888`),
+  renderizado na lista com `formatPhoneBR` (`+55 (11) 99999-8888`). O form
+  aceita com/sem DDI: normaliza com `normalizePhoneBR` (`lib/phone.ts`) antes
+  de enviar, e a API normaliza de novo (fonte da verdade é o servidor).
 - CPF é opcional. O input usa `maskCpfInput` (máscara `000.000.000-00` ao
   digitar) e é validado por checksum no submit; persiste só com dígitos. Na
   lista aparece como `CPF 000.000.000-00` quando preenchido.
-- No submit, qualquer caractere não-dígito é removido antes de enviar à API.
+- No submit, o telefone é normalizado (só dígitos + `55` se faltar o DDI) antes de enviar à API.
 
 **Depende de:**
 

@@ -12,7 +12,9 @@ profissional tem uma instância criada **via API** no primeiro "Conectar", com
 - [status/](./status/) — `GET` consulta estado de conexão, sincroniza
   `whatsapp_connected` e, quando desconectado, devolve o QR junto.
 - [disconnect/](./disconnect/) — `POST` desloga + remove a instância na
-  Evolution e zera as colunas (`zapi_instance_id`/`zapi_token`).
+  Evolution e zera as colunas (`zapi_instance_id`/`zapi_token`). Também serve
+  de "Cancelar" do pareamento: funciona com instância que nunca conectou (erro
+  no logout é ignorado, o delete é sempre tentado).
 - [webhook/](./webhook/) — `POST` público, autenticado por `?secret=`, recebe
   `messages.upsert` da Evolution e roteia para a IA.
 

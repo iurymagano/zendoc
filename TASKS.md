@@ -134,6 +134,14 @@ Legenda:
   - [x] Componente `components/billing/PlanStatusBanner` (past_due, cancelled,
     trial_ending ≤3 dias, trial_expired)
   - [x] Integrado no `/dashboard`
+- [x] Correções da homologação em produção
+  - [x] Paciente duplicado: telefone normalizado para 55 + DDD + número em todas
+    as rotas que gravam `patients.phone`/`appointments.patient_phone`
+    (helper [lib/phone.ts](lib/phone.ts), com testes via `npm test`)
+  - [x] `/configuracoes/whatsapp`: botão "Cancelar" no estado "Aguardando scan"
+    (remove a instância pendurada na Evolution via `POST /api/whatsapp/disconnect`)
+  - [x] Saudação do dashboard pula título (Dr./Dra./Prof.) — "Olá, Teste"
+  - [x] Barra de progresso do onboarding em cor sólida `#4F6EF7` (sem gradiente)
 - [ ] Onboarding de 5 beta testers reais
 - [ ] Coleta de feedback estruturada
 

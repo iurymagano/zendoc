@@ -22,6 +22,8 @@ npm run dev                   # http://localhost:3000
 - `npm run build` — build de produção
 - `npm start` — servidor de produção
 - `npm run lint` — ESLint
+- `npm test` — testes unitários dos helpers de `lib/*.test.ts` (`node:test` via
+  `tsx`, sem framework instalado)
 - `npm run tunnel` — expõe `localhost:3000` numa URL pública (via cloudflared,
   baixado on-demand pelo `untun`) para a Evolution alcançar o webhook em dev.
   Use a URL impressa como `NEXT_PUBLIC_URL` no `.env.local`.

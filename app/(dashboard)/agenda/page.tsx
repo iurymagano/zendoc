@@ -40,6 +40,7 @@ import {
   formatTime,
 } from '@/components/agenda/calendar-utils';
 import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
+import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import type { Appointment, AppointmentStatus, Patient, Service } from '@/types/database';
 
 const DEFAULT_DURATION_MIN = 50;
@@ -292,9 +293,9 @@ export default function AgendaPage() {
     e.preventDefault();
     setFormError(null);
 
-    const phone = form.patient_phone.replace(/\D/g, '');
-    if (phone.length < 11 || phone.length > 13) {
-      setFormError('Telefone deve ter 11 a 13 dígitos (com DDI e DDD).');
+    const phone = normalizePhoneBR(form.patient_phone);
+    if (!isValidPhoneBR(phone)) {
+      setFormError('Informe um telefone válido com DDD (ex.: (11) 91111-2222).');
       return;
     }
     if (!form.patient_name.trim()) {

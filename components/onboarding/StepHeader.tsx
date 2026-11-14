@@ -13,7 +13,7 @@ export function StepHeader({ current, title, subtitle }: Props) {
             key={n}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
               n <= current
-                ? 'bg-gradient-to-r from-[var(--ia-accent)] to-[var(--ia-accent2)]'
+                ? 'bg-[#4F6EF7]'
                 : 'bg-muted'
             }`}
           />

@@ -158,18 +158,30 @@ export async function sendWhatsAppMessage(
   await ensureOk(res, 'sendText');
 }
 
-/** Desloga e remove a instância (libera o slot no servidor). Tolerante a falhas. */
+/**
+ * Desloga e remove a instância (libera o slot no servidor). Tolerante a falhas.
+ * O logout de uma instância que nunca conectou costuma devolver 4xx/5xx na
+ * Evolution — isso é esperado e NÃO impede o delete, que sempre é tentado.
+ * Falha no delete é só logada (o `fetch` não lança em status HTTP) e a rota
+ * ainda zera as colunas locais.
+ */
 export async function disconnectInstance(
   instanceName: string,
   token: string,
 ): Promise<void> {
   const key = instanceKey(token);
-  await fetch(`${base()}/instance/logout/${instanceName}`, {
-    method: 'DELETE',
-    headers: { apikey: key },
-  }).catch(() => {});
-  await fetch(`${base()}/instance/delete/${instanceName}`, {
-    method: 'DELETE',
-    headers: { apikey: key },
-  }).catch(() => {});
+  for (const step of ['logout', 'delete'] as const) {
+    try {
+      const res = await fetch(`${base()}/instance/${step}/${instanceName}`, {
+        method: 'DELETE',
+        headers: { apikey: key },
+      });
+      // logout falhar é esperado (instância nunca conectou); só o delete importa.
+      if (!res.ok && step === 'delete') {
+        console.error(`Evolution delete respondeu ${res.status} (${instanceName})`);
+      }
+    } catch (err) {
+      console.error(`Evolution ${step} falhou (${instanceName}):`, err);
+    }
+  }
 }

@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { formatPhoneBR } from '@/lib/phone';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import type {
   Appointment,
@@ -61,20 +62,6 @@ function formatTime(iso: string): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(iso));
-}
-
-function formatPhone(raw: string): string {
-  const d = raw.replace(/\D/g, '');
-  if (d.length === 13) {
-    return `+${d.slice(0, 2)} (${d.slice(2, 4)}) ${d.slice(4, 9)}-${d.slice(9)}`;
-  }
-  if (d.length === 12) {
-    return `+${d.slice(0, 2)} (${d.slice(2, 4)}) ${d.slice(4, 8)}-${d.slice(8)}`;
-  }
-  if (d.length === 11) {
-    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-  }
-  return raw;
 }
 
 function AppointmentItem({ appointment }: { appointment: Appointment }) {
@@ -170,7 +157,7 @@ export default async function PatientDetailPage({
       <PageHeader
         eyebrow="Paciente"
         title={patient.name}
-        description={`${formatPhone(patient.phone)} · cadastrado em ${registered}`}
+        description={`${formatPhoneBR(patient.phone)} · cadastrado em ${registered}`}
         actions={
           <>
             <Link

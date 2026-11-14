@@ -3,12 +3,14 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
+import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 
-const phoneRegex = /^\d{11,13}$/;
+// Aceita qualquer formato digitado; grava sempre 55 + DDD + número (só dígitos).
+const phoneSchema = z.string().transform(normalizePhoneBR).refine(isValidPhoneBR);
 
 const patchSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
-  phone: z.string().regex(phoneRegex).optional(),
+  phone: phoneSchema.optional(),
   cpf: z.string().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
   messaging_opted_out: z.boolean().optional(),
