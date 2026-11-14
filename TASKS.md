@@ -165,6 +165,20 @@ Legenda:
 - [ ] Renomear o diretório do repositório `zendoc/` → `iazen/` (decisão à
   parte — envolve atualizar paths locais e git remote)
 
+### Redesign da marca (identidade v1)
+
+- [x] Referências pesquisadas e [DESIGN.md](DESIGN.md) com paleta, tipos, componentes e regras por tela
+- [x] Logo em SVG (`Logo`, `LogoMark`, `public/logo*.svg`, `app/icon.svg`)
+- [x] Tokens, fontes (Sora, Inter, JetBrains Mono) e componentes `ui/*` base
+- [x] Landing nova ("Você atende. Ela agenda.")
+- [x] Landing e auth com texto aberto a qualquer profissional ("clientes", "atendimentos") e seção do Assistente pessoal
+- [x] Login e cadastro com o lado de marca
+- [x] `CLAUDE.md` e READMEs atualizados
+- [ ] `app/apple-icon` (ícone iOS)
+- [ ] Fase 2: dashboard (Sidebar, PageHeader, cards de métrica, tabelas, agenda, estados vazios)
+- [ ] Fase 2: onboarding (tirar o halo radial) e `app/privacidade`
+- [ ] Trocar as conversas de exemplo da landing por conversas reais autorizadas
+
 ### Identidade visual
 
 - [x] Fontes Space Grotesk (display) + Inter (body) via `next/font/google`

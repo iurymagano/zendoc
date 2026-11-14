@@ -2,13 +2,22 @@
 
 ## O que é este projeto
 
-IAzen é uma plataforma SaaS de gestão de consultórios para profissionais de saúde autônomos
-(psicólogos, nutricionistas, fisioterapeutas). O produto oferece uma secretária virtual
-inteligente via WhatsApp que agenda, confirma e gerencia consultas automaticamente.
+IAzen é uma plataforma SaaS de agenda com uma **IA secretária para você**, para qualquer
+profissional que atende clientes com hora marcada: barbeiros, cabeleireiras, manicures,
+personais, psicólogos, nutricionistas, advogados, consultores, professores particulares,
+tatuadores. Duas frentes:
 
-**Proposta de valor:** "Sua secretária virtual no WhatsApp — agenda, lembra e gerencia suas consultas automaticamente."
+- **Secretária no WhatsApp:** agenda, confirma, remarca, cancela e lembra os clientes
+  automaticamente, no tom que o profissional escolher.
+- **Assistente pessoal (`/assistente`, no painel):** chat privado do dono com a própria IA para
+  marcar compromissos na sua agenda, criar lembretes para si mesmo e organizar o dia.
 
-**Público-alvo:** Profissionais de saúde autônomos sem secretária, com 10 a 40 atendimentos/semana.
+**Proposta de valor:** "Sua secretária no WhatsApp: agenda, confirma e lembra seus clientes, e
+ainda organiza o seu dia."
+
+**Público-alvo:** Profissionais autônomos de qualquer área, sem secretária, que vivem de
+atendimentos com hora marcada (10 a 40 por semana). O vocabulário da interface é "cliente" e
+"atendimento"; as tabelas do banco continuam `patients`/`appointments` (sem renomear).
 
 **Preço:** R$297/mês com trial gratuito de 7 dias (sem cartão).
 
@@ -16,49 +25,54 @@ inteligente via WhatsApp que agenda, confirma e gerencia consultas automaticamen
 
 ## Identidade visual
 
-O design do IAzen segue uma estética **premium e técnica**, inspirada em Stripe e Vercel —
-moderna, bold, confiável.
+Identidade v1 ("Ensō que vira balão"): **moderna, calma e com personalidade**. O sistema
+completo (paleta, tipos, componentes, regras por tela, referências) está em
+[DESIGN.md](DESIGN.md), que manda sobre qualquer outra descrição visual. Resumo:
 
 ### Tokens de design
 
 ```css
-/* Cores */
---iazen-black: #0a0a0f; /* fundo escuro, texto principal */
---iazen-white: #ffffff;
---iazen-accent: #4f6ef7; /* azul primário — CTAs, links, marca */
---iazen-accent2: #7c3aed; /* violeta — acento de IA, ícone */
---iazen-muted: #6b7280; /* texto secundário */
---iazen-surface: #f4f4f6; /* fundos, cards claros */
---iazen-border: #e5e7eb; /* bordas */
+/* Marca */
+--ia-void: #05060a; /* fundo escuro, sidebar, tinta sobre claro */
+--ia-violet: #8b5cff; /* Violeta Zen: a marca, destaque sobre escuro */
+--ia-spark: #5eead4; /* Faísca: a IA online, sucesso sobre escuro */
+--ia-mist: #f4f3f8; /* Névoa: fundo claro */
+/* Derivados */
+--ia-violet-action: #7a47f5; /* fundo de botão (texto branco, AA) */
+--ia-violet-ink: #5b35d5; /* link e destaque sobre claro */
+--ia-void-1/2/3: #0b0d14 / #12151f / #1c2030; /* degraus do escuro */
 
 /* Tipografia */
---font-display:
-  'Space Grotesk', sans-serif; /* headings, logo, CTAs — peso 600/700 */
---font-body: 'Inter', sans-serif; /* corpo de texto — peso 400/500 */
---font-mono: 'Fira Code', monospace; /* código, labels técnicos */
+--font-display: Sora; /* títulos, logo, números grandes: 700 */
+--font-body: Inter; /* corpo e interface: 400/500/600 */
+--font-mono: JetBrains Mono; /* só dado: horário, data, valor */
 ```
+
+Os tokens shadcn (`--primary`, `--background`, `--card`…) vivem em `app/globals.css` e já
+estão mapeados para estas cores (tema claro no painel, `.dark` na landing e no auth).
 
 ### Regras de uso
 
-- **Headings e logo:** Space Grotesk 700, `letter-spacing: -0.03em`
-- **Corpo de texto:** Inter 400, `line-height: 1.6`
-- **Botão primário:** fundo `#4F6EF7`, texto branco, `border-radius: 8px`
-- **Dark sections:** fundo `#0A0A0F`, texto branco, acento azul
-- **Nunca** usar gradientes decorativos, sombras pesadas ou cores fora da paleta acima
-- **shadcn/ui** é a base de todos os componentes — customizar via `className` com as cores acima
+- **Títulos e logo:** Sora 700, `letter-spacing` de -0.03em a -0.05em, no máximo 2 linhas.
+- **Corpo:** Inter 400, `line-height: 1.6`, texto na cor cheia da tinta.
+- **Botão primário:** pílula, fundo Violeta Ação `#7A47F5`, texto branco. Campos 44px, raio 12.
+- **Landing e auth:** seções Void (`.dark`) alternando com Névoa. **Painel:** claro, com sidebar Void.
+- Superfícies separam por degrau de tom, não por linha nem sombra. Mono só em dado.
+- **Sem gradiente decorativo, brilho ou sombra pesada. Única exceção: o degradê do símbolo do logo.**
+- Cores fora da paleta do DESIGN.md nunca.
+- **shadcn/ui** continua sendo a base de todos os componentes, customizada por `className`/tokens.
+- Logo: `components/brand/Logo.tsx` (`Logo`, `LogoMark`); nunca recriar o desenho à mão.
 
 ### Fontes no projeto
 
-Adicionar no `app/layout.tsx`:
+Carregadas em `app/layout.tsx` via `next/font/google`:
 
 ```tsx
-import { Space_Grotesk, Inter } from 'next/font/google';
+import { Sora, Inter, JetBrains_Mono } from 'next/font/google';
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-display',
-});
-const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
+const sora = Sora({ subsets: ['latin'], variable: '--font-sora' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' });
 ```
 
 ---
@@ -1186,9 +1200,8 @@ O checklist detalhado de cada sprint fica em [TASKS.md](TASKS.md).
   via `npx shadcn@latest add <nome>`. Nunca criar do zero `<button>`/`<input>`
   estilizados manualmente quando existir equivalente shadcn. Wrappers por domínio
   (ex.: `components/onboarding/`) podem compor shadcn, mas não duplicá-lo.
-- **Design system IAzen:** ao estilizar componentes shadcn, usar os tokens de cor e
-  tipografia definidos na seção "Identidade visual" deste arquivo. Fundo escuro `#0A0A0F`,
-  acento `#4F6EF7`, display font Space Grotesk, body font Inter.
+- **Design system IAzen:** ao estilizar componentes shadcn, usar os tokens e as regras do
+  [DESIGN.md](DESIGN.md) (Void `#05060A`, Violeta Zen `#8B5CFF`, Sora para títulos, Inter para o corpo).
 - Toda API Route começa com: `const session = await auth()` → retorna 401 se não autenticado
 - Retornos sempre com `NextResponse.json()`
 - `SUPABASE_SERVICE_KEY` apenas em API Routes (server-side)
