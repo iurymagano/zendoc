@@ -64,11 +64,28 @@ Arquivos relevantes:
   aceita cron 1 vez por dia).
 - [.env.example](./.env.example) — lista completa de variáveis.
 
+### Produção atual (beta grátis)
+
+| Peça | Onde | Custo |
+| --- | --- | --- |
+| App | Vercel Hobby, projeto `zendoc` → https://iazen.vercel.app | grátis |
+| Banco | Supabase free, projeto `zendoc` (São Paulo) | grátis |
+| WhatsApp | Evolution na VM e2-micro do Google Cloud → ver [infra/evolution/](./infra/evolution/) | grátis (Always Free) |
+| Crons | cron-job.org (lembretes 1 min, sync Google 10 min) | grátis |
+| Pagamento | Stripe em **modo de teste** | — |
+
+Enquanto o projeto da Vercel não estiver ligado ao GitHub, publique pela CLI:
+`vercel deploy --prod` (as variáveis ficam na Vercel; os valores não ficam no
+repositório). No Google OAuth, os redirects de produção
+(`/api/auth/callback/google` e `/api/google/calendar/callback`) já estão
+cadastrados; o app está em modo "Testando", então só entra com Google quem for
+usuário de teste.
+
 ### Crons (cron-job.org)
 
 O plano grátis da Vercel (Hobby) só roda cron 1 vez por dia, então os crons
 frequentes ficam no [cron-job.org](https://cron-job.org) (grátis, até de 1 em
-1 minuto). Crie um job para cada linha, método `GET`, com o header
+1 minuto). Crie um job para cada linha, método `GET` ou `POST`, com o header
 `Authorization: Bearer <CRON_SECRET>` (o mesmo valor da env na Vercel):
 
 | Endpoint | Intervalo | Para quê |
