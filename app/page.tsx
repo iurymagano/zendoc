@@ -1,173 +1,209 @@
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
-import { Logo } from '@/components/brand/Logo';
+import { Logo, LogoMark } from '@/components/brand/Logo';
+import { HeroChat } from '@/components/landing/HeroChat';
+import { WeekGrid } from '@/components/landing/WeekGrid';
+import { ReminderTimeline } from '@/components/landing/ReminderTimeline';
+import { ToneDemo } from '@/components/landing/ToneDemo';
+import { AssistantDemo } from '@/components/landing/AssistantDemo';
+import { cn } from '@/lib/utils';
 
-const FEATURES = [
-  {
-    title: 'Agenda 24/7 no WhatsApp',
-    description:
-      'Pacientes marcam, remarcam e cancelam sozinhos, direto na conversa que já conhecem.',
-  },
-  {
-    title: 'Confirma e lembra sem esforço',
-    description:
-      'Lembretes automáticos de 24h e 2h — menos faltas, agenda cheia.',
-  },
-  {
-    title: 'IA que fala com seu tom',
-    description:
-      'Ajuste a personalidade da secretária e ela responde como se fosse da sua equipe.',
-  },
-];
+const WRAP = 'mx-auto w-full max-w-[1200px] px-5 sm:px-8';
 
-const PROOF = [
-  { label: 'Psicólogos' },
-  { label: 'Nutricionistas' },
-  { label: 'Fisioterapeutas' },
-  { label: 'Terapeutas' },
-  { label: 'Fonoaudiólogos' },
+const INCLUDED = [
+  'Secretária no WhatsApp, 24 horas por dia',
+  'Lembretes 24h e 2h antes de cada atendimento',
+  'Assistente pessoal no painel: converse e ela organiza o seu dia',
+  'Agenda, clientes e declarações no painel',
+  'Cancele quando quiser',
 ];
 
 export default function Home() {
   return (
-    <div className="dark relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-[-20%] -z-10 flex justify-center"
-      >
-        <div className="h-[620px] w-[1100px] rounded-full bg-[radial-gradient(circle_at_center,rgba(79,110,247,0.25),transparent_60%)]" />
-      </div>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute right-[-10%] top-[30%] -z-10 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle_at_center,rgba(124,58,237,0.22),transparent_70%)]"
-      />
-
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Logo size="md" href="/" />
-          <nav className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className={buttonVariants({ variant: 'ghost', size: 'lg' })}
-            >
+    <div className="bg-[var(--ia-mist)] text-[var(--ia-void)]">
+      {/* Hero: Void, a conversa é a prova */}
+      <div className="dark bg-background text-foreground">
+        <header className={cn(WRAP, 'flex items-center justify-between py-5')}>
+          <Logo size="md" />
+          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Principal">
+            <a href="#agenda" className="hidden whitespace-nowrap px-3 py-2 text-sm font-medium hover:text-[var(--ia-violet)] lg:block">
+              Como funciona
+            </a>
+            <a href="#lembretes" className="hidden whitespace-nowrap px-3 py-2 text-sm font-medium hover:text-[var(--ia-violet)] lg:block">
+              Lembretes
+            </a>
+            <a href="#assistente" className="hidden whitespace-nowrap px-3 py-2 text-sm font-medium hover:text-[var(--ia-violet)] lg:block">
+              Assistente
+            </a>
+            <a href="#preco" className="mr-3 hidden whitespace-nowrap px-3 py-2 text-sm font-medium hover:text-[var(--ia-violet)] lg:block">
+              Preço
+            </a>
+            <Link href="/login" className={buttonVariants({ variant: 'ghost' })}>
               Entrar
             </Link>
-            <Link
-              href="/register"
-              className={buttonVariants({ size: 'lg' })}
-            >
+            <Link href="/register" className={buttonVariants()}>
               Começar grátis
             </Link>
           </nav>
-        </div>
-      </header>
+        </header>
 
-      <main className="relative">
-        <section className="mx-auto flex max-w-5xl flex-col items-center px-6 py-24 text-center sm:py-32">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/40 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-            <span className="relative inline-block">
-              <span className="absolute inset-0 inline-block h-1.5 w-1.5 animate-ping rounded-full bg-[var(--ia-accent2)] opacity-60" />
-              <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-[var(--ia-accent2)]" />
-            </span>
-            Secretária virtual com IA para profissionais de saúde
+        <main>
+          <section className={cn(WRAP, 'grid items-center gap-12 pb-20 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-28 lg:pt-16')}>
+            <div>
+              <h1 className="text-[2.9rem] font-bold leading-[0.96] tracking-[-0.04em] sm:text-[4rem] lg:text-[4.5rem] xl:text-[5.25rem]">
+                Você atende.
+                <br />
+                Ela agenda.
+              </h1>
+              <p className="mt-7 max-w-xl text-lg leading-relaxed sm:text-xl">
+                IAzen é a secretária no WhatsApp de quem atende com hora marcada.
+                Agenda, confirma e lembra seus clientes, 24 horas por dia, no tom que você escolher.
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link href="/register" className={buttonVariants({ size: 'lg' })}>
+                  Testar grátis por 7 dias
+                </Link>
+                <Link href="/login" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
+                  Já tenho conta
+                </Link>
+              </div>
+              <p className="mt-5 text-sm text-muted-foreground">
+                Sem cartão para começar. Depois do teste, R$297 por mês.
+              </p>
+              <p className="mt-10 max-w-md text-base text-muted-foreground">
+                Para barbeiros, cabeleireiras, manicures, personais, psicólogos, advogados, consultores, professoras particulares e tatuadores.
+              </p>
+            </div>
+            <HeroChat />
+          </section>
+        </main>
+      </div>
+
+      {/* Agenda: Névoa, a semana que a secretária enxerga */}
+      <section id="agenda" className="scroll-mt-4 py-20 sm:py-28">
+        <div className={WRAP}>
+          <h2 className="max-w-4xl text-[2rem] font-bold leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.5rem]">
+            Ela só oferece o que está livre.
+          </h2>
+          <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div className="max-w-md text-lg leading-relaxed">
+              <p>
+                Você define os blocos de cada dia da semana e as folgas. O almoço nunca é
+                oferecido, e o horário que já foi marcado sai da lista na hora.
+              </p>
+              <p className="mt-5">
+                Os atendimentos têm 50 minutos, ou o tempo que você configurar. Se prefere aprovar
+                cada pedido, ele chega ao painel como pendente até você confirmar.
+              </p>
+            </div>
+            <WeekGrid />
           </div>
+        </div>
+      </section>
 
-          <h1
-            className="mt-8 font-display text-5xl font-semibold leading-[1.04] tracking-tight sm:text-6xl md:text-7xl"
-            style={{ letterSpacing: '-0.04em' }}
-          >
-            Sua secretária virtual
-            <br />
-            <span className="bg-gradient-to-r from-[var(--ia-accent)] via-[var(--ia-accent2)] to-[var(--ia-accent)] bg-clip-text text-transparent">
-              direto no WhatsApp
-            </span>
-          </h1>
-
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Agenda, confirma e gerencia consultas automaticamente — 24h por dia,
-            direto no WhatsApp dos seus pacientes.
+      {/* Lembretes: Void, a linha do tempo de um atendimento */}
+      <section id="lembretes" className="dark scroll-mt-4 bg-background py-20 text-foreground sm:py-28">
+        <div className={WRAP}>
+          <h2 className="max-w-4xl text-[2rem] font-bold leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.5rem]">
+            Ninguém esquece o horário.
+          </h2>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed sm:text-xl">
+            A secretária lembra o cliente um dia antes e de novo duas horas antes, na mesma
+            conversa em que ele marcou.
           </p>
+          <div className="mt-12 lg:mt-16">
+            <ReminderTimeline />
+          </div>
+        </div>
+      </section>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+      {/* Tom: Névoa, a mesma resposta em dois jeitos */}
+      <section className="py-20 sm:py-28">
+        <div className={cn(WRAP, 'grid items-center gap-12 lg:grid-cols-2 lg:gap-20')}>
+          <div className="lg:order-2">
+            <h2 className="text-[2rem] font-bold leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3rem]">
+              Responde do jeito que você responderia.
+            </h2>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed">
+              Escolha entre o tom amigável e o formal, e acrescente instruções suas, como
+              &ldquo;peça para chegar 10 minutos antes&rdquo; ou &ldquo;não atendo às quartas à tarde&rdquo;.
+            </p>
+          </div>
+          <div className="lg:order-1">
+            <ToneDemo />
+          </div>
+        </div>
+      </section>
+
+      {/* Assistente pessoal: Void, a IA também cuida de você */}
+      <section id="assistente" className="dark scroll-mt-4 bg-background py-20 text-foreground sm:py-28">
+        <div className={cn(WRAP, 'grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20')}>
+          <div>
+            <h2 className="text-[2rem] font-bold leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3rem]">
+              E ela também organiza o seu dia.
+            </h2>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed">
+              No painel, converse com o seu Assistente pessoal como numa conversa com uma
+              secretária de verdade: marque compromissos na sua agenda, crie lembretes para você
+              mesmo e peça o resumo do dia. Ela gerencia tudo.
+            </p>
             <Link
               href="/register"
-              className={buttonVariants({ size: 'lg' })}
+              className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'mt-8')}
             >
-              Testar grátis por 7 dias
-            </Link>
-            <Link
-              href="/login"
-              className={buttonVariants({ variant: 'outline', size: 'lg' })}
-            >
-              Já tenho conta
+              Conhecer o assistente
             </Link>
           </div>
+          <AssistantDemo />
+        </div>
+      </section>
 
-          <p className="mt-6 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-            R$297/mês · sem cartão no trial · cancele quando quiser
+      {/* Preço e chamada: Violeta */}
+      <section id="preco" className="relative scroll-mt-4 overflow-hidden bg-[var(--ia-violet)] py-20 text-[var(--ia-void)] sm:py-28">
+        <LogoMark
+          size={620}
+          variant="mono"
+          title={null}
+          className="pointer-events-none absolute -bottom-40 -right-32 hidden text-[var(--ia-violet-action)] lg:block"
+        />
+        <div className={cn(WRAP, 'relative')}>
+          <p className="font-display text-[4.5rem] font-bold leading-none tracking-[-0.05em] text-white sm:text-[7rem] lg:text-[9rem]">
+            R$297
+            <span className="ml-2 text-[1.75rem] font-light tracking-[-0.02em] sm:text-4xl">/mês</span>
           </p>
-        </section>
-
-        <section className="mx-auto max-w-5xl px-6 pb-24">
-          <div className="grid gap-4 md:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <div
-                key={f.title}
-                className="group relative overflow-hidden rounded-xl border border-border/70 bg-card/40 p-6 backdrop-blur transition-colors hover:border-primary/40"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">
-                    0{i + 1}
-                  </span>
-                  <span className="h-px flex-1 bg-border/60" />
-                </div>
-                <h3
-                  className="mt-4 font-display text-lg font-semibold tracking-tight"
-                  style={{ letterSpacing: '-0.02em' }}
-                >
-                  {f.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {f.description}
-                </p>
-              </div>
+          <h2 className="mt-6 max-w-2xl text-[1.75rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-4xl">
+            Os 7 primeiros dias são por nossa conta, sem cartão.
+          </h2>
+          <ul className="mt-8 flex max-w-xl flex-col gap-2.5 text-lg">
+            {INCLUDED.map((item) => (
+              <li key={item} className="flex items-start gap-3">
+                <span aria-hidden className="mt-2.5 size-2 shrink-0 rounded-full bg-[var(--ia-void)]" />
+                {item}
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+          <Link
+            href="/register"
+            className={cn(
+              buttonVariants({ size: 'lg' }),
+              'mt-10 bg-[var(--ia-void)] text-white hover:bg-[var(--ia-void-2)]',
+            )}
+          >
+            Começar o teste grátis
+          </Link>
+        </div>
+      </section>
 
-        <section className="mx-auto max-w-5xl px-6 pb-24">
-          <div className="rounded-2xl border border-border/70 bg-card/40 p-8 backdrop-blur">
-            <div className="flex flex-col items-center text-center">
-              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                Feito para
-              </span>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-foreground/80">
-                {PROOF.map((p, i) => (
-                  <span key={p.label} className="flex items-center gap-6">
-                    {p.label}
-                    {i < PROOF.length - 1 && (
-                      <span className="h-1 w-1 rounded-full bg-border" />
-                    )}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="relative border-t border-border/60">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-6 text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
+      <footer className="dark bg-background text-foreground">
+        <div className={cn(WRAP, 'flex flex-wrap items-center justify-between gap-4 py-8 text-sm')}>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Logo size="sm" href={null} />
-            <span>© {new Date().getFullYear()}</span>
-            <a href="/privacidade" className="hover:text-foreground">
+            <span className="text-muted-foreground">© {new Date().getFullYear()} IAzen</span>
+            <Link href="/privacidade" className="underline-offset-4 hover:underline">
               Privacidade
-            </a>
+            </Link>
           </div>
-          <span className="font-mono uppercase tracking-[0.14em]">
-            Feito com IA · hospedado no Brasil
-          </span>
+          <span className="text-muted-foreground">Feito com IA, hospedado no Brasil</span>
         </div>
       </footer>
     </div>

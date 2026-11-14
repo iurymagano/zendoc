@@ -39,39 +39,45 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 
 ## layout.tsx
 
-**O que faz:** layout raiz com as fontes IAzen (Space Grotesk para display, Inter
-para body) via `next/font/google` e metadata do IAzen.
+**O que faz:** layout raiz com as fontes da identidade v1 (Sora para títulos, Inter
+para o corpo, JetBrains Mono só para dado) via `next/font/google` e metadata do IAzen.
 
 **Depende de:** `./globals.css`, `next/font/google`
 
+## icon.svg
+
+**O que faz:** favicon da marca (símbolo Ensō-balão sobre Void), servido pelo Next como ícone do site.
+
+**Notas:** gerado da geometria em `components/brand/logo-geometry.ts`. Não há `apple-icon` ainda.
+
 ## page.tsx
 
-**O que faz:** landing pública com hero dark section (identidade IAzen):
-fundo `#0A0A0F`, texto branco, acento azul `#4F6EF7` no headline e acento
-violeta `#7C3AED` (`--ia-accent2`) em detalhes. Aplica `.dark` no wrapper raiz
-para trocar todos os tokens shadcn para a paleta dark.
+**O que faz:** landing pública (tipo "convencer") da identidade v1. A ideia é
+"Você atende. Ela agenda.", com uma conversa de WhatsApp como prova do produto.
+Texto aberto a qualquer profissional com hora marcada ("clientes", "atendimentos").
 
-**Estrutura:**
+**Estrutura** (cada seção é uma afirmação com a prova ao lado):
 
-- Gradient blobs decorativos (radiais, `z -1`) atrás do conteúdo — azul no
-  topo, violeta na lateral
-- Header sticky translúcido com `<Logo>` + CTAs (Entrar / Começar grátis)
-- Hero com badge animado (`animate-ping` no ponto), headline em duas linhas
-  — a segunda com gradiente azul→violeta em `bg-clip-text`
-- Grid `0x — 0x — 0x` de 3 features com eyebrow mono, título e descrição
-- Seção "Feito para" listando os nichos atendidos
-- Footer com logo, copyright e linha técnica em fonte mono
+- Hero Void (`.dark`) com o título e a conversa ([`HeroChat`](../components/landing/README.md))
+- "Ela só oferece o que está livre." em Névoa, com a semana (`WeekGrid`)
+- "Ninguém esquece o horário." em Void, com a linha do tempo (`ReminderTimeline`)
+- "Responde do jeito que você responderia." em Névoa, com `ToneDemo` (amigável x formal)
+- "E ela também organiza o seu dia." em Void, com `AssistantDemo` (Assistente pessoal)
+- Preço R$297/mês em faixa Violeta, com o símbolo gigante e o CTA
+- Footer Void
 
-**Depende de:** `@/components/ui/button`, `@/components/brand/Logo`.
+**Depende de:** `@/components/ui/button`, `@/components/brand/Logo`, `@/components/landing/*`.
+
+**Notas:** os textos de exemplo (Marina, Dra. Helena, horários) são fictícios.
 
 ## globals.css
 
 **O que faz:** importa Tailwind v4, tw-animate-css e tokens shadcn. Define os
-tokens IAzen (`--ia-black`, `--ia-accent`, etc.) e mapeia nos tokens shadcn
-(`--primary`, `--muted`, etc.) em hex para `:root` e `.dark`. Headings aplicam
-`font-display` (Space Grotesk) + `letter-spacing: -0.03em`; body usa
-`font-body` (Inter) com `line-height: 1.6`.
+tokens da marca (`--ia-void`, `--ia-violet`, `--ia-spark`, `--ia-mist` e derivados) e
+mapeia nos tokens shadcn (`--primary`, `--muted`, etc.) para `:root` (tema claro) e
+`.dark` (landing e auth). Headings usam Sora com `letter-spacing: -0.03em`; o corpo usa
+Inter com `line-height: 1.6`. Também define `.tabular` e os keyframes `ia-rise` e
+`ia-spark` (com alternativa para `prefers-reduced-motion`).
 
-**Notas:** a paleta e tipografia seguem o design system do IAzen (ver seção
-"Identidade visual" em [CLAUDE.md](../CLAUDE.md)). Editar os tokens aqui
-propaga para todos os componentes de [components/ui/](../components/ui/).
+**Notas:** a paleta e a tipografia seguem o [DESIGN.md](../DESIGN.md). Editar os tokens
+aqui propaga para todos os componentes de [components/ui/](../components/ui/).
