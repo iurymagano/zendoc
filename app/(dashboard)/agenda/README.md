@@ -43,15 +43,17 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
 vazio (`isPersonalCommitment`), o form esconde telefone/CPF e a lista de
 clientes, rotula o nome como "Título do compromisso" e envia `patient_phone`
 vazio — o `PATCH` aceita (não exige telefone) e nenhum lembrete é enviado a
-cliente. Ao mudar o horário de um atendimento, o servidor reagenda os lembretes
+cliente. O painel se chama "Editar compromisso", não mostra "Declaração" nem
+"Confirmar"/"Aprovar"/aviso de cliente com o mesmo telefone, e a única ação de
+status é "Cancelar compromisso". Ao mudar o horário de um atendimento, o servidor reagenda os lembretes
 24h/2h pendentes.
 
 **Cancelamento:** `window.confirm` + `window.prompt` (motivo) →
 `POST /api/appointments/:id/cancel`.
 
-**Declaração de comparecimento:** no form de edição (atendimento não cancelado),
-o botão "Declaração" abre `/documentos/declaracao/[id]` em nova aba (documento
-imprimível). Ver `app/documentos/`.
+**Declaração de comparecimento:** no form de edição (atendimento de cliente não
+cancelado; não aparece em compromisso pessoal) o botão "Declaração" abre
+`/documentos/declaracao/[id]` em nova aba (documento imprimível). Ver `app/documentos/`.
 
 **Serviço:** o seletor "Serviço (opcional)" lista os serviços ativos
 (`GET /api/services`); ao escolher, o **Fim** é calculado pela duração do serviço

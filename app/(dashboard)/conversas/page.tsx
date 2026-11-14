@@ -234,7 +234,7 @@ export default function ConversasPage() {
 
               {thread.needs_attention && (
                 <div className="border-b border-destructive/20 bg-destructive/5 px-4 py-2 text-xs text-destructive">
-                  ⚠️ A IA não soube responder a última mensagem. Responda abaixo —
+                  A IA não soube responder a última mensagem. Responda abaixo —
                   ao enviar, o aviso some.
                 </div>
               )}

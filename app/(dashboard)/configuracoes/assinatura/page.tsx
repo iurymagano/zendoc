@@ -128,7 +128,7 @@ export default async function AssinaturaPage({
     : null;
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Configurações"
         title="Assinatura"
@@ -138,7 +138,7 @@ export default async function AssinaturaPage({
       {success && (
         <Card className="border-emerald-500/40">
           <CardContent className="py-4 text-sm text-emerald-800 dark:text-emerald-200">
-            ✅ Pagamento configurado! Pode levar alguns segundos para o status
+            Pagamento configurado! Pode levar alguns segundos para o status
             atualizar aqui.
           </CardContent>
         </Card>

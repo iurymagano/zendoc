@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 // Página pública (fora dos grupos (auth)/(dashboard)) — também usada como a URL
 // de política de privacidade exigida na verificação OAuth do Google.
-// ⚠️ TEXTO-BASE: revisar com um advogado e preencher os campos <entre colchetes>
+// ATENÇÃO, TEXTO-BASE: revisar com um advogado e preencher os campos <entre colchetes>
 // antes de publicar/lançar. Não é aconselhamento jurídico.
 export default function PrivacidadePage() {
-  const updated = '09/06/2026';
+  const updated = '14/11/2026';
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-[var(--ia-void)] text-white">
@@ -64,8 +64,10 @@ export default function PrivacidadePage() {
               <li>
                 <strong>Do profissional:</strong> nome, e-mail, área de atuação,
                 telefone, endereço, dados de acesso e de assinatura (pagamento via
-                Stripe), além do conteúdo das conversas com o Assistente pessoal
-                e dos lembretes pessoais que ele cria.
+                Stripe), além do que você conversa com o Assistente pessoal
+                (histórico do chat), dos compromissos que ele marca na sua
+                agenda e dos lembretes pessoais que ele cria, com o texto e o
+                horário de cada um.
               </li>
               <li>
                 <strong>Dos clientes:</strong> nome, telefone, CPF (opcional),
@@ -81,6 +83,12 @@ export default function PrivacidadePage() {
               <li>
                 Operar a secretária virtual por WhatsApp (responder e marcar
                 automaticamente).
+              </li>
+              <li>
+                Operar o Assistente pessoal: o chat privado do profissional com a
+                IA para consultar a agenda, marcar ou remarcar compromissos e
+                criar lembretes. Os lembretes pessoais são enviados por WhatsApp
+                ao telefone cadastrado no perfil do profissional, na hora marcada.
               </li>
               <li>Emitir documentos (ex.: declaração de comparecimento).</li>
               <li>Cobrança da assinatura do profissional.</li>
@@ -103,12 +111,14 @@ export default function PrivacidadePage() {
               <li><strong>Supabase</strong> — banco de dados e autenticação.</li>
               <li>
                 <strong>Anthropic (Claude)</strong> — IA que processa as mensagens
-                para responder e agendar. Não usamos esses dados para treinar
+                da secretária virtual e as conversas do Assistente pessoal para
+                responder, agendar e criar lembretes. Não usamos esses dados para treinar
                 modelos.
               </li>
               <li>
                 <strong>WhatsApp / provedor de mensageria</strong> — envio e
-                recebimento das mensagens.
+                recebimento das mensagens, inclusive os lembretes pessoais do
+                Assistente.
               </li>
               <li>
                 <strong>Google Calendar</strong> — quando o profissional conecta,
@@ -127,7 +137,7 @@ export default function PrivacidadePage() {
               informações recebidas das APIs do Google segue a{' '}
               <a
                 href="https://developers.google.com/terms/api-services-user-data-policy"
-                className="text-primary hover:underline"
+                className="text-[var(--ia-violet-ink)] underline underline-offset-4"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -166,8 +176,8 @@ export default function PrivacidadePage() {
             </p>
           </Section>
 
-          <p className="rounded-lg border border-amber-300/60 bg-amber-50/60 p-3 text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
-            ⚠️ Documento-base, não é aconselhamento jurídico. Revise com um
+          <p className="rounded-2xl bg-[var(--warning-soft)] p-4 text-sm text-foreground/80">
+            Documento-base, não é aconselhamento jurídico. Revise com um
             advogado e preencha os campos entre colchetes antes do lançamento.
           </p>
         </div>

@@ -150,7 +150,7 @@ export default function ExceptionsPage() {
                       setType((v as ExceptionType) ?? 'day_off')
                     }
                   >
-                    <SelectTrigger id="exc_type">
+                    <SelectTrigger id="exc_type" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

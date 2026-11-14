@@ -10,6 +10,7 @@ import {
   startOfWeek,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -435,6 +436,16 @@ export default function AgendaPage() {
   }
 
   function statusActions(a: Appointment) {
+    // Compromisso pessoal (sem telefone): não tem cliente para confirmar,
+    // aprovar ou dar falta; só cancelar.
+    if (isPersonalCommitment(a.patient_phone)) {
+      if (a.status === 'cancelled' || a.status === 'no_show') return null;
+      return (
+        <Button type="button" size="sm" variant="outline" onClick={() => cancel(a)}>
+          Cancelar compromisso
+        </Button>
+      );
+    }
     if (a.status === 'pending_approval') {
       return (
         <>
@@ -538,10 +549,17 @@ export default function AgendaPage() {
       {formOpen && (
         <Card>
           <CardHeader>
-            <CardTitle>{editing ? 'Editar agendamento' : 'Novo agendamento'}</CardTitle>
+            <CardTitle>
+              {editing
+                ? isPersonalCommitment(editing.patient_phone)
+                  ? 'Editar compromisso'
+                  : 'Editar agendamento'
+                : 'Novo agendamento'}
+            </CardTitle>
             <CardDescription>
-              Horários interpretados em America/Sao_Paulo. Se o cliente já existir
-              (mesmo telefone), seu cadastro é reutilizado.
+              {editing && isPersonalCommitment(editing.patient_phone)
+                ? 'Horários interpretados em America/Sao_Paulo.'
+                : 'Horários interpretados em America/Sao_Paulo. Se o cliente já existir (mesmo telefone), seu cadastro é reutilizado.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -551,7 +569,7 @@ export default function AgendaPage() {
                   {STATUS_LABEL[editing.status]}
                 </span>
                 {statusActions(editing)}
-                {editing.status !== 'cancelled' && (
+                {editing.status !== 'cancelled' && !isPersonalCommitment(editing.patient_phone) && (
                   <Button
                     type="button"
                     size="sm"
@@ -573,14 +591,14 @@ export default function AgendaPage() {
                     variant="outline"
                     onClick={() => stopSeries(editing)}
                   >
-                    Encerrar série 🔁
+                    Encerrar série
                   </Button>
                 )}
               </div>
             )}
             {editing?.recurrence_id && (
               <p className="mb-4 -mt-2 text-xs text-muted-foreground">
-                🔁 Este atendimento faz parte de uma série recorrente. Editar ou
+                Este atendimento faz parte de uma série recorrente. Editar ou
                 cancelar aqui afeta só esta ocorrência; use “Encerrar série” para
                 cancelar as futuras.
               </p>
@@ -796,7 +814,7 @@ export default function AgendaPage() {
                   </div>
                   {form.repeat !== 'none' && (
                     <p className="-mt-1 text-xs text-muted-foreground">
-                      🔁 <strong>Início</strong> e <strong>Fim</strong> acima são o
+                      <strong>Início</strong> e <strong>Fim</strong> acima são o
                       horário de <strong>um</strong> atendimento (mesmo dia). Ela vai
                       se repetir {form.repeat === 'weekly' ? 'toda semana' : 'a cada 2 semanas'} no
                       mesmo dia e horário, até a data de “Repetir até”.
@@ -880,7 +898,8 @@ export default function AgendaPage() {
           ))}
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm border border-dashed border-border bg-muted" />
-            🔒 Google (pessoal)
+            <Lock className="size-3" aria-hidden />
+            Google (pessoal)
           </span>
         </div>
       )}

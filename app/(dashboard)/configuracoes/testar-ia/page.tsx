@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Card,
@@ -30,14 +30,14 @@ type Conversation = {
 };
 
 const ACTION_LABEL: Record<AIAction, string> = {
-  book: '✅ agendou',
-  confirm: '👍 confirmou presença',
-  cancel: '🗑️ cancelou',
-  reschedule: '🔄 remarcou',
-  offer_slots: '📅 ofereceu horários',
-  reply: '💬 respondeu',
-  approval_needed: '⏳ aguardando aprovação',
-  handoff: '🙋 precisa de você',
+  book: 'agendou',
+  confirm: 'confirmou presença',
+  cancel: 'cancelou',
+  reschedule: 'remarcou',
+  offer_slots: 'ofereceu horários',
+  reply: 'respondeu',
+  approval_needed: 'aguardando aprovação',
+  handoff: 'precisa de você',
 };
 
 const SUGGESTIONS = [
@@ -396,13 +396,13 @@ export default function TestarIaPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-amber-500/40">
-        <CardContent className="py-4 text-sm text-muted-foreground">
-          ⚠️ As ações são <strong>reais</strong>: se a IA marcar ou cancelar, isso
+      <Card className="bg-[var(--warning-soft)] ring-0">
+        <CardContent className="py-4 text-sm text-foreground/80">
+          As ações são <strong>reais</strong>: se a IA marcar ou cancelar, isso
           acontece no banco e aparece na{' '}
           <Link
             href="/agenda"
-            className={buttonVariants({ variant: 'link', size: 'sm' }) + ' px-0'}
+            className="font-medium text-[var(--ia-violet-ink)] underline underline-offset-4"
           >
             agenda
           </Link>

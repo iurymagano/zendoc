@@ -122,7 +122,7 @@ export default function OnboardingStep2() {
             value={specialtyChoice}
             onValueChange={(v) => setSpecialtyChoice(v ?? '')}
           >
-            <SelectTrigger id="specialty">
+            <SelectTrigger id="specialty" className="w-full">
               <SelectValue placeholder="Selecione…" />
             </SelectTrigger>
             <SelectContent>
