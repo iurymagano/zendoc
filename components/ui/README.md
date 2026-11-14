@@ -7,6 +7,10 @@ aqui e é nosso para customizar.
 Tokens de cor vêm de `app/globals.css` (`--primary`, `--muted`, etc.). Preset:
 `base-nova` (base-ui + lucide icons).
 
+**Identidade v1 (ver [DESIGN.md](../../DESIGN.md)):** botões em pílula (altura 40/48), campos de 44px com
+raio 12, cards de raio 24 sem sombra e `Switch` de 44x24. Quem reinstalar um componente pelo CLI
+deve reaplicar esses ajustes.
+
 ## Componentes instalados
 
 | Arquivo           | Comando de instalação                          |

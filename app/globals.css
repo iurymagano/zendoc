@@ -7,11 +7,21 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-body);
-  --font-mono: var(--font-mono);
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
-  --font-heading: var(--font-display);
+  --font-sans: var(--font-inter);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+  --font-display: var(--font-sora);
+  --font-heading: var(--font-sora);
+  --color-violet: var(--ia-violet);
+  --color-violet-ink: var(--ia-violet-ink);
+  --color-spark: var(--ia-spark);
+  --color-void: var(--ia-void);
+  --color-mist: var(--ia-mist);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive-soft: var(--destructive-soft);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -51,82 +61,98 @@
 }
 
 :root {
-  /* IAzen design tokens (spec em CLAUDE.md — seção "Identidade visual") */
-  --ia-black: #0a0a0f;
-  --ia-white: #ffffff;
-  --ia-accent: #4f6ef7;
-  --ia-accent2: #7c3aed;
-  --ia-muted: #6b7280;
-  --ia-surface: #f4f4f6;
-  --ia-border: #e5e7eb;
+  /* Identidade IAzen v1 (spec em DESIGN.md). Paleta da marca: */
+  --ia-void: #05060a; /* tinta, fundo escuro, sidebar */
+  --ia-violet: #8b5cff; /* Violeta Zen: marca, destaque sobre escuro */
+  --ia-violet-action: #7a47f5; /* Violeta Ação: fundo de botão com texto branco (AA) */
+  --ia-violet-ink: #5b35d5; /* Violeta Tinta: link e texto de destaque sobre claro */
+  --ia-spark: #5eead4; /* Faísca: a IA online, sucesso sobre escuro */
+  --ia-mist: #f4f3f8; /* Névoa: fundo claro */
+  /* Degraus do escuro (cada superfície sobe um tom, sem linha) */
+  --ia-void-1: #0b0d14;
+  --ia-void-2: #12151f;
+  --ia-void-3: #1c2030;
+  --ia-on-void: #f4f3f8;
+  --ia-on-void-muted: #a3a7ba;
 
-  /* shadcn tokens mapeados para a paleta IAzen */
-  --background: #ffffff;
-  --foreground: #0a0a0f;
+  /* shadcn (tema claro: Névoa de fundo, cards brancos) */
+  --background: #f4f3f8;
+  --foreground: #0e0f18;
   --card: #ffffff;
-  --card-foreground: #0a0a0f;
+  --card-foreground: #0e0f18;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0f;
-  --primary: #4f6ef7;
+  --popover-foreground: #0e0f18;
+  --primary: #7a47f5;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f6;
-  --secondary-foreground: #0a0a0f;
-  --muted: #f4f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #f4f4f6;
-  --accent-foreground: #0a0a0f;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #e5e7eb;
-  --input: #e5e7eb;
-  --ring: #4f6ef7;
-  --chart-1: #4f6ef7;
-  --chart-2: #7c3aed;
-  --chart-3: #6b7280;
-  --chart-4: #9ca3af;
-  --chart-5: #d1d5db;
-  --radius: 0.5rem; /* 8px — botões/inputs IAzen */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0a0a0f;
-  --sidebar-primary: #4f6ef7;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f4f4f6;
-  --sidebar-accent-foreground: #0a0a0f;
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: #4f6ef7;
+  --secondary: #eae8f2;
+  --secondary-foreground: #0e0f18;
+  --muted: #eae8f2;
+  --muted-foreground: #5a5d72;
+  --accent: #e8e1ff;
+  --accent-foreground: #3d2399;
+  --destructive: #c62f3a;
+  --destructive-soft: #fbe3e4;
+  --success: #0f766e;
+  --success-soft: #d9f4ee;
+  --warning: #8a5a00;
+  --warning-soft: #fdf0d0;
+  --border: #e3e1ee;
+  --input: #cfcce0;
+  --ring: #8b5cff;
+  --chart-1: #8b5cff;
+  --chart-2: #5eead4;
+  --chart-3: #79a6ee;
+  --chart-4: #a3a7ba;
+  --chart-5: #cfcce0;
+  --radius: 0.75rem; /* 12px: campos e superfícies; botões são pílula */
+  --sidebar: #05060a;
+  --sidebar-foreground: #f4f3f8;
+  --sidebar-primary: #8b5cff;
+  --sidebar-primary-foreground: #05060a;
+  --sidebar-accent: #1c2030;
+  --sidebar-accent-foreground: #f4f3f8;
+  --sidebar-border: #1c2030;
+  --sidebar-ring: #8b5cff;
 }
 
+/* Tema escuro (landing e auth usam .dark). Superfícies sobem do Void em degraus. */
 .dark {
-  --background: #0a0a0f;
-  --foreground: #ffffff;
-  --card: #151520;
-  --card-foreground: #ffffff;
-  --popover: #151520;
-  --popover-foreground: #ffffff;
-  --primary: #4f6ef7;
+  --background: #05060a;
+  --foreground: #f4f3f8;
+  --card: #12151f;
+  --card-foreground: #f4f3f8;
+  --popover: #12151f;
+  --popover-foreground: #f4f3f8;
+  --primary: #7a47f5;
   --primary-foreground: #ffffff;
-  --secondary: #1f1f2e;
-  --secondary-foreground: #ffffff;
-  --muted: #1f1f2e;
-  --muted-foreground: #9ca3af;
-  --accent: #1f1f2e;
-  --accent-foreground: #ffffff;
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
-  --ring: #4f6ef7;
-  --chart-1: #4f6ef7;
-  --chart-2: #7c3aed;
-  --chart-3: #9ca3af;
-  --chart-4: #6b7280;
-  --chart-5: #4b5563;
-  --sidebar: #151520;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #4f6ef7;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1f1f2e;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #4f6ef7;
+  --secondary: #1c2030;
+  --secondary-foreground: #f4f3f8;
+  --muted: #12151f;
+  --muted-foreground: #a3a7ba;
+  --accent: #1c2030;
+  --accent-foreground: #f4f3f8;
+  --destructive: #ff7a82;
+  --destructive-soft: #3a1519;
+  --success: #5eead4;
+  --success-soft: #0f2f2c;
+  --warning: #f5b945;
+  --warning-soft: #33260a;
+  --border: #1c2030;
+  --input: #565c7c;
+  --ring: #8b5cff;
+  --chart-1: #8b5cff;
+  --chart-2: #5eead4;
+  --chart-3: #79a6ee;
+  --chart-4: #a3a7ba;
+  --chart-5: #2a2f44;
+  --sidebar: #0b0d14;
+  --sidebar-foreground: #f4f3f8;
+  --sidebar-primary: #8b5cff;
+  --sidebar-primary-foreground: #05060a;
+  --sidebar-accent: #1c2030;
+  --sidebar-accent-foreground: #f4f3f8;
+  --sidebar-border: #1c2030;
+  --sidebar-ring: #8b5cff;
 }
 
 @layer base {
@@ -135,7 +161,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-body);
+    font-family: var(--font-inter), system-ui, sans-serif;
     line-height: 1.6;
   }
   html {
@@ -147,7 +173,53 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-display);
+    font-family: var(--font-sora), system-ui, sans-serif;
     letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  /* Dado tabular: horários e valores alinham em coluna. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Movimento: um momento orquestrado na landing (transform e opacity).
+   Quem pede menos movimento vê tudo já no lugar. */
+@keyframes ia-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ia-spark {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.8);
+  }
+}
+.ia-rise {
+  opacity: 0;
+  animation: ia-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.ia-spark {
+  animation: ia-spark 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ia-rise {
+    opacity: 1;
+    animation: none;
+  }
+  .ia-spark {
+    animation: none;
   }
 }
