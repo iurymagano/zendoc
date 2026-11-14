@@ -6,7 +6,7 @@ agenda, confirma e gerencia consultas automaticamente.
 
 - **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind v4 · Supabase · NextAuth v5
 - **Integrações:** Anthropic Claude (IA), Evolution API (WhatsApp), Stripe (pagamentos)
-- **Preço:** R$197/mês · trial 7 dias sem cartão
+- **Preço:** R$297/mês · trial 7 dias sem cartão
 
 ## Como rodar
 
