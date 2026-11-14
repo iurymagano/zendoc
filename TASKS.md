@@ -453,8 +453,11 @@ Legenda:
   - [x] Sincroniza com o Google (cada ocorrência é appointment real → push automático)
   - [x] UI: campo "Repetir" + "até" no form; marcador 🔁; "Encerrar série"
 - [x] **LGPD** (dado sensível de saúde + pré-requisito da verificação OAuth Google)
-  - [x] Política de privacidade pública `/privacidade` (texto-base — **revisar com
-    advogado e preencher os campos entre colchetes**); link no footer da landing
+  - [x] Política de privacidade pública `/privacidade`; link no footer da landing
+  - [x] Tirar da página pública os campos provisórios e o aviso interno; dados legais
+    vêm das envs `PRIVACY_*` (sem elas, a linha some) + teste que barra placeholder
+  - [ ] Preencher `PRIVACY_CONTROLLER_NAME`, `PRIVACY_CONTROLLER_DOC` e
+    `PRIVACY_CONTACT_EMAIL` na Vercel (dados do Iury) e revisar o texto com advogado
   - [x] Opt-out de mensagens ativas por paciente (`patients.messaging_opted_out`,
     migration `0007`): toggle no cadastro, badge na lista; o dispatch de lembretes
     pula quem optou por não receber (conversas iniciadas pelo paciente seguem)
