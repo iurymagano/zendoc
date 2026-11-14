@@ -20,6 +20,7 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 | `/clientes/[id]`                        | página | `(dashboard)/clientes/[id]/page.tsx`                       |
 | `/assistente`                           | página | `(dashboard)/assistente/page.tsx`                          |
 | `/agenda`                               | página | `(dashboard)/agenda/page.tsx`                              |
+| `/privacidade`                          | página | `privacidade/page.tsx` (pública; ver `privacidade/README.md`) |
 | `/api/auth/*`                           | API    | `api/auth/[...nextauth]/route.ts`                          |
 | `/api/auth/register`                    | API    | `api/auth/register/route.ts`                               |
 | `/api/onboarding/profile`               | API    | `api/onboarding/profile/route.ts`                          |

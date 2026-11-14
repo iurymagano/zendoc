@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Logo } from '@/components/brand/Logo';
+import { formatOperatorLine, getPrivacyContact } from '@/lib/legal';
 
 export const metadata: Metadata = {
   title: 'Política de Privacidade · IAzen',
@@ -9,10 +10,12 @@ export const metadata: Metadata = {
 
 // Página pública (fora dos grupos (auth)/(dashboard)) — também usada como a URL
 // de política de privacidade exigida na verificação OAuth do Google.
-// ATENÇÃO, TEXTO-BASE: revisar com um advogado e preencher os campos <entre colchetes>
-// antes de publicar/lançar. Não é aconselhamento jurídico.
+// Os dados legais (responsável, documento, e-mail) vêm de lib/legal.ts (envs
+// PRIVACY_*). Sem eles a página omite as linhas: nada provisório vai ao ar.
 export default function PrivacidadePage() {
   const updated = '14/11/2026';
+  const contact = getPrivacyContact();
+  const operatorLine = formatOperatorLine(contact);
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-[var(--ia-void)] text-white">
@@ -54,9 +57,7 @@ export default function PrivacidadePage() {
               segundo as instruções do profissional. Para os dados de cadastro do
               próprio profissional, a IAzen é a controladora.
             </p>
-            <p className="text-muted-foreground">
-              Operadora: [razão social], CNPJ [nº], contato: [email do DPO].
-            </p>
+            {operatorLine && <p className="text-muted-foreground">{operatorLine}</p>}
           </Section>
 
           <Section title="2. Dados que tratamos">
@@ -153,8 +154,8 @@ export default function PrivacidadePage() {
               Clientes e profissionais podem solicitar acesso, correção,
               portabilidade, exclusão e a interrupção do tratamento de seus dados,
               além de se opor ao recebimento de mensagens. Os pedidos podem ser
-              feitos diretamente ao profissional (controlador) ou pelo contato
-              [email do DPO]. O profissional pode exportar ou excluir os dados de
+              feitos diretamente ao profissional (controlador)
+              {contact.email ? ` ou pelo e-mail ${contact.email}` : ''}. O profissional pode exportar ou excluir os dados de
               um cliente na própria plataforma.
             </p>
           </Section>
@@ -172,14 +173,12 @@ export default function PrivacidadePage() {
 
           <Section title="8. Contato">
             <p>
-              Dúvidas sobre privacidade ou pedidos de titular: [email do DPO].
+              {contact.email
+                ? `Dúvidas sobre privacidade ou pedidos de titular: ${contact.email}.`
+                : 'Dúvidas sobre privacidade ou pedidos de titular: fale com o profissional que atende você, que é o controlador dos seus dados.'}
             </p>
           </Section>
 
-          <p className="rounded-2xl bg-[var(--warning-soft)] p-4 text-sm text-foreground/80">
-            Documento-base, não é aconselhamento jurídico. Revise com um
-            advogado e preencha os campos entre colchetes antes do lançamento.
-          </p>
         </div>
       </main>
     </div>

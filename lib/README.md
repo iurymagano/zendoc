@@ -63,6 +63,22 @@ ser internacional ou `@lid`; prefixar 55 corromperia o identificador. Testes em
 
 **Usado por:** `/dashboard` (`Olá, {nome}`). Testes em `name.test.ts`.
 
+## legal.ts
+
+**O que faz:** dados legais da `/privacidade` (responsável, documento e e-mail de
+contato), lidos do ambiente.
+
+**Exporta:**
+
+- `getPrivacyContact(env?): PrivacyContact` — lê `PRIVACY_CONTROLLER_NAME`,
+  `PRIVACY_CONTROLLER_DOC` e `PRIVACY_CONTACT_EMAIL` (vazio → `null`).
+- `formatOperatorLine(c): string | null` — linha "Operadora: ..." ou `null`.
+
+**Notas:** sem as variáveis, a página omite as linhas em vez de mostrar texto
+provisório. `legal.test.ts` também trava o repositório: falha se alguma página
+de `app/` ou `components/` tiver campo entre colchetes (`[email do DPO]`,
+`[razão social]`...), "entre colchetes", "Documento-base" ou lorem ipsum.
+
 ## stripe.ts
 
 **O que faz:** cliente Stripe (server-side) com inicialização **lazy** e o

@@ -78,9 +78,11 @@ Arquivos relevantes:
 | Crons | cron-job.org (lembretes 1 min, sync Google 10 min) | grátis |
 | Pagamento | Stripe em **modo de teste** | — |
 
-Enquanto o projeto da Vercel não estiver ligado ao GitHub, publique pela CLI:
-`vercel deploy --prod` (as variáveis ficam na Vercel; os valores não ficam no
-repositório). No Google OAuth, os redirects de produção
+O projeto da Vercel está ligado ao GitHub: todo merge na `main` publica sozinho
+em produção (as variáveis ficam na Vercel; os valores não ficam no repositório).
+Os dados legais da `/privacidade` vêm das envs opcionais `PRIVACY_CONTROLLER_NAME`,
+`PRIVACY_CONTROLLER_DOC` e `PRIVACY_CONTACT_EMAIL`; sem elas a página omite a linha
+(nunca mostra campo provisório). No Google OAuth, os redirects de produção
 (`/api/auth/callback/google` e `/api/google/calendar/callback`) já estão
 cadastrados; o app está em modo "Testando", então só entra com Google quem for
 usuário de teste.
