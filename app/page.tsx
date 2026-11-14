@@ -48,30 +48,33 @@ export default function Home() {
         </header>
 
         <main>
-          <section className={cn(WRAP, 'grid items-center gap-12 pb-20 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-28 lg:pt-16')}>
+          <section className={cn(WRAP, 'grid items-center gap-10 pb-20 pt-6 sm:pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-28 lg:pt-16')}>
             <div>
               <h1 className="text-[2.9rem] font-bold leading-[0.96] tracking-[-0.04em] sm:text-[4rem] lg:text-[4.5rem] xl:text-[5.25rem]">
                 Você atende.
                 <br />
                 Ela agenda.
               </h1>
-              <p className="mt-7 max-w-xl text-lg leading-relaxed sm:text-xl">
-                IAzen é a secretária no WhatsApp de quem atende com hora marcada.
-                Agenda, confirma e lembra seus clientes, 24 horas por dia, no tom que você escolher.
+              <p className="mt-5 max-w-xl text-lg leading-relaxed sm:mt-7 sm:text-xl">
+                A secretária no WhatsApp de quem atende com hora marcada: agenda, confirma e
+                lembra seus clientes, 24 horas por dia, no tom que você escolher.
               </p>
-              <div className="mt-9 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 sm:mt-9">
                 <Link href="/register" className={buttonVariants({ size: 'lg' })}>
                   Testar grátis por 7 dias
                 </Link>
-                <Link href="/login" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
+                <Link
+                  href="/login"
+                  className="hidden px-1 py-3 text-base font-semibold underline decoration-[var(--ia-violet)] decoration-2 underline-offset-[6px] hover:text-[var(--ia-violet)] sm:inline-block"
+                >
                   Já tenho conta
                 </Link>
               </div>
-              <p className="mt-5 text-sm text-muted-foreground">
-                Sem cartão para começar. Depois do teste, R$297 por mês.
+              <p className="mt-4 text-sm text-muted-foreground">
+                Sem cartão. Depois do teste, R$297 por mês.
               </p>
-              <p className="mt-10 max-w-md text-base text-muted-foreground">
-                Para barbeiros, cabeleireiras, manicures, personais, psicólogos, advogados, consultores, professoras particulares e tatuadores.
+              <p className="mt-6 max-w-md text-base text-muted-foreground sm:mt-10">
+                Barbearia, personal, terapia, advocacia, tatuagem e mais.
               </p>
             </div>
             <HeroChat />

@@ -25,7 +25,7 @@ entrando em sequência (`ia-rise`) e a faísca "online agora".
 ## WeekGrid.tsx
 
 **O que faz:** semana de segunda a sexta com os blocos de manhã e tarde, atendimentos de 50 minutos,
-horários ocupados riscados, almoço hachurado ("a secretária não oferece") e um horário marcado.
+horários ocupados riscados, almoço em degrau de tom liso ("a secretária não oferece") e um horário marcado.
 
 **Exporta:** `WeekGrid()`
 

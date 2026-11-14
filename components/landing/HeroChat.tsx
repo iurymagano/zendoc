@@ -29,24 +29,24 @@ export function HeroChat() {
       </div>
 
       <div className="flex flex-col gap-3 px-4 pb-5 pt-5 sm:px-5" aria-hidden>
-        <Bubble side="in" time="22:47" className="ia-rise" style={{ '--d': '500ms' } as React.CSSProperties}>
+        <Bubble side="in" time="22:47" className="ia-rise" style={{ '--d': '300ms' } as React.CSSProperties}>
           Oi, boa noite! Tem horário essa semana com a Bia?
         </Bubble>
-        <Bubble side="out" time="22:47" className="ia-rise" style={{ '--d': '1500ms' } as React.CSSProperties}>
+        <Bubble side="out" time="22:47" className="ia-rise" style={{ '--d': '1000ms' } as React.CSSProperties}>
           Boa noite, Marina! Tenho quinta às 14h, sexta às 9h ou sexta às 16h.
           Qual fica melhor?
         </Bubble>
-        <Bubble side="in" time="22:48" className="ia-rise" style={{ '--d': '2600ms' } as React.CSSProperties}>
+        <Bubble side="in" time="22:48" className="ia-rise" style={{ '--d': '1700ms' } as React.CSSProperties}>
           Quinta às 14h
         </Bubble>
-        <Bubble side="out" time="22:48" className="ia-rise" style={{ '--d': '3500ms' } as React.CSSProperties}>
+        <Bubble side="out" time="22:48" className="ia-rise" style={{ '--d': '2400ms' } as React.CSSProperties}>
           Marcado! Quinta, 19/11, às 14h. Eu te lembro na quarta e de novo duas
           horas antes.
         </Bubble>
 
         <div
           className="ia-rise mt-2 rounded-2xl bg-[var(--ia-mist)] p-4 text-[var(--ia-void)]"
-          style={{ '--d': '4600ms' } as React.CSSProperties}
+          style={{ '--d': '3200ms' } as React.CSSProperties}
         >
           <div className="flex items-center justify-between gap-3">
             <p className="flex items-center gap-2 text-sm font-semibold">

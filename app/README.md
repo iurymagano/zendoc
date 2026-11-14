@@ -44,11 +44,15 @@ para o corpo, JetBrains Mono só para dado) via `next/font/google` e metadata do
 
 **Depende de:** `./globals.css`, `next/font/google`
 
+## apple-icon.png
+
+**O que faz:** ícone de tela de início do iOS (180x180), servido pelo Next como `apple-touch-icon`. Gerado do `icon.svg` sem o raio dos cantos.
+
 ## icon.svg
 
 **O que faz:** favicon da marca (símbolo Ensō-balão sobre Void), servido pelo Next como ícone do site.
 
-**Notas:** gerado da geometria em `components/brand/logo-geometry.ts`. Não há `apple-icon` ainda.
+**Notas:** gerado da geometria em `components/brand/logo-geometry.ts`. O `apple-icon.png` (180x180, quadrado sem cantos, o iOS aplica a máscara) é o mesmo símbolo sobre Void.
 
 ## page.tsx
 

@@ -174,7 +174,7 @@ Legenda:
 - [x] Landing e auth com texto aberto a qualquer profissional ("clientes", "atendimentos") e seção do Assistente pessoal
 - [x] Login e cadastro com o lado de marca
 - [x] `CLAUDE.md` e READMEs atualizados
-- [ ] `app/apple-icon` (ícone iOS)
+- [x] `app/apple-icon` (ícone iOS)
 - [ ] Fase 2: dashboard (Sidebar, PageHeader, cards de métrica, tabelas, agenda, estados vazios)
 - [ ] Fase 2: onboarding (tirar o halo radial) e `app/privacidade`
 - [ ] Trocar as conversas de exemplo da landing por conversas reais autorizadas

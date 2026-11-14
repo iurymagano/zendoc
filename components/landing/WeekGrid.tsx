@@ -76,7 +76,7 @@ export function WeekGrid() {
       <div className="mt-5 flex flex-col gap-5">
         <Block label="Manhã" range="08:00 a 12:00" times={MORNING} />
         <div
-          className="flex h-11 items-center justify-center rounded-lg bg-[repeating-linear-gradient(135deg,transparent_0_7px,rgba(14,15,24,0.07)_7px_8px)] bg-muted text-sm text-muted-foreground"
+          className="flex h-11 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground"
         >
           Almoço: a secretária não oferece
         </div>

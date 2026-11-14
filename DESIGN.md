@@ -119,7 +119,7 @@ no hero como prova do produto (22:47, a cabeleireira já fechou o salão). Cada 
 com a prova ao lado:
 
 1. Você atende. Ela agenda. — a conversa.
-2. Ela só oferece o que está livre. — a semana com blocos, almoço hachurado, horários ocupados
+2. Ela só oferece o que está livre. — a semana com blocos, almoço em degrau de tom liso (sem hachura nem degradê), horários ocupados
    riscados.
 3. Ninguém esquece o horário. — linha do tempo de um atendimento (lembrete 24h, 2h, o atendimento).
 4. Responde do jeito que você responderia. — o mesmo pedido nos tons amigável e formal.
@@ -196,6 +196,5 @@ Descartadas:
   horários fictícios, várias profissões). Trocar por conversas reais autorizadas quando houver beta testers.
 - A conversa do Assistente pessoal na landing é demonstração; o recurso real (`/assistente`) é do
   dev e ainda não passou pela revisão visual da fase 2.
-- Ícone de app iOS (`apple-icon`) ainda não gerado; só `app/icon.svg`.
 - Dashboard, onboarding e páginas internas só recebem a base (cor, fonte, componentes); o
   redesenho segue as regras acima, na fase 2.
