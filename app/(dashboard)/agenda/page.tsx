@@ -10,6 +10,7 @@ import {
   startOfWeek,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,6 +41,7 @@ import {
   formatTime,
 } from '@/components/agenda/calendar-utils';
 import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
+import { isPersonalCommitment } from '@/lib/appointments/personal';
 import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import type { Appointment, AppointmentStatus, Patient, Service } from '@/types/database';
 
@@ -293,8 +295,10 @@ export default function AgendaPage() {
     e.preventDefault();
     setFormError(null);
 
-    const phone = normalizePhoneBR(form.patient_phone);
-    if (!isValidPhoneBR(phone)) {
+    // Compromisso pessoal (criado pelo Assistente) não tem cliente: sem telefone.
+    const editingPersonal = !!editing && isPersonalCommitment(editing.patient_phone);
+    const phone = editingPersonal ? '' : normalizePhoneBR(form.patient_phone);
+    if (!editingPersonal && !isValidPhoneBR(phone)) {
       setFormError('Informe um telefone válido com DDD (ex.: (11) 91111-2222).');
       return;
     }
@@ -316,7 +320,7 @@ export default function AgendaPage() {
       form.starts_local.slice(0, 10) !== form.ends_local.slice(0, 10)
     ) {
       setFormError(
-        'Para repetir, início e fim devem ser no mesmo dia — eles definem o horário de UMA consulta. Use "Repetir até" para a data em que a série termina.',
+        'Para repetir, início e fim devem ser no mesmo dia — eles definem o horário de UM atendimento. Use "Repetir até" para a data em que a série termina.',
       );
       return;
     }
@@ -328,7 +332,7 @@ export default function AgendaPage() {
 
     setSaving(true);
 
-    // Consulta recorrente (só na criação): cria a série e materializa as
+    // Atendimento recorrente (só na criação): cria a série e materializa as
     // ocorrências; senão, fluxo normal de appointment único.
     if (!editing && form.repeat !== 'none') {
       const res = await fetch('/api/recurrences', {
@@ -388,7 +392,7 @@ export default function AgendaPage() {
     if (!a.recurrence_id) return;
     if (
       !window.confirm(
-        'Encerrar esta série? As consultas futuras desta recorrência serão canceladas (as passadas permanecem).',
+        'Encerrar esta série? Os atendimentos futuros desta recorrência serão cancelados (os passados permanecem).',
       )
     ) {
       return;
@@ -432,6 +436,16 @@ export default function AgendaPage() {
   }
 
   function statusActions(a: Appointment) {
+    // Compromisso pessoal (sem telefone): não tem cliente para confirmar,
+    // aprovar ou dar falta; só cancelar.
+    if (isPersonalCommitment(a.patient_phone)) {
+      if (a.status === 'cancelled' || a.status === 'no_show') return null;
+      return (
+        <Button type="button" size="sm" variant="outline" onClick={() => cancel(a)}>
+          Cancelar compromisso
+        </Button>
+      );
+    }
     if (a.status === 'pending_approval') {
       return (
         <>
@@ -535,10 +549,17 @@ export default function AgendaPage() {
       {formOpen && (
         <Card>
           <CardHeader>
-            <CardTitle>{editing ? 'Editar agendamento' : 'Novo agendamento'}</CardTitle>
+            <CardTitle>
+              {editing
+                ? isPersonalCommitment(editing.patient_phone)
+                  ? 'Editar compromisso'
+                  : 'Editar agendamento'
+                : 'Novo agendamento'}
+            </CardTitle>
             <CardDescription>
-              Horários interpretados em America/Sao_Paulo. Se o paciente já existir
-              (mesmo telefone), seu cadastro é reutilizado.
+              {editing && isPersonalCommitment(editing.patient_phone)
+                ? 'Horários interpretados em America/Sao_Paulo.'
+                : 'Horários interpretados em America/Sao_Paulo. Se o cliente já existir (mesmo telefone), seu cadastro é reutilizado.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -548,7 +569,7 @@ export default function AgendaPage() {
                   {STATUS_LABEL[editing.status]}
                 </span>
                 {statusActions(editing)}
-                {editing.status !== 'cancelled' && (
+                {editing.status !== 'cancelled' && !isPersonalCommitment(editing.patient_phone) && (
                   <Button
                     type="button"
                     size="sm"
@@ -570,21 +591,28 @@ export default function AgendaPage() {
                     variant="outline"
                     onClick={() => stopSeries(editing)}
                   >
-                    Encerrar série 🔁
+                    Encerrar série
                   </Button>
                 )}
               </div>
             )}
             {editing?.recurrence_id && (
               <p className="mb-4 -mt-2 text-xs text-muted-foreground">
-                🔁 Esta consulta faz parte de uma série recorrente. Editar ou
+                Este atendimento faz parte de uma série recorrente. Editar ou
                 cancelar aqui afeta só esta ocorrência; use “Encerrar série” para
                 cancelar as futuras.
               </p>
             )}
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Nome do paciente" htmlFor="ap_name">
+                <FormField
+                  label={
+                    editing && isPersonalCommitment(editing.patient_phone)
+                      ? 'Título do compromisso'
+                      : 'Nome do cliente'
+                  }
+                  htmlFor="ap_name"
+                >
                   <div className="relative">
                     <Input
                       id="ap_name"
@@ -599,8 +627,10 @@ export default function AgendaPage() {
                       required
                       maxLength={120}
                     />
-                    {suggestionsOpen && suggestions.length > 0 && (
-                      <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto rounded-md border bg-popover shadow-md">
+                    {suggestionsOpen &&
+                      suggestions.length > 0 &&
+                      !(editing && isPersonalCommitment(editing.patient_phone)) && (
+                      <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto rounded-xl bg-popover ring-1 ring-border">
                         {suggestions.map((p) => (
                           <li key={p.id}>
                             <button
@@ -621,26 +651,30 @@ export default function AgendaPage() {
                     )}
                   </div>
                 </FormField>
-                <FormField label="Telefone" htmlFor="ap_phone">
-                  <Input
-                    id="ap_phone"
-                    value={form.patient_phone}
-                    onChange={(e) => setForm((p) => ({ ...p, patient_phone: e.target.value }))}
-                    placeholder="5511999998888"
-                    required
-                  />
-                </FormField>
-                <FormField label="CPF (opcional)" htmlFor="ap_cpf">
-                  <Input
-                    id="ap_cpf"
-                    value={form.patient_cpf}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, patient_cpf: maskCpfInput(e.target.value) }))
-                    }
-                    placeholder="000.000.000-00"
-                    inputMode="numeric"
-                  />
-                </FormField>
+                {!(editing && isPersonalCommitment(editing.patient_phone)) && (
+                  <>
+                    <FormField label="Telefone" htmlFor="ap_phone">
+                      <Input
+                        id="ap_phone"
+                        value={form.patient_phone}
+                        onChange={(e) => setForm((p) => ({ ...p, patient_phone: e.target.value }))}
+                        placeholder="5511999998888"
+                        required
+                      />
+                    </FormField>
+                    <FormField label="CPF (opcional)" htmlFor="ap_cpf">
+                      <Input
+                        id="ap_cpf"
+                        value={form.patient_cpf}
+                        onChange={(e) =>
+                          setForm((p) => ({ ...p, patient_cpf: maskCpfInput(e.target.value) }))
+                        }
+                        placeholder="000.000.000-00"
+                        inputMode="numeric"
+                      />
+                    </FormField>
+                  </>
+                )}
               </div>
 
               {servicesList.length > 0 && (
@@ -734,7 +768,7 @@ export default function AgendaPage() {
                           setForm((p) => {
                             const repeat = (v ?? 'none') as Repeat;
                             // Ao ativar a repetição, garante que o fim fique no
-                            // mesmo dia do início (é o horário de UMA consulta).
+                            // mesmo dia do início (é o horário de UM atendimento).
                             const sameDay =
                               p.starts_local.slice(0, 10) ===
                               p.ends_local.slice(0, 10);
@@ -780,8 +814,8 @@ export default function AgendaPage() {
                   </div>
                   {form.repeat !== 'none' && (
                     <p className="-mt-1 text-xs text-muted-foreground">
-                      🔁 <strong>Início</strong> e <strong>Fim</strong> acima são o
-                      horário de <strong>uma</strong> consulta (mesmo dia). Ela vai
+                      <strong>Início</strong> e <strong>Fim</strong> acima são o
+                      horário de <strong>um</strong> atendimento (mesmo dia). Ela vai
                       se repetir {form.repeat === 'weekly' ? 'toda semana' : 'a cada 2 semanas'} no
                       mesmo dia e horário, até a data de “Repetir até”.
                     </p>
@@ -795,7 +829,7 @@ export default function AgendaPage() {
                   value={form.notes}
                   onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
                   rows={2}
-                  placeholder="Ex.: primeira consulta, encaminhamento, etc."
+                  placeholder="Ex.: primeiro atendimento, indicação, observações, etc."
                 />
               </FormField>
 
@@ -864,7 +898,8 @@ export default function AgendaPage() {
           ))}
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm border border-dashed border-border bg-muted" />
-            🔒 Google (pessoal)
+            <Lock className="size-3" aria-hidden />
+            Google (pessoal)
           </span>
         </div>
       )}

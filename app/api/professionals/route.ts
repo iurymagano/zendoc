@@ -51,7 +51,7 @@ export async function GET() {
   const supabase = createServerClient();
   const { data } = await supabase
     .from('professionals')
-    .select('id, name, specialty, buffer_min')
+    .select('id, name, specialty, buffer_min, ai_enabled')
     .eq('user_id', session.user.id)
     .maybeSingle();
   if (!data) {

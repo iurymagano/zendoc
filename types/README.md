@@ -11,11 +11,14 @@ usados em toda a aplicação.
 
 - Unions: `PlanStatus`, `AppointmentStatus`, `BookedVia`, `BlockType`,
   `ExceptionType`, `ReminderType`, `ReminderStatus`, `ConversationRole`,
-  `AIAction` (inclui `confirm`), `RecurrenceFrequency`
+  `AIAction` (inclui `confirm`), `RecurrenceFrequency`, `PersonalReminderStatus`
 - Interfaces: `Professional` (com `buffer_min`), `Appointment` (com
   `recurrence_id` e `service_id`), `AvailabilityWeekly`, `AvailabilityException`,
   `Patient`, `Reminder`, `ConversationMessage`, `AIResponse`, `GoogleBusyEvent`,
-  `Recurrence`, `Service`
+  `Recurrence`, `Service`, `PersonalReminder` (lembrete pessoal do
+  Assistente), `AssistantMessage` (histórico do chat do Assistente),
+  `AssistantPendingAction` (cancelar/remarcar preparado, aguardando confirmação;
+  com `AssistantPendingKind`/`AssistantPendingStatus`)
 
 **Notas:** mantém paridade com o SQL em `CLAUDE.md`. Atualizar os dois lados em
 conjunto quando o schema mudar. `Patient.cpf` é `string | null` (dígitos puros,
@@ -23,6 +26,8 @@ sem máscara). `Professional` ganhou as colunas `google_*` (tokens + estado da
 conexão Google Calendar) e `Appointment.google_event_id` (espelho no Google) —
 ver migration `supabase/migrations/0002_google_calendar.sql`.
 `Patient.messaging_opted_out` (LGPD — opor-se a mensagens ativas, migration `0007`).
+`PersonalReminder` e `AssistantMessage` vêm da migration `0008` (Assistente pessoal);
+`AssistantPendingAction`, da `0009` (confirmação em duas etapas do cancelar/remarcar).
 
 ## next-auth.d.ts
 

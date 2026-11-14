@@ -138,7 +138,7 @@ export default function WhatsAppConfigPage() {
 
   async function onDisconnect() {
     const ok = window.confirm(
-      'Desconectar WhatsApp? A IA parará de responder as mensagens dos seus pacientes.',
+      'Desconectar WhatsApp? A IA parará de responder as mensagens dos seus clientes.',
     );
     if (!ok) return;
     await disconnect();
@@ -172,11 +172,11 @@ export default function WhatsAppConfigPage() {
           : null;
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Configurações"
         title="WhatsApp"
-        description="Conecte seu WhatsApp para que a IA responda seus pacientes automaticamente, 24h por dia."
+        description="Conecte seu WhatsApp para que a IA responda seus clientes automaticamente, 24h por dia."
         actions={
           statusBadge ? (
             <span
@@ -202,8 +202,8 @@ export default function WhatsAppConfigPage() {
             <CardHeader>
               <CardTitle>Conectar seu WhatsApp</CardTitle>
               <CardDescription>
-                Clique para gerar o QR Code e parear o número do seu consultório.
-                A partir daí a secretária virtual responde seus pacientes
+                Clique para gerar o QR Code e parear o número que você usa para atender.
+                A partir daí a secretária virtual responde seus clientes
                 automaticamente.
               </CardDescription>
             </CardHeader>

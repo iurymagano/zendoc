@@ -5,7 +5,7 @@ import type { Appointment, AIResponse, Professional } from '@/types/database';
 type Supabase = ReturnType<typeof createServerClient>;
 
 /**
- * Localiza a próxima consulta ativa do paciente (pelo telefone). A IA não
+ * Localiza o próximo atendimento ativo do cliente (pelo telefone). A IA não
  * conhece o uuid do appointment — então confirm/cancel/reschedule resolvem o
  * alvo por aqui. Se `appointmentId` vier preenchido, busca por ele.
  */
@@ -44,7 +44,7 @@ export async function executeAction(
 
   if (response.action === 'book' && response.booking) {
     // Nome: usa o que a IA capturou; se não veio, preserva o nome já cadastrado
-    // (não reescreve com o placeholder); só cai em "Paciente" se não houver nada.
+    // (não reescreve com o placeholder); só cai em "Cliente" se não houver nada.
     const providedName = response.booking.patient_name?.trim();
     const { data: existingPatient } = await supabase
       .from('patients')
@@ -52,7 +52,7 @@ export async function executeAction(
       .eq('professional_id', professional.id)
       .eq('phone', patientPhone)
       .maybeSingle();
-    const patientName = providedName || existingPatient?.name || 'Paciente';
+    const patientName = providedName || existingPatient?.name || 'Cliente';
 
     const { data: patient } = await supabase
       .from('patients')
@@ -76,7 +76,7 @@ export async function executeAction(
       .insert({
         professional_id: professional.id,
         patient_id: patient?.id ?? null,
-        patient_name: patient?.name ?? 'Paciente',
+        patient_name: patient?.name ?? 'Cliente',
         patient_phone: patientPhone,
         starts_at: response.booking.starts_at,
         ends_at: response.booking.ends_at,
@@ -90,7 +90,7 @@ export async function executeAction(
     return;
   }
 
-  // Paciente confirmou presença (resposta ao lembrete): scheduled → confirmed.
+  // Cliente confirmou presença (resposta ao lembrete): scheduled → confirmed.
   // Não confirma pending_approval (isso depende do profissional aprovar).
   if (response.action === 'confirm') {
     const target = await findUpcomingAppointment(

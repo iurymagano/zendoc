@@ -15,7 +15,7 @@ async function getProfessionalId(userId: string) {
 
 /**
  * GET /api/patients/[id]/export
- * Exporta todos os dados de um paciente em JSON (LGPD — direito de acesso e
+ * Exporta todos os dados de um cliente em JSON (LGPD — direito de acesso e
  * portabilidade): cadastro + agendamentos + histórico de conversa. Baixado como
  * arquivo. Só o profissional dono acessa.
  */
@@ -42,7 +42,7 @@ export async function GET(
     .eq('professional_id', professionalId)
     .maybeSingle<Patient>();
   if (!patient) {
-    return NextResponse.json({ error: 'Paciente não encontrado' }, { status: 404 });
+    return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 });
   }
 
   const [{ data: appointments }, { data: conversation }] = await Promise.all([
@@ -71,7 +71,7 @@ export async function GET(
   return new NextResponse(JSON.stringify(payload, null, 2), {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'Content-Disposition': `attachment; filename="paciente_${safeName || id}.json"`,
+      'Content-Disposition': `attachment; filename="cliente_${safeName || id}.json"`,
     },
   });
 }

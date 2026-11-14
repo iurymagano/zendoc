@@ -46,17 +46,17 @@ Cria um appointment manual (`booked_via = 'manual'`, `status = 'scheduled'`).
   "cpf": "390.533.447-05",
   "starts_at": "2026-05-10T10:00:00-03:00",
   "ends_at":   "2026-05-10T10:50:00-03:00",
-  "notes": "primeira consulta (opcional)"
+  "notes": "primeiro atendimento (opcional)"
 }
 ```
 
 - `patient_phone` é normalizado no servidor (`normalizePhoneBR`: só dígitos,
-  `55` + DDD + número) antes de gravar no appointment e no paciente — evita
-  paciente duplicado quando o mesmo número chega com/sem DDI. `PATCH [id]` idem.
-- Paciente é **reaproveitado por telefone** (upsert em
+  `55` + DDD + número) antes de gravar no appointment e no cliente — evita
+  cliente duplicado quando o mesmo número chega com/sem DDI. `PATCH [id]` idem.
+- Cliente é **reaproveitado por telefone** (upsert em
   `patients(professional_id, phone)`) — mesmo comportamento que o fluxo da IA.
 - `cpf` opcional (validado por checksum). Quando informado, é gravado no
-  paciente durante o upsert; quando ausente, **não** sobrescreve um CPF já
+  cliente durante o upsert; quando ausente, **não** sobrescreve um CPF já
   cadastrado.
 - Timestamps precisam ter offset (`-03:00`). O cliente
   [`/agenda`](../../(dashboard)/agenda/README.md) converte `datetime-local` +

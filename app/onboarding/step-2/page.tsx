@@ -17,19 +17,38 @@ import {
 
 const STEP1_KEY = 'iazen:onboarding:step1';
 
+// Exemplos de ramos que atendem com hora marcada. "Outra" abre um campo livre:
+// o IAzen serve a qualquer profissional ou negócio com agenda, não só saúde.
 const SPECIALTIES = [
   'Psicólogo(a)',
   'Psicanalista',
   'Nutricionista',
   'Fisioterapeuta',
+  'Dentista',
+  'Médico(a)',
   'Terapeuta',
   'Fonoaudiólogo(a)',
-  'Outro',
+  'Personal trainer',
+  'Esteticista',
+  'Cabeleireiro(a) / Barbeiro(a)',
+  'Manicure / Designer de sobrancelhas',
+  'Massoterapeuta',
+  'Tatuador(a)',
+  'Coach / Mentor(a)',
+  'Consultor(a)',
+  'Advogado(a)',
+  'Contador(a)',
+  'Professor(a) particular',
+  'Fotógrafo(a)',
+  'Veterinário(a)',
 ];
+const OTHER = 'Outra';
+const MAX_SPECIALTY = 60;
 
 export default function OnboardingStep2() {
   const router = useRouter();
-  const [specialty, setSpecialty] = useState('');
+  const [specialtyChoice, setSpecialtyChoice] = useState('');
+  const [customSpecialty, setCustomSpecialty] = useState('');
   const [address, setAddress] = useState('');
   const [tone, setTone] = useState<'amigável' | 'formal'>('amigável');
   const [customInstructions, setCustomInstructions] = useState('');
@@ -51,8 +70,14 @@ export default function OnboardingStep2() {
       router.replace('/onboarding/step-1');
       return;
     }
-    if (specialty.trim().length === 0) {
-      setError('Selecione sua especialidade.');
+    const specialty =
+      specialtyChoice === OTHER ? customSpecialty.trim() : specialtyChoice;
+    if (specialty.length === 0) {
+      setError(
+        specialtyChoice === OTHER
+          ? 'Escreva a sua área de atuação.'
+          : 'Selecione a sua área de atuação.',
+      );
       return;
     }
 
@@ -87,17 +112,17 @@ export default function OnboardingStep2() {
     <div className="flex flex-col gap-6">
       <StepHeader
         current={2}
-        title="Perfil do consultório"
-        subtitle="Essas informações ajudam a IA a conversar com seus pacientes."
+        title="Perfil do seu negócio"
+        subtitle="Essas informações ajudam a IA a conversar com seus clientes."
       />
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <FormField label="Especialidade" htmlFor="specialty">
+        <FormField label="Área de atuação" htmlFor="specialty">
           <Select
-            value={specialty}
-            onValueChange={(v) => setSpecialty(v ?? '')}
+            value={specialtyChoice}
+            onValueChange={(v) => setSpecialtyChoice(v ?? '')}
           >
-            <SelectTrigger id="specialty">
+            <SelectTrigger id="specialty" className="w-full">
               <SelectValue placeholder="Selecione…" />
             </SelectTrigger>
             <SelectContent>
@@ -106,12 +131,26 @@ export default function OnboardingStep2() {
                   {s}
                 </SelectItem>
               ))}
+              <SelectItem value={OTHER}>{OTHER}</SelectItem>
             </SelectContent>
           </Select>
         </FormField>
 
+        {specialtyChoice === OTHER && (
+          <FormField label="Qual é a sua área?" htmlFor="custom_specialty">
+            <Input
+              id="custom_specialty"
+              name="custom_specialty"
+              value={customSpecialty}
+              onChange={(e) => setCustomSpecialty(e.target.value)}
+              maxLength={MAX_SPECIALTY}
+              placeholder="Ex.: Professor de violão, Estúdio de pilates"
+            />
+          </FormField>
+        )}
+
         <FormField
-          label="Endereço do consultório (opcional)"
+          label="Endereço de atendimento (opcional)"
           htmlFor="address"
         >
           <Input
@@ -149,11 +188,15 @@ export default function OnboardingStep2() {
             value={customInstructions}
             onChange={(e) => setCustomInstructions(e.target.value)}
             rows={4}
-            placeholder="Ex.: primeira consulta dura 60min; peço para pacientes chegarem 10min antes."
+            placeholder="Ex.: o primeiro atendimento dura 60min; peço para os clientes chegarem 10min antes."
           />
         </FormField>
 
-        {error && <span className="text-sm text-destructive">{error}</span>}
+        {error && (
+          <span role="alert" className="text-sm font-medium text-destructive">
+            {error}
+          </span>
+        )}
 
         <div className="flex gap-3">
           <Button

@@ -15,6 +15,7 @@ import {
   Menu,
   MessageSquare,
   MessagesSquare,
+  Sparkles,
   Tag,
   Users,
   X,
@@ -27,8 +28,9 @@ type Item = { href: string; label: string; icon: ComponentType<{ className?: str
 const PRIMARY: Item[] = [
   { href: '/dashboard', label: 'Visão geral', icon: LayoutDashboard },
   { href: '/agenda', label: 'Agenda', icon: CalendarDays },
+  { href: '/assistente', label: 'Assistente', icon: Sparkles },
   { href: '/conversas', label: 'Conversas', icon: MessagesSquare },
-  { href: '/pacientes', label: 'Pacientes', icon: Users },
+  { href: '/clientes', label: 'Clientes', icon: Users },
 ];
 
 const SETTINGS: Item[] = [
@@ -111,16 +113,16 @@ export function Sidebar() {
         href={item.href}
         onClick={() => setOpen(false)}
         className={cn(
-          'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
           active
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            ? 'bg-sidebar-accent text-white'
+            : 'text-[var(--ia-on-void-muted)] hover:bg-[var(--ia-void-2)] hover:text-white',
         )}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+          <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[var(--ia-violet)]" />
         )}
-        <Icon className="size-[18px] shrink-0" />
+        <Icon className={cn('size-[18px] shrink-0', active && 'text-[var(--ia-violet)]')} />
         <span className="flex-1 truncate">{item.label}</span>
         {item.href === '/conversas' && attention > 0 && (
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold leading-none text-white">
@@ -132,8 +134,8 @@ export function Sidebar() {
   }
 
   const nav = (
-    <div className="flex h-full flex-col bg-sidebar">
-      <div className="flex h-16 items-center border-b border-sidebar-border bg-gradient-to-b from-primary/[0.04] to-transparent px-5">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      <div className="flex h-16 items-center px-5">
         <Logo size="md" href="/dashboard" />
       </div>
 
@@ -144,7 +146,7 @@ export function Sidebar() {
           ))}
         </nav>
 
-        <div className="px-3 pb-1 pt-5 text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+        <div className="px-3 pb-1.5 pt-7 text-xs font-semibold text-[var(--ia-on-void-muted)]">
           Configurações
         </div>
         <nav className="flex flex-col gap-0.5">
@@ -154,16 +156,16 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="border-t border-sidebar-border p-3">
+      <div className="bg-[var(--ia-void-1)] p-3">
         {profile && (
           <div className="mb-1 flex items-center gap-3 px-2 py-2">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4f6ef7] to-[#7c3aed] text-xs font-semibold text-white">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ia-violet-action)] text-xs font-semibold text-white">
               {initials || '·'}
             </span>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium">{profile.name}</div>
+              <div className="truncate text-sm font-medium text-white">{profile.name}</div>
               {profile.specialty && (
-                <div className="truncate text-xs text-muted-foreground">
+                <div className="truncate text-xs text-[var(--ia-on-void-muted)]">
                   {profile.specialty}
                 </div>
               )}
@@ -173,7 +175,7 @@ export function Sidebar() {
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: '/' })}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--ia-on-void-muted)] transition-colors hover:bg-[var(--ia-void-2)] hover:text-white"
         >
           <LogOut className="size-[18px] shrink-0" />
           Sair
@@ -185,23 +187,23 @@ export function Sidebar() {
   return (
     <>
       {/* Topo mobile */}
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-sidebar px-4 py-3 md:hidden">
+      <div className="sticky top-0 z-20 flex items-center justify-between bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
         <Logo size="sm" href="/dashboard" />
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Abrir menu"
-          className="relative rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="relative flex size-11 items-center justify-center rounded-xl text-[var(--ia-on-void-muted)] hover:bg-[var(--ia-void-2)] hover:text-white"
         >
           <Menu className="size-5" />
           {attention > 0 && (
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-sidebar" />
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-[var(--ia-void)]" />
           )}
         </button>
       </div>
 
       {/* Sidebar desktop (fixa) */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sidebar-border md:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 md:block">
         {nav}
       </aside>
 
@@ -209,15 +211,15 @@ export function Sidebar() {
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-[1px]"
+            className="absolute inset-0 bg-[var(--ia-void)]/60"
             onClick={() => setOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 w-64 border-r border-sidebar-border shadow-xl">
+          <aside className="absolute inset-y-0 left-0 w-64">
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Fechar menu"
-              className="absolute right-2 top-3 z-10 rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="absolute right-2 top-2.5 z-10 flex size-11 items-center justify-center rounded-xl text-[var(--ia-on-void-muted)] hover:bg-[var(--ia-void-2)] hover:text-white"
             >
               <X className="size-5" />
             </button>

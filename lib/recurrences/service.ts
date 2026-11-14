@@ -7,12 +7,12 @@ const TZ = 'America/Sao_Paulo';
 const DEFAULT_HORIZON_WEEKS = 8;
 const MAX_OCCURRENCES = 60; // backstop contra loop
 
-/** Data de hoje (yyyy-MM-dd) no fuso do consultório. */
+/** Data de hoje (yyyy-MM-dd) no fuso da agenda. */
 function todayKey(): string {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: TZ }).format(new Date());
 }
 
-/** Chave de dia (yyyy-MM-dd, fuso do consultório) de um ISO. */
+/** Chave de dia (yyyy-MM-dd, fuso da agenda) de um ISO. */
 function dayKey(iso: string): string {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: TZ }).format(
     new Date(iso),

@@ -34,24 +34,33 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
   **faixa de hora** (semana) abre o form já com a data/hora pré-preenchida.
 - Clicar num **bloco de agendamento** abre o form em modo edição, com as ações
   de status no topo (Aprovar/Confirmar/Não compareceu/Cancelar conforme o status).
-- Autocomplete de pacientes (nome OU telefone), campo CPF com máscara, fim
+- Autocomplete de clientes (nome OU telefone), campo CPF com máscara, fim
   auto-preenchido em `+50min`. Salva via `POST`/`PATCH /api/appointments`.
   O telefone é normalizado (`normalizePhoneBR`: `55` + DDD + número) antes do
-  envio — o mesmo número digitado com/sem DDI cai no mesmo paciente.
+  envio — o mesmo número digitado com/sem DDI cai no mesmo cliente.
+
+**Compromisso pessoal (sem cliente):** ao editar um item com `patient_phone`
+vazio (`isPersonalCommitment`), o form esconde telefone/CPF e a lista de
+clientes, rotula o nome como "Título do compromisso" e envia `patient_phone`
+vazio — o `PATCH` aceita (não exige telefone) e nenhum lembrete é enviado a
+cliente. O painel se chama "Editar compromisso", não mostra "Declaração" nem
+"Confirmar"/"Aprovar"/aviso de cliente com o mesmo telefone, e a única ação de
+status é "Cancelar compromisso". Ao mudar o horário de um atendimento, o servidor reagenda os lembretes
+24h/2h pendentes.
 
 **Cancelamento:** `window.confirm` + `window.prompt` (motivo) →
 `POST /api/appointments/:id/cancel`.
 
-**Declaração de comparecimento:** no form de edição (consulta não cancelada),
-o botão "Declaração" abre `/documentos/declaracao/[id]` em nova aba (documento
-imprimível). Ver `app/documentos/`.
+**Declaração de comparecimento:** no form de edição (atendimento de cliente não
+cancelado; não aparece em compromisso pessoal) o botão "Declaração" abre
+`/documentos/declaracao/[id]` em nova aba (documento imprimível). Ver `app/documentos/`.
 
 **Serviço:** o seletor "Serviço (opcional)" lista os serviços ativos
 (`GET /api/services`); ao escolher, o **Fim** é calculado pela duração do serviço
 e o `service_id` vai no payload do appointment. Cadastro em
 `/configuracoes/servicos`.
 
-**Consultas recorrentes:** no form de criação, o campo "Repetir" (Não repete /
+**Atendimentos recorrentes:** no form de criação, o campo "Repetir" (Não repete /
 Toda semana / A cada 2 semanas) + "Repetir até" opcional cria uma série via
 `POST /api/recurrences` (materializa as ocorrências) em vez de um único
 appointment. Ocorrências recorrentes mostram 🔁 no calendário; no form de edição
@@ -63,7 +72,7 @@ de uma delas há o aviso da série e o botão "Encerrar série"
 - `@/components/agenda/{CalendarMonth,CalendarWeek,calendar-utils}`
 - `@/components/ui/{button,input,textarea,card,form-field}`
 - `GET /api/appointments`, `POST/PATCH /api/appointments`, `POST /api/appointments/:id/cancel`
-- `@/lib/patients/cpf`, `date-fns`
+- `@/lib/patients/cpf`, `@/lib/appointments/personal`, `date-fns`
 
 **Notas:**
 

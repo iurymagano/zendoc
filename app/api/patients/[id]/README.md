@@ -1,6 +1,6 @@
 # app/api/patients/[id]/
 
-Rota dinâmica para operações em um paciente específico.
+Rota dinâmica para operações em um cliente específico.
 
 ## route.ts
 
@@ -14,7 +14,7 @@ Rota dinâmica para operações em um paciente específico.
   inválido → 400.
 - `DELETE /api/patients/:id` — remove. Idempotente (não erra se já não
   existe). A FK em `appointments.patient_id` é `ON DELETE SET NULL`, então
-  agendamentos antigos viram "paciente removido" mas preservam `patient_name`
+  agendamentos antigos viram "cliente removido" mas preservam `patient_name`
   e `patient_phone` desnormalizados.
 
 **Autenticação:** todas as operações filtram por `professional_id` derivado
@@ -23,5 +23,5 @@ RLS).
 
 **Erros:**
 
-- `409` no `PATCH` se o novo telefone **ou CPF** colidir com outro paciente do
+- `409` no `PATCH` se o novo telefone **ou CPF** colidir com outro cliente do
   mesmo profissional (a mensagem diferencia o campo).

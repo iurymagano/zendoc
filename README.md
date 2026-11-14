@@ -1,8 +1,10 @@
 # IAzen
 
-SaaS de gestão de consultórios para profissionais de saúde autônomos (psicólogos,
-nutricionistas, fisioterapeutas). Oferece uma secretária virtual no WhatsApp que
-agenda, confirma e gerencia consultas automaticamente.
+SaaS de agenda com IA para qualquer profissional que atende clientes com hora
+marcada (barbeiros, cabeleireiras, personais, psicólogos, advogados, consultores...).
+Oferece uma secretária virtual no WhatsApp que agenda, confirma e gerencia os
+atendimentos dos clientes e um **Assistente pessoal** (`/assistente`): chat do
+próprio profissional com a IA para marcar compromissos na agenda e criar lembretes.
 
 - **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind v4 · Supabase · NextAuth v5
 - **Integrações:** Anthropic Claude (IA), Evolution API (WhatsApp), Stripe (pagamentos)
@@ -92,7 +94,7 @@ frequentes ficam no [cron-job.org](https://cron-job.org) (grátis, até de 1 em
 
 | Endpoint | Intervalo | Para quê |
 | --- | --- | --- |
-| `/api/reminders/dispatch` | 1 min | lembretes de 24h e 2h antes da consulta |
+| `/api/reminders/dispatch` | 1 min | lembretes de 24h e 2h antes do atendimento (clientes) e lembretes pessoais do Assistente (para o próprio profissional) |
 | `/api/google/calendar/sync` | 10 min | puxar compromissos do Google Agenda |
 
 O `/api/recurrences/materialize` segue no `vercel.json` (diário). As respostas

@@ -2,13 +2,22 @@
 
 ## O que é este projeto
 
-IAzen é uma plataforma SaaS de gestão de consultórios para profissionais de saúde autônomos
-(psicólogos, nutricionistas, fisioterapeutas). O produto oferece uma secretária virtual
-inteligente via WhatsApp que agenda, confirma e gerencia consultas automaticamente.
+IAzen é uma plataforma SaaS de agenda com uma **IA secretária para você**, para qualquer
+profissional que atende clientes com hora marcada: barbeiros, cabeleireiras, manicures,
+personais, psicólogos, nutricionistas, advogados, consultores, professores particulares,
+tatuadores. Duas frentes:
 
-**Proposta de valor:** "Sua secretária virtual no WhatsApp — agenda, lembra e gerencia suas consultas automaticamente."
+- **Secretária no WhatsApp:** agenda, confirma, remarca, cancela e lembra os clientes
+  automaticamente, no tom que o profissional escolher.
+- **Assistente pessoal (`/assistente`, no painel):** chat privado do dono com a própria IA para
+  marcar compromissos na sua agenda, criar lembretes para si mesmo e organizar o dia.
 
-**Público-alvo:** Profissionais de saúde autônomos sem secretária, com 10 a 40 atendimentos/semana.
+**Proposta de valor:** "Sua secretária no WhatsApp: agenda, confirma e lembra seus clientes, e
+ainda organiza o seu dia."
+
+**Público-alvo:** Profissionais autônomos de qualquer área, sem secretária, que vivem de
+atendimentos com hora marcada (10 a 40 por semana). O vocabulário da interface é "cliente" e
+"atendimento"; as tabelas do banco continuam `patients`/`appointments` (sem renomear).
 
 **Preço:** R$297/mês com trial gratuito de 7 dias (sem cartão).
 
@@ -16,49 +25,54 @@ inteligente via WhatsApp que agenda, confirma e gerencia consultas automaticamen
 
 ## Identidade visual
 
-O design do IAzen segue uma estética **premium e técnica**, inspirada em Stripe e Vercel —
-moderna, bold, confiável.
+Identidade v1 ("Ensō que vira balão"): **moderna, calma e com personalidade**. O sistema
+completo (paleta, tipos, componentes, regras por tela, referências) está em
+[DESIGN.md](DESIGN.md), que manda sobre qualquer outra descrição visual. Resumo:
 
 ### Tokens de design
 
 ```css
-/* Cores */
---iazen-black: #0a0a0f; /* fundo escuro, texto principal */
---iazen-white: #ffffff;
---iazen-accent: #4f6ef7; /* azul primário — CTAs, links, marca */
---iazen-accent2: #7c3aed; /* violeta — acento de IA, ícone */
---iazen-muted: #6b7280; /* texto secundário */
---iazen-surface: #f4f4f6; /* fundos, cards claros */
---iazen-border: #e5e7eb; /* bordas */
+/* Marca */
+--ia-void: #05060a; /* fundo escuro, sidebar, tinta sobre claro */
+--ia-violet: #8b5cff; /* Violeta Zen: a marca, destaque sobre escuro */
+--ia-spark: #5eead4; /* Faísca: a IA online, sucesso sobre escuro */
+--ia-mist: #f4f3f8; /* Névoa: fundo claro */
+/* Derivados */
+--ia-violet-action: #7a47f5; /* fundo de botão (texto branco, AA) */
+--ia-violet-ink: #5b35d5; /* link e destaque sobre claro */
+--ia-void-1/2/3: #0b0d14 / #12151f / #1c2030; /* degraus do escuro */
 
 /* Tipografia */
---font-display:
-  'Space Grotesk', sans-serif; /* headings, logo, CTAs — peso 600/700 */
---font-body: 'Inter', sans-serif; /* corpo de texto — peso 400/500 */
---font-mono: 'Fira Code', monospace; /* código, labels técnicos */
+--font-display: Sora; /* títulos, logo, números grandes: 700 */
+--font-body: Inter; /* corpo e interface: 400/500/600 */
+--font-mono: JetBrains Mono; /* só dado: horário, data, valor */
 ```
+
+Os tokens shadcn (`--primary`, `--background`, `--card`…) vivem em `app/globals.css` e já
+estão mapeados para estas cores (tema claro no painel, `.dark` na landing e no auth).
 
 ### Regras de uso
 
-- **Headings e logo:** Space Grotesk 700, `letter-spacing: -0.03em`
-- **Corpo de texto:** Inter 400, `line-height: 1.6`
-- **Botão primário:** fundo `#4F6EF7`, texto branco, `border-radius: 8px`
-- **Dark sections:** fundo `#0A0A0F`, texto branco, acento azul
-- **Nunca** usar gradientes decorativos, sombras pesadas ou cores fora da paleta acima
-- **shadcn/ui** é a base de todos os componentes — customizar via `className` com as cores acima
+- **Títulos e logo:** Sora 700, `letter-spacing` de -0.03em a -0.05em, no máximo 2 linhas.
+- **Corpo:** Inter 400, `line-height: 1.6`, texto na cor cheia da tinta.
+- **Botão primário:** pílula, fundo Violeta Ação `#7A47F5`, texto branco. Campos 44px, raio 12.
+- **Landing e auth:** seções Void (`.dark`) alternando com Névoa. **Painel:** claro, com sidebar Void.
+- Superfícies separam por degrau de tom, não por linha nem sombra. Mono só em dado.
+- **Sem gradiente decorativo, brilho ou sombra pesada. Única exceção: o degradê do símbolo do logo.**
+- Cores fora da paleta do DESIGN.md nunca.
+- **shadcn/ui** continua sendo a base de todos os componentes, customizada por `className`/tokens.
+- Logo: `components/brand/Logo.tsx` (`Logo`, `LogoMark`); nunca recriar o desenho à mão.
 
 ### Fontes no projeto
 
-Adicionar no `app/layout.tsx`:
+Carregadas em `app/layout.tsx` via `next/font/google`:
 
 ```tsx
-import { Space_Grotesk, Inter } from 'next/font/google';
+import { Sora, Inter, JetBrains_Mono } from 'next/font/google';
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-display',
-});
-const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
+const sora = Sora({ subsets: ['latin'], variable: '--font-sora' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' });
 ```
 
 ---
@@ -449,7 +463,48 @@ create policy "reminders: own data"
   on reminders for all using (professional_id = my_professional_id());
 create policy "conversation_history: own data"
   on conversation_history for all using (professional_id = my_professional_id());
+
+-- ASSISTENTE PESSOAL (migration 0008 — chat do dono com a IA + lembretes pessoais)
+create table personal_reminders (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  text              text not null check (char_length(text) between 1 and 500),
+  remind_at         timestamptz not null,
+  status            text not null default 'pending' check (
+                      status in ('pending','sent','failed','cancelled')
+                    ),
+  sent_at           timestamptz,
+  error_message     text,
+  created_at        timestamptz not null default now()
+);
+create index personal_reminders_due_idx
+  on personal_reminders(remind_at) where status = 'pending';
+create index personal_reminders_professional_idx
+  on personal_reminders(professional_id, remind_at);
+
+create table assistant_messages (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  role              text not null check (role in ('user','assistant')),
+  content           text not null,
+  actions           jsonb,            -- ações executadas no turno (só no assistant)
+  created_at        timestamptz not null default now()
+);
+create index assistant_messages_lookup_idx
+  on assistant_messages(professional_id, created_at desc);
+
+alter table personal_reminders enable row level security;
+alter table assistant_messages enable row level security;
+create policy "personal_reminders: own data"
+  on personal_reminders for all using (professional_id = my_professional_id());
+create policy "assistant_messages: own data"
+  on assistant_messages for all using (professional_id = my_professional_id());
 ```
+
+> As demais tabelas do projeto (`services`, `recurrences`, `google_*`...) vivem em
+> `supabase/schema.sql` e `supabase/migrations/`; este bloco mostra o núcleo.
+> O vocabulário da interface é "cliente"/"atendimento", mas as tabelas seguem
+> `patients`/`appointments` (sem renomear).
 
 ---
 
@@ -572,6 +627,30 @@ export interface ConversationMessage {
   created_at: string;
 }
 
+export type PersonalReminderStatus = 'pending' | 'sent' | 'failed' | 'cancelled';
+
+// Lembrete pessoal criado pelo Assistente e enviado pelo cron (types/database.ts)
+export interface PersonalReminder {
+  id: string;
+  professional_id: string;
+  text: string;
+  remind_at: string;
+  status: PersonalReminderStatus;
+  sent_at: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
+// Mensagem do chat do Assistente pessoal (tabela assistant_messages)
+export interface AssistantMessage {
+  id: string;
+  professional_id: string;
+  role: ConversationRole;
+  content: string;
+  actions: string[] | null;
+  created_at: string;
+}
+
 // Resposta esperada da Claude API — sempre JSON puro
 export interface AIResponse {
   action: AIAction;
@@ -642,8 +721,8 @@ export function buildSystemPrompt(
       ? 'Use linguagem formal e objetiva.'
       : 'Use linguagem amigável e acolhedora.';
 
-  return `Você é a secretária virtual do consultório de ${professional.name}${professional.specialty ? `, ${professional.specialty}` : ''}.
-Nunca se apresente como IA — você é a secretária do consultório.
+  return `Você é a secretária virtual de ${professional.name}${professional.specialty ? `, ${professional.specialty}` : ''}.
+Nunca se apresente como IA — você é a secretária de quem atende.
 ${tone}
 ${professional.address ? `Endereço: ${professional.address}` : ''}
 ${professional.custom_instructions ? `Instruções especiais: ${professional.custom_instructions}` : ''}
@@ -656,7 +735,7 @@ REGRAS:
 - Ao agendar/remarcar, copie EXATAMENTE starts_at e ends_at do horário escolhido
   (na lista). Nunca construa nem altere a data/hora — use o ISO exato, com ano.
 - Responda em no máximo 3 frases.
-- Para cancelamentos, só cancele consultas futuras.
+- Para cancelamentos, só cancele atendimentos futuros.
 
 RESPONDA SEMPRE com JSON puro e válido, sem markdown:
 {
@@ -905,6 +984,13 @@ todas as instâncias — uma por profissional.
 
 ## Cálculo de slots (lib/availability/slots.ts)
 
+> **Fuso horário (regra do servidor):** todo cálculo de data/hora no servidor
+> (slots, prompt da IA, Assistente, Google) é feito em **America/Sao_Paulo
+> (`-03:00` fixo)**, nunca no fuso do processo — a Vercel roda em UTC e
+> `date-fns` (`setHours`, `startOfDay`, `getDay`) usa o fuso local. O código real
+> está em `lib/availability/compute.ts` (puro, testado com `TZ=UTC`) e nos
+> helpers de `lib/assistant/datetime.ts`; o trecho abaixo é o desenho original.
+
 ```typescript
 import { createServerClient } from '@/lib/supabase';
 import {
@@ -1062,7 +1148,8 @@ export default auth((req) => {
   const isDashboard =
     path.startsWith('/dashboard') ||
     path.startsWith('/agenda') ||
-    path.startsWith('/pacientes') ||
+    path.startsWith('/clientes') ||
+    path.startsWith('/assistente') ||
     path.startsWith('/configuracoes') ||
     path.startsWith('/onboarding');
   const isAuth = path.startsWith('/login') || path.startsWith('/register');
@@ -1132,6 +1219,47 @@ o webhook do WhatsApp já ignora mensagens fora de `['trialing','active']`.
 - Se parse falhar → fallback para `action: reply` com mensagem genérica
 - Histórico limitado a 10 mensagens para controlar custo (~R$2,70/cliente/mês)
 
+**Assistente pessoal (`/assistente`):**
+
+- Chat do PRÓPRIO profissional com a IA (Claude com tool use, modelo `AI_MODEL`);
+  não confundir com a secretária do WhatsApp, que fala com os clientes.
+- O `professional_id` vem sempre da sessão (`auth()`); nenhuma ferramenta aceita
+  `professional_id` na entrada. Toda query filtra por ele (service key ignora RLS).
+- Ferramentas: `list_agenda`, `list_free_slots`, `create_appointment`,
+  `create_personal_event`, `set_day_off`, `prepare_cancel_appointment`,
+  `prepare_reschedule_appointment`, `confirm_pending_action`, `create_reminder`,
+  `list_reminders`, `cancel_reminder`. Entrada validada com zod; loop limitado a
+  8 iterações.
+- Cancelar/remarcar é em **dois passos impostos pelo servidor**: `prepare_*` só
+  grava a ação em `assistant_pending_actions` (uma por profissional, validade de
+  15 min, não altera a agenda) e `confirm_pending_action` só executa a ação
+  preparada numa requisição POSTERIOR (outra mensagem do usuário), uma única vez;
+  se a execução falhar, a ação volta a `pending`. Como o histórico guarda só
+  texto, o chat injeta a ação pendente no prompt dinâmico, e repetir o mesmo
+  `prepare_*` não a substitui. Cancelar/remarcar muda só a agenda: o cliente NÃO
+  é avisado.
+- Compromisso pessoal = `appointments` com `booked_via='manual'` e `patient_phone`
+  vazio (não gera lembrete para cliente; vai para o Google Agenda com o título).
+- Lembrete pessoal vai por WhatsApp para `professionals.phone`, enviado pelo mesmo
+  cron de 1 min (`/api/reminders/dispatch`). Sem plano `trialing`/`active`, sem
+  WhatsApp conectado ou sem telefone válido → `failed` com `error_message`.
+- Plano fora de `trialing`/`active` → `POST /api/assistant/chat` responde 402.
+- Limite de uso por profissional (custo na Anthropic): 30 mensagens em 10 min e
+  200 em 24h (conta `role='user'` em `assistant_messages`); acima disso responde
+  429 com mensagem amigável e `Retry-After` (`lib/assistant/rate-limit.ts`).
+- Datas sempre em America/Sao_Paulo (-03:00); o prompt recebe data/hora atuais.
+- Histórico em `assistant_messages` (últimas 20 mensagens vão para a IA).
+
+**Endpoints do Assistente (todos começam com `auth()`):**
+
+- `POST /api/assistant/chat` — `{ message }` (1–2000 chars) → `{ reply, actions }`;
+  402 se o plano não estiver `trialing`/`active`; 429 acima do limite de uso.
+  `maxDuration = 60`.
+- `GET /api/assistant/messages` — histórico do chat (`assistant_messages`).
+- `GET /api/assistant/reminders` — `{ pending, recent }` (lembretes pessoais).
+- `POST /api/assistant/reminders/[id]/cancel` — cancela um lembrete pendente.
+- Código em `lib/assistant/` (README com o fluxo completo); UI em `/assistente`.
+
 **Plano:**
 
 - `trialing` e `active` → IA habilitada
@@ -1186,14 +1314,14 @@ O checklist detalhado de cada sprint fica em [TASKS.md](TASKS.md).
   via `npx shadcn@latest add <nome>`. Nunca criar do zero `<button>`/`<input>`
   estilizados manualmente quando existir equivalente shadcn. Wrappers por domínio
   (ex.: `components/onboarding/`) podem compor shadcn, mas não duplicá-lo.
-- **Design system IAzen:** ao estilizar componentes shadcn, usar os tokens de cor e
-  tipografia definidos na seção "Identidade visual" deste arquivo. Fundo escuro `#0A0A0F`,
-  acento `#4F6EF7`, display font Space Grotesk, body font Inter.
+- **Design system IAzen:** ao estilizar componentes shadcn, usar os tokens e as regras do
+  [DESIGN.md](DESIGN.md) (Void `#05060A`, Violeta Zen `#8B5CFF`, Sora para títulos, Inter para o corpo).
 - Toda API Route começa com: `const session = await auth()` → retorna 401 se não autenticado
 - Retornos sempre com `NextResponse.json()`
 - `SUPABASE_SERVICE_KEY` apenas em API Routes (server-side)
 - `SUPABASE_ANON_KEY` apenas em componentes client-side
 - Datas: `timestamptz` no banco, ISO 8601 com `-03:00` no código
+- Datas no servidor: nunca `getHours()`/`startOfDay()` locais; usar `lib/assistant/datetime.ts` (America/Sao_Paulo)
 - Telefones: `5511999999999` (sem +, sem traços, sem espaços)
 - `'use client'` apenas quando necessário (hooks, event handlers)
 - Erros: `console.error(...)` + status HTTP adequado

@@ -1,5 +1,5 @@
 // Utilitários de CPF — normalização, validação (checksum) e máscara.
-// Usado nos endpoints de pacientes/agendamentos e nos formulários da UI.
+// Usado nos endpoints de clientes/agendamentos e nos formulários da UI.
 
 /** Remove tudo que não for dígito. */
 export function normalizeCpf(raw: string): string {

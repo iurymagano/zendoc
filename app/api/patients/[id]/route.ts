@@ -19,8 +19,8 @@ const patchSchema = z.object({
 /** Mensagem de conflito conforme o índice violado (cpf x telefone). */
 function uniqueConflictMessage(message?: string): string {
   return message?.includes('cpf')
-    ? 'Já existe um paciente com este CPF.'
-    : 'Já existe um paciente com este telefone.';
+    ? 'Já existe um cliente com este CPF.'
+    : 'Já existe um cliente com este telefone.';
 }
 
 async function getProfessionalId(userId: string) {
@@ -57,15 +57,15 @@ export async function GET(
     .maybeSingle();
 
   if (error) {
-    console.error('Erro ao buscar paciente:', error);
+    console.error('Erro ao buscar cliente:', error);
     return NextResponse.json(
-      { error: 'Erro ao buscar paciente.' },
+      { error: 'Erro ao buscar cliente.' },
       { status: 500 },
     );
   }
 
   if (!data) {
-    return NextResponse.json({ error: 'Paciente não encontrado' }, { status: 404 });
+    return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 });
   }
 
   return NextResponse.json({ patient: data });
@@ -131,15 +131,15 @@ export async function PATCH(
         { status: 409 },
       );
     }
-    console.error('Erro ao atualizar paciente:', error);
+    console.error('Erro ao atualizar cliente:', error);
     return NextResponse.json(
-      { error: 'Erro ao atualizar paciente.' },
+      { error: 'Erro ao atualizar cliente.' },
       { status: 500 },
     );
   }
 
   if (!data) {
-    return NextResponse.json({ error: 'Paciente não encontrado' }, { status: 404 });
+    return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 });
   }
 
   return NextResponse.json({ ok: true, patient: data });
@@ -168,9 +168,9 @@ export async function DELETE(
     .eq('professional_id', professionalId);
 
   if (error) {
-    console.error('Erro ao excluir paciente:', error);
+    console.error('Erro ao excluir cliente:', error);
     return NextResponse.json(
-      { error: 'Erro ao excluir paciente.' },
+      { error: 'Erro ao excluir cliente.' },
       { status: 500 },
     );
   }

@@ -40,7 +40,7 @@ async function main() {
   } else {
     product = await stripe.products.create({
       name: PRODUCT_NAME,
-      description: 'Secretária virtual no WhatsApp — agenda, lembra e gerencia consultas.',
+      description: 'Secretária virtual no WhatsApp — agenda, lembra e gerencia atendimentos.',
     });
     console.log(`✓ Produto criado: ${product.id}`);
   }

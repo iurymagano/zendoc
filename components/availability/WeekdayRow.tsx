@@ -37,8 +37,8 @@ interface BlockEditorProps {
 
 function BlockEditor({ label, state, onChange, disabled }: BlockEditorProps) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 w-40">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <div className="flex w-full items-center gap-2 sm:w-44">
         <Switch
           checked={state.enabled}
           onCheckedChange={(v: boolean) => onChange({ ...state, enabled: v })}
@@ -51,7 +51,7 @@ function BlockEditor({ label, state, onChange, disabled }: BlockEditorProps) {
         value={state.start}
         disabled={disabled || !state.enabled}
         onChange={(e) => onChange({ ...state, start: e.target.value })}
-        className="w-32"
+        className="min-w-0 flex-1 sm:w-40 sm:flex-none"
       />
       <span className="text-sm text-muted-foreground">até</span>
       <Input
@@ -59,7 +59,7 @@ function BlockEditor({ label, state, onChange, disabled }: BlockEditorProps) {
         value={state.end}
         disabled={disabled || !state.enabled}
         onChange={(e) => onChange({ ...state, end: e.target.value })}
-        className="w-32"
+        className="min-w-0 flex-1 sm:w-40 sm:flex-none"
       />
     </div>
   );
@@ -75,7 +75,7 @@ export function WeekdayRow({ day, onChange }: Props) {
   const update = (patch: Partial<DayState>) => onChange({ ...day, ...patch });
 
   return (
-    <div className="rounded-lg border p-4 flex flex-col gap-3">
+    <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 ring-1 ring-border">
       <div className="flex items-center justify-between">
         <Label className="text-base font-medium">{label}</Label>
         <div className="flex items-center gap-2">

@@ -25,11 +25,10 @@ const PLAN_LABEL: Record<PlanStatus, string> = {
 };
 
 const PLAN_STYLE: Record<PlanStatus, string> = {
-  trialing: 'bg-primary/10 text-primary border-primary/20',
-  active:
-    'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-900/50',
-  past_due: 'bg-destructive/10 text-destructive border-destructive/30',
-  cancelled: 'bg-muted text-muted-foreground border-border',
+  trialing: 'bg-accent text-accent-foreground',
+  active: 'bg-[var(--success-soft)] text-[var(--success)]',
+  past_due: 'bg-[var(--destructive-soft)] text-destructive',
+  cancelled: 'bg-muted text-muted-foreground',
 };
 
 function daysUntil(iso: string | null): number | null {
@@ -76,7 +75,6 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        eyebrow={`Plano · ${PLAN_LABEL[professional.plan_status]}`}
         title={`Olá, ${firstNameSkippingTitle(professional.name)}`}
         description={
           professional.specialty
@@ -85,7 +83,7 @@ export default async function DashboardPage() {
         }
         actions={
           <span
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${PLAN_STYLE[professional.plan_status]}`}
+            className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold ${PLAN_STYLE[professional.plan_status]}`}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-current" />
             {PLAN_LABEL[professional.plan_status]}
@@ -100,13 +98,13 @@ export default async function DashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard
-          label="Próximas consultas"
+          label="Próximos atendimentos"
           value={(upcomingCount ?? 0).toString()}
-          hint="agendadas daqui pra frente"
+          hint="agendados daqui para a frente"
           icon={CalendarDays}
         />
         <StatCard
-          label="Pacientes cadastrados"
+          label="Clientes cadastrados"
           value={(patientsCount ?? 0).toString()}
           hint="no seu cadastro central"
           icon={Users}
@@ -120,15 +118,14 @@ export default async function DashboardPage() {
       </section>
 
       {!availabilityConfigured && (
-        <Card className="border-primary/40 bg-primary/5">
+        <Card className="bg-accent ring-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-primary" />
               Configure sua agenda
             </CardTitle>
             <CardDescription>
               Defina os horários em que você atende para que a IA possa agendar
-              consultas automaticamente.
+              atendimentos automaticamente.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -152,11 +149,11 @@ export default async function DashboardPage() {
           icon={CalendarDays}
         />
         <ActionCard
-          eyebrow="Pacientes"
-          title="Cadastro de pacientes"
+          eyebrow="Clientes"
+          title="Cadastro de clientes"
           description="Cadastro central usado nos agendamentos manuais e no fluxo da IA."
-          href="/pacientes"
-          cta="Ver pacientes"
+          href="/clientes"
+          cta="Ver clientes"
           icon={Users}
         />
         <ActionCard
@@ -197,30 +194,19 @@ function StatCard({
   label,
   value,
   hint,
-  icon: Icon,
 }: {
   label: string;
   value: string;
   hint?: string;
-  icon: ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-card p-5 shadow-sm shadow-foreground/[0.03] ring-1 ring-foreground/[0.07] transition-shadow hover:shadow-md">
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          {label}
-        </span>
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon className="size-4" />
-        </span>
-      </div>
-      <span
-        className="font-display text-3xl font-semibold tracking-tight"
-        style={{ letterSpacing: '-0.03em' }}
-      >
+    <div className="flex flex-col gap-1 rounded-2xl bg-card p-5 ring-1 ring-border">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <span className="tabular font-display text-5xl font-bold leading-none tracking-[-0.04em]">
         {value}
       </span>
-      {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+      {hint && <span className="mt-1 text-sm text-muted-foreground">{hint}</span>}
     </div>
   );
 }
@@ -228,7 +214,6 @@ function StatCard({
 function ActionCard({
   eyebrow,
   eyebrowTone = 'default',
-  icon: Icon,
   title,
   description,
   href,
@@ -237,7 +222,7 @@ function ActionCard({
 }: {
   eyebrow: string;
   eyebrowTone?: 'default' | 'success' | 'warning';
-  icon: ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string }>;
   title: string;
   description: string;
   href: string;
@@ -246,32 +231,25 @@ function ActionCard({
 }) {
   const toneClass =
     eyebrowTone === 'success'
-      ? 'text-emerald-600 dark:text-emerald-300'
+      ? 'bg-[var(--success-soft)] text-[var(--success)]'
       : eyebrowTone === 'warning'
-        ? 'text-amber-600 dark:text-amber-300'
-        : 'text-primary';
-  const chipClass =
-    eyebrowTone === 'success'
-      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
-      : eyebrowTone === 'warning'
-        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300'
-        : 'bg-primary/10 text-primary';
+        ? 'bg-[var(--warning-soft)] text-[var(--warning)]'
+        : 'text-[var(--ia-violet-ink)]';
 
   return (
-    <Card className="group transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/20">
+    <Card>
       <CardHeader>
         <span
-          className={`mb-1 flex size-9 items-center justify-center rounded-lg ${chipClass}`}
-        >
-          <Icon className="size-[18px]" />
-        </span>
-        <span
-          className={`font-mono text-[11px] uppercase tracking-[0.18em] ${toneClass}`}
+          className={`w-fit text-sm font-semibold ${
+            eyebrowTone === 'default' ? toneClass : `rounded-full px-2.5 py-0.5 ${toneClass}`
+          }`}
         >
           {eyebrow}
         </span>
-        <CardTitle className="text-lg">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle className="mt-1 font-display text-xl font-bold tracking-[-0.03em]">
+          {title}
+        </CardTitle>
+        <CardDescription className="text-base">{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
         <Link href={href} className={buttonVariants({ variant: 'outline' })}>

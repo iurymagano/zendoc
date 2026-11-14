@@ -9,7 +9,7 @@ profissional tem uma instância criada **via API** no primeiro "Conectar", com
 
 - [connect/](./connect/) — `POST` cria a instância (se não existir) e devolve o
   QR; se já existe, só busca o QR atual.
-- [status/](./status/) — `GET` consulta estado de conexão, sincroniza
+- [status/](./status/) — `GET` consulta o estado de conexão, sincroniza
   `whatsapp_connected` e, quando desconectado, devolve o QR junto.
 - [disconnect/](./disconnect/) — `POST` desloga + remove a instância na
   Evolution e zera as colunas (`zapi_instance_id`/`zapi_token`). Também serve

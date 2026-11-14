@@ -1,16 +1,16 @@
-# app/(dashboard)/pacientes/
+# app/(dashboard)/clientes/
 
-Tela de cadastro e gestão manual de pacientes.
+Tela de cadastro e gestão manual de clientes.
 
 ## page.tsx
 
 **O que faz:** client component com busca, listagem e formulário inline para
-criar/editar pacientes.
+criar/editar clientes.
 
 **Fluxo:**
 
 1. Ao montar, faz `GET /api/patients` e preenche a lista.
-2. Botão "Novo paciente" abre o formulário inline zerado (`POST`).
+2. Botão "Novo cliente" abre o formulário inline zerado (`POST`).
 3. Botão "Editar" em cada linha abre o mesmo formulário pré-preenchido
    (`PATCH /api/patients/:id`).
 4. Botão "Excluir" pede confirmação via `window.confirm` e chama
@@ -42,9 +42,9 @@ criar/editar pacientes.
 - A exclusão é hard delete. A FK `appointments.patient_id ON DELETE SET NULL`
   mantém o histórico de atendimentos — o appointment ainda guarda
   `patient_name`/`patient_phone` desnormalizados.
-- Cada linha tem botão "Histórico" que navega para `/pacientes/[id]` com a
-  visão de próximas consultas + histórico completo.
+- Cada linha tem botão "Histórico" que navega para `/clientes/[id]` com a
+  visão de próximos atendimentos + histórico completo.
 
 ## Subpastas
 
-- [\[id\]/](./[id]/) — página de detalhe + histórico do paciente.
+- [\[id\]/](./[id]/) — página de detalhe + histórico do cliente.

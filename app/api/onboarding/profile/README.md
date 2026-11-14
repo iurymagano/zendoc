@@ -17,4 +17,5 @@ custom_instructions). Define `plan_status = 'trialing'` e
 
 - Chave única: `professionals.user_id`. Chamadas subsequentes atualizam em vez
   de duplicar.
+- `specialty` (área de atuação) aceita texto livre: `trim`, 1 a 60 caracteres — ele entra no prompt da IA.
 - Phone já vem normalizado (`55DDDNNNNNNNNN`) do passo 1.

@@ -40,17 +40,11 @@ function LoginForm() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          Bem-vindo de volta
-        </span>
-        <h1
-          className="mt-2 font-display text-3xl font-semibold tracking-tight"
-          style={{ letterSpacing: '-0.03em' }}
-        >
+        <h1 className="text-3xl font-bold tracking-[-0.035em]">
           Entrar no IAzen
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Acesse sua secretária virtual.
+        <p className="mt-2 text-base text-muted-foreground">
+          Sua secretária virtual está esperando.
         </p>
       </div>
 
@@ -63,7 +57,7 @@ function LoginForm() {
         Continuar com Google
       </Button>
 
-      <div className="flex items-center gap-3 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="flex items-center gap-3 text-sm text-muted-foreground">
         <Separator className="flex-1" />
         ou
         <Separator className="flex-1" />
@@ -92,15 +86,15 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </FormField>
-        {error && <span className="text-sm text-destructive">{error}</span>}
+        {error && <span role="alert" className="text-sm font-medium text-destructive">{error}</span>}
         <Button type="submit" size="lg" disabled={loading}>
           {loading ? 'Entrando…' : 'Entrar'}
         </Button>
       </form>
 
-      <p className="text-sm text-muted-foreground text-center">
+      <p className="text-center text-base text-muted-foreground">
         Não tem conta?{' '}
-        <Link href="/register" className="text-foreground font-medium underline">
+        <Link href="/register" className="font-semibold text-[var(--ia-violet-ink)] underline underline-offset-4">
           Criar conta grátis
         </Link>
       </p>

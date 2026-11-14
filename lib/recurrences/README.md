@@ -1,6 +1,6 @@
 # lib/recurrences/
 
-Consultas recorrentes. A recorrência guarda a **regra**; os appointments são
+Atendimentos recorrentes. A recorrência guarda a **regra**; os appointments são
 **materializados** (linhas reais), então reaproveitam lembretes, checagem de
 conflito e o sync do Google sem tratamento especial.
 

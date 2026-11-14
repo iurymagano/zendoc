@@ -155,16 +155,16 @@ export default async function PatientDetailPage({
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <PageHeader
-        eyebrow="Paciente"
+        eyebrow="Cliente"
         title={patient.name}
         description={`${formatPhoneBR(patient.phone)} · cadastrado em ${registered}`}
         actions={
           <>
             <Link
-              href="/pacientes"
+              href="/clientes"
               className={buttonVariants({ variant: 'ghost' })}
             >
-              ← Pacientes
+              ← Clientes
             </Link>
             <Link
               href="/agenda"
@@ -175,7 +175,7 @@ export default async function PatientDetailPage({
             <a
               href={`/api/patients/${patient.id}/export`}
               className={buttonVariants({ variant: 'ghost' })}
-              title="Exportar todos os dados deste paciente (LGPD)"
+              title="Exportar todos os dados deste cliente (LGPD)"
             >
               Exportar dados
             </a>
@@ -199,11 +199,11 @@ export default async function PatientDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Próximas consultas</CardTitle>
+            <CardTitle>Próximos atendimentos</CardTitle>
             <CardDescription>
               {upcoming.length === 0
-                ? 'Sem consultas marcadas.'
-                : `${upcoming.length} consulta${upcoming.length === 1 ? '' : 's'} futura${upcoming.length === 1 ? '' : 's'}.`}
+                ? 'Sem atendimentos marcados.'
+                : `${upcoming.length} atendimento${upcoming.length === 1 ? '' : 's'} futuro${upcoming.length === 1 ? '' : 's'}.`}
             </CardDescription>
           </CardHeader>
           {upcoming.length > 0 && (
@@ -222,8 +222,8 @@ export default async function PatientDetailPage({
             <CardTitle>Histórico</CardTitle>
             <CardDescription>
               {past.length === 0
-                ? 'Nenhuma consulta anterior registrada.'
-                : `${past.length} consulta${past.length === 1 ? '' : 's'} no histórico (mais recentes primeiro).`}
+                ? 'Nenhum atendimento anterior registrado.'
+                : `${past.length} atendimento${past.length === 1 ? '' : 's'} no histórico (mais recentes primeiro).`}
             </CardDescription>
           </CardHeader>
           {past.length > 0 && (

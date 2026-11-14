@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Card,
@@ -30,20 +30,20 @@ type Conversation = {
 };
 
 const ACTION_LABEL: Record<AIAction, string> = {
-  book: '✅ agendou',
-  confirm: '👍 confirmou presença',
-  cancel: '🗑️ cancelou',
-  reschedule: '🔄 remarcou',
-  offer_slots: '📅 ofereceu horários',
-  reply: '💬 respondeu',
-  approval_needed: '⏳ aguardando aprovação',
-  handoff: '🙋 precisa de você',
+  book: 'agendou',
+  confirm: 'confirmou presença',
+  cancel: 'cancelou',
+  reschedule: 'remarcou',
+  offer_slots: 'ofereceu horários',
+  reply: 'respondeu',
+  approval_needed: 'aguardando aprovação',
+  handoff: 'precisa de você',
 };
 
 const SUGGESTIONS = [
-  'Oi, queria marcar uma consulta',
+  'Oi, queria marcar um horário',
   'Quais horários você tem essa semana?',
-  'Preciso remarcar minha consulta',
+  'Preciso remarcar meu horário',
 ];
 
 const STORAGE_KEY = 'iazen:testchat:phone';
@@ -247,7 +247,7 @@ export default function TestarIaPage() {
       <PageHeader
         eyebrow="Configurações"
         title="Testar IA"
-        description="Simule conversas de paciente sem WhatsApp. Cada conversa fica salva — você pode ter várias e voltar nelas depois."
+        description="Simule conversas de cliente sem WhatsApp. Cada conversa fica salva — você pode ter várias e voltar nelas depois."
         actions={
           <Button onClick={newConversation} disabled={sending}>
             Nova conversa
@@ -312,7 +312,7 @@ export default function TestarIaPage() {
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="m-auto max-w-sm text-center text-sm text-muted-foreground">
-                    Mande uma mensagem como se fosse o paciente.
+                    Mande uma mensagem como se fosse o cliente.
                   </div>
                 ) : (
                   messages.map((m, i) => (
@@ -336,7 +336,7 @@ export default function TestarIaPage() {
                         {m.content}
                       </div>
                       {m.role === 'assistant' && m.action && !m.error && (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-primary ring-1 ring-primary/20">
+                        <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-[var(--ia-violet-ink)]">
                           {ACTION_LABEL[m.action]}
                         </span>
                       )}
@@ -373,7 +373,7 @@ export default function TestarIaPage() {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Escreva como o paciente…"
+                  placeholder="Escreva como o cliente…"
                   disabled={sending || !selectedPhone}
                   autoComplete="off"
                 />
@@ -396,17 +396,17 @@ export default function TestarIaPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-amber-500/40">
-        <CardContent className="py-4 text-sm text-muted-foreground">
-          ⚠️ As ações são <strong>reais</strong>: se a IA marcar ou cancelar, isso
+      <Card className="bg-[var(--warning-soft)] ring-0">
+        <CardContent className="py-4 text-sm text-foreground/80">
+          As ações são <strong>reais</strong>: se a IA marcar ou cancelar, isso
           acontece no banco e aparece na{' '}
           <Link
             href="/agenda"
-            className={buttonVariants({ variant: 'link', size: 'sm' }) + ' px-0'}
+            className="font-medium text-[var(--ia-violet-ink)] underline underline-offset-4"
           >
             agenda
           </Link>
-          . Use telefones fake (prefixo 5500) para não misturar com pacientes
+          . Use telefones fake (prefixo 5500) para não misturar com clientes
           reais.
         </CardContent>
       </Card>

@@ -176,6 +176,54 @@ export interface ConversationMessage {
   created_at: string;
 }
 
+export type PersonalReminderStatus = 'pending' | 'sent' | 'failed' | 'cancelled';
+
+/** Lembrete pessoal do profissional, criado pelo Assistente e enviado pelo cron. */
+export interface PersonalReminder {
+  id: string;
+  professional_id: string;
+  text: string;
+  remind_at: string;
+  status: PersonalReminderStatus;
+  sent_at: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
+/** Mensagem do chat do Assistente pessoal (tabela assistant_messages). */
+export interface AssistantMessage {
+  id: string;
+  professional_id: string;
+  role: ConversationRole;
+  content: string;
+  /** Resumo das ações executadas naquele turno (só em mensagens do assistente). */
+  actions: string[] | null;
+  created_at: string;
+}
+
+export type AssistantPendingKind = 'cancel' | 'reschedule';
+export type AssistantPendingStatus = 'pending' | 'done' | 'replaced';
+
+/**
+ * Ação de cancelar/remarcar "preparada" pelo Assistente e ainda não confirmada
+ * (tabela assistant_pending_actions). Só é executada numa requisição POSTERIOR
+ * à que a preparou.
+ */
+export interface AssistantPendingAction {
+  id: string;
+  professional_id: string;
+  kind: AssistantPendingKind;
+  appointment_id: string;
+  new_starts_at: string | null;
+  new_ends_at: string | null;
+  reason: string | null;
+  summary: string;
+  request_id: string;
+  status: AssistantPendingStatus;
+  created_at: string;
+  expires_at: string;
+}
+
 export interface AIResponse {
   action: AIAction;
   message_to_patient: string;

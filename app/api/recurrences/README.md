@@ -1,6 +1,6 @@
 # app/api/recurrences/
 
-Séries de consultas recorrentes (semanal/quinzenal). A regra fica em
+Séries de atendimentos recorrentes (semanal/quinzenal). A regra fica em
 `recurrences`; os appointments são materializados — lógica em
 [lib/recurrences/](../../../lib/recurrences/).
 
@@ -27,7 +27,7 @@ Séries de consultas recorrentes (semanal/quinzenal). A regra fica em
   (ISO sempre `-03:00` → slice exato); início e fim devem ser no mesmo dia.
 - `patient_phone` é normalizado no servidor (`normalizePhoneBR`, `55` + DDD +
   número), igual ao booking.
-- Reaproveita/cria o paciente por telefone (igual ao booking).
+- Reaproveita/cria o cliente por telefone (igual ao booking).
 
 **Retorno:** `{ ok, recurrence, created, skipped }`. 401/404/400 nos casos usuais.
 

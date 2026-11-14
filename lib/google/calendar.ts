@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { createServerClient } from '@/lib/supabase';
 import { getAccessToken } from '@/lib/google/auth';
+import { calendarValueToIso } from '@/lib/assistant/datetime';
 import type { Appointment, Professional } from '@/types/database';
 
 const CAL_BASE = 'https://www.googleapis.com/calendar/v3';
@@ -41,14 +42,19 @@ function calId(professional: Professional): string {
 function eventBody(appointment: Appointment) {
   const sourceLabel =
     appointment.booked_via === 'whatsapp_ai' ? 'IA no WhatsApp' : 'manual';
+  // Compromisso pessoal (criado no Assistente) não tem cliente: o título fica em
+  // patient_name e o telefone é vazio.
+  const isPersonal = !appointment.patient_phone;
   const lines = [
     `Agendado via IAzen (${sourceLabel}).`,
-    `Paciente: ${appointment.patient_name}`,
-    `Telefone: ${appointment.patient_phone}`,
+    isPersonal ? null : `Cliente: ${appointment.patient_name}`,
+    isPersonal ? null : `Telefone: ${appointment.patient_phone}`,
     appointment.notes ? `Notas: ${appointment.notes}` : null,
   ].filter(Boolean);
   return {
-    summary: `${appointment.patient_name} — consulta`,
+    summary: isPersonal
+      ? appointment.patient_name
+      : `${appointment.patient_name} — atendimento`,
     description: lines.join('\n'),
     start: { dateTime: appointment.starts_at, timeZone: TZ },
     end: { dateTime: appointment.ends_at, timeZone: TZ },
@@ -216,8 +222,8 @@ export async function syncBusyEvents(
           professional_id: professional.id,
           google_event_id: ev.id,
           summary: ev.summary ?? null,
-          starts_at: new Date(startsAt).toISOString(),
-          ends_at: new Date(endsAt).toISOString(),
+          starts_at: calendarValueToIso(startsAt),
+          ends_at: calendarValueToIso(endsAt),
           all_day: allDay,
           updated_at: new Date().toISOString(),
         },

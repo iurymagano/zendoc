@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   const endTime = d.ends_at.slice(11, 19);
   if (d.ends_at.slice(0, 10) !== startDate) {
     return NextResponse.json(
-      { error: 'A consulta recorrente deve começar e terminar no mesmo dia.' },
+      { error: 'O atendimento recorrente deve começar e terminar no mesmo dia.' },
       { status: 400 },
     );
   }
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServerClient();
 
-  // Reaproveita/cria o paciente por telefone (mesmo comportamento do booking).
+  // Reaproveita/cria o cliente por telefone (mesmo comportamento do booking).
   const { data: patient } = await supabase
     .from('patients')
     .upsert(

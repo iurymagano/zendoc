@@ -6,7 +6,7 @@ Caixa de conversas do WhatsApp + handoff (pausar a IA por contato). Lê de
 ## route.ts
 
 - **`GET /api/conversations`** — lista as conversas do profissional (uma por
-  telefone) com última mensagem, nome do paciente (se cadastrado) e `ai_paused`.
+  telefone) com última mensagem, nome do cliente (se cadastrado) e `ai_paused`.
   Reduz as ~400 mensagens mais recentes a uma entrada por telefone.
 
 - **`GET /api/conversations/attention-count`** — `{ count }` de conversas que

@@ -143,7 +143,7 @@ export default function PatientsPage() {
     setSaving(false);
 
     if (!res.ok) {
-      setError(body.error ?? 'Erro ao salvar paciente.');
+      setError(body.error ?? 'Erro ao salvar cliente.');
       return;
     }
 
@@ -164,11 +164,11 @@ export default function PatientsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Pacientes"
+        eyebrow="Clientes"
         title="Seu cadastro"
         description="Base central usada em agendamentos manuais e no fluxo da IA pelo WhatsApp."
         actions={
-          !formOpen ? <Button onClick={openCreate}>Novo paciente</Button> : null
+          !formOpen ? <Button onClick={openCreate}>Novo cliente</Button> : null
         }
       />
 
@@ -176,7 +176,7 @@ export default function PatientsPage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                {editingId ? 'Editar paciente' : 'Novo paciente'}
+                {editingId ? 'Editar cliente' : 'Novo cliente'}
               </CardTitle>
               <CardDescription>
                 Telefone no formato internacional (ex.: 5511999998888) ou
@@ -239,7 +239,7 @@ export default function PatientsPage() {
                       Não enviar mensagens ativas
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      LGPD — o paciente optou por não receber lembretes pelo
+                      LGPD — o cliente optou por não receber lembretes pelo
                       WhatsApp. Conversas iniciadas por ele continuam funcionando.
                     </p>
                   </div>
@@ -269,7 +269,7 @@ export default function PatientsPage() {
                       ? 'Salvando…'
                       : editingId
                         ? 'Salvar alterações'
-                        : 'Adicionar paciente'}
+                        : 'Adicionar cliente'}
                   </Button>
                 </div>
               </form>
@@ -279,10 +279,10 @@ export default function PatientsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Lista de pacientes</CardTitle>
+            <CardTitle>Lista de clientes</CardTitle>
             <CardDescription>
               {loaded
-                ? `${patients.length} paciente${patients.length === 1 ? '' : 's'} cadastrado${patients.length === 1 ? '' : 's'}.`
+                ? `${patients.length} cliente${patients.length === 1 ? '' : 's'} cadastrado${patients.length === 1 ? '' : 's'}.`
                 : 'Carregando…'}
             </CardDescription>
           </CardHeader>
@@ -308,14 +308,14 @@ export default function PatientsPage() {
             ) : patients.length === 0 ? (
               <EmptyState
                 icon={Users}
-                title="Nenhum paciente cadastrado"
-                description="Cadastre seus pacientes aqui — eles também são criados automaticamente quando a IA agenda pelo WhatsApp."
+                title="Nenhum cliente cadastrado"
+                description="Cadastre seus clientes aqui — eles também são criados automaticamente quando a IA agenda pelo WhatsApp."
               >
-                <Button onClick={openCreate}>Novo paciente</Button>
+                <Button onClick={openCreate}>Novo cliente</Button>
               </EmptyState>
             ) : filtered.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
-                Nenhum paciente encontrado para essa busca.
+                Nenhum cliente encontrado para essa busca.
               </div>
             ) : (
               <ul className="flex flex-col divide-y">
@@ -341,7 +341,7 @@ export default function PatientsPage() {
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Link
-                        href={`/pacientes/${p.id}`}
+                        href={`/clientes/${p.id}`}
                         className={buttonVariants({
                           variant: 'outline',
                           size: 'sm',

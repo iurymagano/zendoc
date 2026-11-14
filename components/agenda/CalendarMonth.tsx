@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { Lock, Repeat } from 'lucide-react';
 import {
   addDays,
   endOfMonth,
@@ -52,7 +53,7 @@ export function CalendarMonth({
         {WEEKDAYS.map((w) => (
           <div
             key={w}
-            className="px-2 py-2 text-center text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground"
+            className="px-2 py-2 text-center text-xs font-semibold capitalize text-muted-foreground"
           >
             {w}
           </div>
@@ -90,7 +91,8 @@ export function CalendarMonth({
                     className="truncate rounded px-1 py-0.5 text-[11px] bg-muted text-muted-foreground ring-1 ring-border"
                     title={b.summary ?? 'Compromisso (Google)'}
                   >
-                    🔒 {b.summary ?? 'Ocupado'}
+                    <Lock className="mr-0.5 inline size-2.5 align-[-1px]" aria-hidden />
+                    {b.summary ?? 'Ocupado'}
                   </span>
                 ))}
                 {items.slice(0, 3).map((a) => (
@@ -111,7 +113,9 @@ export function CalendarMonth({
                     className={`block truncate rounded px-1 py-0.5 text-[11px] font-medium ${STATUS_BLOCK[a.status]}`}
                     title={`${formatTime(a.starts_at)} ${a.patient_name}`}
                   >
-                    {a.recurrence_id ? '🔁 ' : ''}
+                    {a.recurrence_id && (
+                      <Repeat className="mr-0.5 inline size-2.5 align-[-1px]" aria-label="Série" />
+                    )}
                     {formatTime(a.starts_at)} {a.patient_name}
                   </span>
                 ))}

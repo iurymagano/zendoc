@@ -168,6 +168,21 @@ Legenda:
 - [ ] Renomear o diretório do repositório `zendoc/` → `iazen/` (decisão à
   parte — envolve atualizar paths locais e git remote)
 
+### Redesign da marca (identidade v1)
+
+- [x] Referências pesquisadas e [DESIGN.md](DESIGN.md) com paleta, tipos, componentes e regras por tela
+- [x] Logo em SVG (`Logo`, `LogoMark`, `public/logo*.svg`, `app/icon.svg`)
+- [x] Tokens, fontes (Sora, Inter, JetBrains Mono) e componentes `ui/*` base
+- [x] Landing nova ("Você atende. Ela agenda.")
+- [x] Landing e auth com texto aberto a qualquer profissional ("clientes", "atendimentos") e seção do Assistente pessoal
+- [x] Login e cadastro com o lado de marca
+- [x] `CLAUDE.md` e READMEs atualizados
+- [x] `app/apple-icon` (ícone iOS)
+- [x] Fase 2: dashboard (Sidebar, PageHeader, cards de métrica, tabelas, agenda, estados vazios)
+- [x] Fase 2: onboarding (tirar o halo radial) e `app/privacidade`
+- [x] Fase 2: `/assistente` com a cara da marca (painel Void, faísca como "pensando")
+- [ ] Trocar as conversas de exemplo da landing por conversas reais autorizadas
+
 ### Identidade visual
 
 - [x] Fontes Space Grotesk (display) + Inter (body) via `next/font/google`
@@ -204,6 +219,140 @@ Legenda:
 - [x] Dashboard com `StatCard` (próximas consultas, pacientes, blocos ativos)
   e grid 2×2 de `ActionCard`
 - [x] Badges de status (agendamentos, plano, WhatsApp) com `ring-1`
+
+---
+
+## Sprint 3.6 — Público amplo + Assistente pessoal (em andamento)
+
+> Pedido do Iury (14/11/2026): abrir o IAzen para qualquer pessoa que atende
+> com hora marcada (não só saúde) e ter um chat com a própria IA para cuidar da
+> agenda e dos lembretes de quem usa. Tabelas e colunas **não** foram
+> renomeadas (`patients`, `appointments`...): só o texto visível mudou.
+
+### Público amplo (cliente / atendimento)
+
+- [x] Texto visível em linguagem genérica: "cliente(s)" e "atendimento" no lugar
+  de "paciente" e "consulta"; nunca "consultório" (dashboard, agenda, conversas,
+  configurações, documentos, mensagens de erro das APIs, READMEs)
+- [x] Página `/pacientes` virou `/clientes` (pasta
+  `app/(dashboard)/clientes/`); `next.config.ts` redireciona `/pacientes` e
+  `/pacientes/:id` → `/clientes` (rota de API `/api/patients` mantida)
+- [x] Prompt da secretária do WhatsApp genérico, adaptado à `specialty` do
+  profissional (`lib/ai/prompt-builder.ts` + 4 testes)
+- [x] Onboarding: lista ampla de áreas de atuação (21 opções) + "Outra" com
+  campo livre (até 60 caracteres); `POST /api/onboarding/profile` aceita texto
+  livre em `specialty`
+- [x] Declaração de comparecimento e política de privacidade sem vocabulário de
+  saúde; privacidade passa a citar o Assistente pessoal e os lembretes pessoais
+- [x] Eventos do Google Agenda de compromissos pessoais (sem cliente) usam o
+  título em vez de "paciente — consulta"
+- [ ] Landing: `components/landing/ReminderTimeline.tsx` e `HeroChat.tsx` ainda
+  têm texto de saúde (área da designer — alinhar com ela)
+- [ ] Renomear `patients`/`patient_*` no banco e nas rotas `/api/patients`
+  (decisão adiada: só vale a pena se o custo de manter o nome antigo atrapalhar)
+
+### Assistente pessoal (chat com a IA da própria agenda)
+
+- [x] Migration `supabase/migrations/0008_assistente_pessoal.sql` (tabelas
+  `personal_reminders` e `assistant_messages`, índices, RLS) — **aplicada no
+  Supabase de produção** e espelhada em `supabase/schema.sql`
+- [x] Tipos `PersonalReminder`, `AssistantMessage` em `types/database.ts`
+- [x] `lib/assistant/` — loop de tool use (Claude, limite de 8 iterações), 10
+  ferramentas com validação de entrada (zod), executor sempre filtrando pelo
+  `professional_id` da sessão, prompt em dois blocos (estável cacheado + data/hora
+  atual em America/Sao_Paulo) e 5 suítes de teste
+  - [x] Agenda: listar, ver horários livres, criar atendimento, criar compromisso
+    pessoal, cancelar e remarcar (com `confirmed`), marcar dia de folga
+  - [x] Lembretes: criar, listar e cancelar
+  - [x] Cancelar/remarcar só com confirmação explícita no chat; o cliente **não**
+    é avisado automaticamente (a resposta lembra disso)
+  - [x] Compromisso pessoal = `appointments` manual com `patient_phone` vazio
+    (sem lembrete para cliente; aparece na agenda e no Google Agenda)
+- [x] `POST /api/assistant/chat` (auth + bloqueio 402 fora de
+  `trialing`/`active`), `GET /api/assistant/messages`,
+  `GET /api/assistant/reminders`, `POST /api/assistant/reminders/[id]/cancel`
+- [x] Página `/assistente` (chat em shadcn + lembretes próximos com cancelar +
+  recentes), item "Assistente" na Sidebar, rota protegida em `proxy.ts`
+- [x] Cron de lembretes (`/api/reminders/dispatch`) também envia os lembretes
+  pessoais vencidos, por WhatsApp, para o telefone do próprio profissional; sem
+  plano ativo / WhatsApp / telefone válido o lembrete vira `failed` com o motivo
+- [x] Teste real do chat com conta de QA (criar atendimento, consultar agenda,
+  lembrete a ~2 min, cancelar com confirmação)
+- [ ] Testar o **envio real** do lembrete pessoal por WhatsApp (a conta de QA
+  não tem instância conectada; só o caminho "falhou com motivo" foi exercitado)
+- [ ] Conferir a página `/assistente` com print (layout desktop e celular)
+- [ ] Testar o bloqueio 402 do chat com plano `past_due`/`cancelled`
+- [x] Endurecer a confirmação de cancelar/remarcar: hoje é só prompt + flag
+  `confirmed` na ferramenta (guarda "macia"); considerar um token de
+  confirmação emitido pelo servidor
+  - [x] Feito: `prepare_cancel_appointment`/`prepare_reschedule_appointment`
+    gravam a ação em `assistant_pending_actions` (migration `0009`, **aplicada
+    em produção**, aditiva) e `confirm_pending_action` só a executa numa
+    requisição **posterior** (outra mensagem do usuário), em até 15 min, uma vez
+    (reserva `pending → done` antes de executar) e revalidando conflito/horário;
+    não existe mais ferramenta que cancele/remarque direto (`lib/assistant/pending.ts`
+    + `pending.test.ts`; smoke com a conta de QA: confirmar na mesma requisição é
+    recusado)
+  - [ ] Cobrir `prepare`/`confirm` do executor com teste automatizado (hoje só
+    as regras puras de `pending.ts` têm teste; o fluxo com banco foi smoke manual)
+  - [x] Achado do qa (PR #2, alta): ao responder "Sim, confirmo" a IA preparava
+    de novo e a ação nunca executava (6 de 6 tentativas). Corrigido por dois
+    lados: o chat injeta a ação pendente no prompt dinâmico (a IA vai direto ao
+    `confirm_pending_action`) **e** repetir o mesmo `prepare_*` não substitui a
+    ação pendente (mantém o `request_id`, `decidePendingSave`). Reproduzido com a
+    conta de QA e o modelo real: cancelar e remarcar terminam em `done` no banco
+    e o atendimento muda
+  - [x] Se a execução falha (conflito, horário que passou, erro/exceção), a ação
+    volta a `pending` em vez de ficar `done` sem ter sido feita
+  - [x] `ilike` do nome de cliente escapa `%`, `_` e `\` (`lib/assistant/ilike.ts`
+    + teste)
+- [x] Limite de uso do chat: 30 mensagens/10 min e 200/dia por profissional
+  (`POST /api/assistant/chat` → 429 com mensagem amigável e `Retry-After`;
+  `lib/assistant/rate-limit.ts` + teste; a tela já mostra o `error` retornado)
+  - [ ] Hoje conta só turnos concluídos (a linha do usuário é gravada no fim) e
+    requisições paralelas passam juntas; se virar problema, gravar a linha antes
+    de chamar o modelo ou usar contador atômico
+- [x] Declaração de comparecimento (`/documentos/declaracao/[id]`) só é emitida
+  se o atendimento já começou e não está cancelado/falta; futuro mostra "A
+  declaração fica disponível depois do atendimento"
+  (`lib/appointments/declaration.ts` + teste)
+  - [ ] Esconder o botão "Declaração" na `/agenda` para atendimento futuro (hoje
+    só some para cancelado; a página já bloqueia, mas o botão leva a um aviso)
+- [x] `supabase/migrations/README.md` com uma linha por migration (0001–0009)
+- [ ] `app/api/patients/route.ts` monta o filtro `.or()` da busca com o texto
+  cru: `%`, `_`, `,` e `)` do usuário alteram/quebram o filtro (só afeta a busca
+  do próprio profissional); escapar
+- [ ] Avisar o cliente (opcional, pedindo OK) quando o atendimento dele for
+  cancelado ou remarcado pelo Assistente
+  - Nota: **nenhum** fluxo do app avisa o cliente por WhatsApp quando o
+    profissional cancela/remarca (nem `POST /api/appointments/:id/cancel`, nem o
+    `PATCH`, nem o Assistente) — não há código para reaproveitar; o Assistente
+    devolve `client_notified: false` e o prompt manda avisar o profissional disso
+  - [ ] Ao remarcar, o lembrete 24h/2h que **já foi enviado** para o horário
+    antigo não é reenviado para o novo (só os `pending` são recalculados)
+- [x] Editar um compromisso pessoal pela agenda: o formulário valida telefone e
+  falharia (cancelar funciona)
+  - Feito: `PATCH /api/appointments/[id]` aceita telefone vazio em compromisso
+    pessoal (`lib/appointments/personal.ts`), a página da agenda esconde
+    telefone/CPF nesse caso e o cron nunca envia para telefone vazio
+- [ ] Resumo diário/semanal da agenda enviado pelo Assistente por WhatsApp
+- [ ] Recebimento de pedidos pelo WhatsApp do próprio profissional (hoje o chat
+  é só na página `/assistente`)
+
+### Bugs encontrados no caminho (fora do escopo, a corrigir)
+
+- [x] `lib/availability/slots.ts` usa o fuso do servidor: em produção (UTC) a
+  comparação de conflito/horário ocupado desloca 3 h — padronizar em
+  America/Sao_Paulo (-03:00)
+  - Feito: cálculo puro em `lib/availability/compute.ts` (testes com `TZ=UTC`,
+    Tóquio e Los Angeles); `prompt-builder`, `processor`, `listFreeSlots` do
+    Assistente e eventos de dia inteiro do Google também no relógio de São Paulo
+- [x] `PATCH /api/appointments/[id]` não reagenda os lembretes pendentes quando
+  `starts_at` muda (já existe o helper `rescheduleAppointmentReminders` em
+  `lib/appointments/reminders.ts`, usado pelo Assistente)
+- [x] `GET /api/professionals` devolve `ai_enabled` (achado do designer)
+  - [ ] Nenhuma tela consome `ai_enabled` ainda (Sidebar/serviços): decidir onde
+    mostrar o indicador "secretária pausada"
 
 ---
 
@@ -464,7 +613,7 @@ Legenda:
     `POST /api/appointments`): 11 dígitos + checksum opcional
     (em [lib/patients/cpf.ts](lib/patients/cpf.ts))
   - [x] Input com máscara `000.000.000-00` em
-    [/pacientes](app/(dashboard)/pacientes/page.tsx) e no form de
+    [/pacientes](app/(dashboard)/clientes/page.tsx) e no form de
     [/agenda](app/(dashboard)/agenda/page.tsx)
   - [x] Exibir CPF na lista de pacientes e no autocomplete
   - [x] Atualizar o schema completo em [CLAUDE.md](CLAUDE.md)

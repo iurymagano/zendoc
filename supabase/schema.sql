@@ -215,3 +215,72 @@ create policy "reminders: own data"
   on reminders for all using (professional_id = my_professional_id());
 create policy "conversation_history: own data"
   on conversation_history for all using (professional_id = my_professional_id());
+
+-- ──────────────────────────────────────────────
+-- ASSISTENTE PESSOAL (migration 0008)
+-- ──────────────────────────────────────────────
+create table personal_reminders (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  text              text not null check (char_length(text) between 1 and 500),
+  remind_at         timestamptz not null,
+  status            text not null default 'pending' check (
+                      status in ('pending','sent','failed','cancelled')
+                    ),
+  sent_at           timestamptz,
+  error_message     text,
+  created_at        timestamptz not null default now()
+);
+create index personal_reminders_due_idx
+  on personal_reminders(remind_at)
+  where status = 'pending';
+create index personal_reminders_professional_idx
+  on personal_reminders(professional_id, remind_at);
+
+create table assistant_messages (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  role              text not null check (role in ('user','assistant')),
+  content           text not null,
+  actions           jsonb,
+  created_at        timestamptz not null default now()
+);
+create index assistant_messages_lookup_idx
+  on assistant_messages(professional_id, created_at desc);
+
+-- Ação de cancelar/remarcar preparada pelo Assistente, aguardando o "sim" do
+-- usuário numa mensagem POSTERIOR (confirmação em duas etapas, imposta pelo servidor).
+create table assistant_pending_actions (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  kind              text not null check (kind in ('cancel','reschedule')),
+  appointment_id    uuid references appointments on delete cascade not null,
+  new_starts_at     timestamptz,
+  new_ends_at       timestamptz,
+  reason            text,
+  summary           text not null,
+  request_id        text not null,
+  status            text not null default 'pending' check (
+                      status in ('pending','done','replaced')
+                    ),
+  created_at        timestamptz not null default now(),
+  expires_at        timestamptz not null,
+  constraint reschedule_needs_times check (
+    kind <> 'reschedule'
+    or (new_starts_at is not null and new_ends_at is not null and new_ends_at > new_starts_at)
+  )
+);
+create index assistant_pending_actions_lookup_idx
+  on assistant_pending_actions(professional_id, created_at desc)
+  where status = 'pending';
+
+alter table personal_reminders enable row level security;
+alter table assistant_messages enable row level security;
+alter table assistant_pending_actions enable row level security;
+
+create policy "personal_reminders: own data"
+  on personal_reminders for all using (professional_id = my_professional_id());
+create policy "assistant_messages: own data"
+  on assistant_messages for all using (professional_id = my_professional_id());
+create policy "assistant_pending_actions: own data"
+  on assistant_pending_actions for all using (professional_id = my_professional_id());

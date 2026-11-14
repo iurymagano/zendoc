@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { Lock, Repeat } from 'lucide-react';
 import { addDays, format, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -74,7 +75,7 @@ export function CalendarWeek({
               key={day.toISOString()}
               className={`border-r border-border px-2 py-2 text-center ${today ? 'bg-primary/5' : ''}`}
             >
-              <div className="text-xs font-mono uppercase tracking-[0.1em] text-muted-foreground">
+              <div className="text-xs font-semibold capitalize text-muted-foreground">
                 {format(day, 'EEE', { locale: ptBR })}
               </div>
               <div
@@ -136,7 +137,8 @@ export function CalendarWeek({
                     style={{ top: topFor(b.starts_at), height: heightFor(b.starts_at, b.ends_at) }}
                     title={b.summary ?? 'Compromisso (Google)'}
                   >
-                    🔒 {b.summary ?? 'Ocupado'}
+                    <Lock className="mr-0.5 inline size-2.5 align-[-1px]" aria-hidden />
+                    {b.summary ?? 'Ocupado'}
                   </div>
                 ))}
 
@@ -151,7 +153,9 @@ export function CalendarWeek({
                   title={`${formatTime(a.starts_at)}–${formatTime(a.ends_at)} ${a.patient_name}`}
                 >
                   <span className="block truncate tabular-nums">
-                    {a.recurrence_id ? '🔁 ' : ''}
+                    {a.recurrence_id && (
+                      <Repeat className="mr-0.5 inline size-2.5 align-[-1px]" aria-label="Série" />
+                    )}
                     {formatTime(a.starts_at)} {a.patient_name}
                   </span>
                 </button>

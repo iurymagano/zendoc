@@ -1,6 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { saoPauloParts } from '@/lib/assistant/datetime';
 import { buildSystemPrompt } from './prompt-builder';
 import { executeAction } from './executor';
 import { setNeedsAttention } from '@/lib/conversations/state';
@@ -16,8 +15,8 @@ import type {
 type Supabase = ReturnType<typeof createServerClient>;
 
 /**
- * Monta um resumo do paciente (se já cadastrado) para dar contexto à IA:
- * nome, consultas realizadas, faltas, próxima consulta marcada e notas.
+ * Monta um resumo do cliente (se já cadastrado) para dar contexto à IA:
+ * nome, atendimentos realizados, faltas, próximo atendimento marcado e notas.
  * Retorna null quando o número é desconhecido (a IA trata como novo).
  */
 async function buildPatientContext(
@@ -55,25 +54,30 @@ async function buildPatientContext(
       ['scheduled', 'confirmed', 'pending_approval'].includes(a.status),
   );
 
-  const d = (iso: string) =>
-    format(new Date(iso), "dd/MM/yyyy", { locale: ptBR });
-  const dt = (iso: string) =>
-    format(new Date(iso), "dd/MM 'às' HH:mm", { locale: ptBR });
+  // Relógio de Brasília, não o fuso do servidor.
+  const d = (iso: string) => {
+    const p = saoPauloParts(new Date(iso));
+    return `${String(p.day).padStart(2, '0')}/${String(p.month).padStart(2, '0')}/${p.year}`;
+  };
+  const dt = (iso: string) => {
+    const p = saoPauloParts(new Date(iso));
+    return `${String(p.day).padStart(2, '0')}/${String(p.month).padStart(2, '0')} às ${p.time}`;
+  };
 
-  const lines = ['CONTEXTO DO PACIENTE (já cadastrado — personalize o atendimento):'];
+  const lines = ['CONTEXTO DO CLIENTE (já cadastrado — personalize o atendimento):'];
   if (patient?.name) lines.push(`- Nome: ${patient.name}`);
   if (attended.length) {
     lines.push(
-      `- Consultas realizadas: ${attended.length} (última em ${d(attended[attended.length - 1].starts_at)})`,
+      `- Atendimentos realizados: ${attended.length} (última em ${d(attended[attended.length - 1].starts_at)})`,
     );
   }
   if (noShows.length) lines.push(`- Faltas (não compareceu): ${noShows.length}`);
   if (upcoming) {
     lines.push(
-      `- Já tem consulta marcada: ${dt(upcoming.starts_at)}. NÃO marque outra sem confirmar com o paciente; ofereça remarcar/cancelar se for o caso.`,
+      `- Já tem atendimento marcado: ${dt(upcoming.starts_at)}. NÃO marque outro sem confirmar com o cliente; ofereça remarcar/cancelar se for o caso.`,
     );
   }
-  if (patient?.notes) lines.push(`- Notas do consultório: ${patient.notes}`);
+  if (patient?.notes) lines.push(`- Notas da agenda: ${patient.notes}`);
 
   return lines.length > 1 ? lines.join('\n') : null;
 }
@@ -175,7 +179,7 @@ export async function processWhatsAppMessage(
       // System prompt como bloco com cache_control → a parte estável (perfil,
       // regras, lista de horários) é cacheada e custa ~10% nas mensagens
       // seguintes da mesma conversa (TTL de 5 min). A parte volátil (a mensagem
-      // do paciente) fica em `messages`, depois do prefixo cacheado.
+      // do cliente) fica em `messages`, depois do prefixo cacheado.
       system: [
         {
           type: 'text',
@@ -203,7 +207,7 @@ export async function processWhatsAppMessage(
     const text = rawText.trim();
     // Se o modelo respondeu em prosa (sem JSON), usa o próprio texto como
     // resposta — melhor que "não entendi". Só cai no fallback genérico se vier
-    // vazio ou um JSON quebrado (que não dá pra mostrar ao paciente).
+    // vazio ou um JSON quebrado (que não dá pra mostrar ao cliente).
     const looksLikeJson = /[{}]|"action"|```/.test(text);
     if (parsed) {
       aiResponse = parsed;

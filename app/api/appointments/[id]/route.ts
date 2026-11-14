@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import { createServerClient } from '@/lib/supabase';
 import { hasAppointmentConflict } from '@/lib/appointments/conflicts';
+import {
+  isPersonalCommitment,
+  resolvePhonePatch,
+} from '@/lib/appointments/personal';
+import { rescheduleAppointmentReminders } from '@/lib/appointments/reminders';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
-
-// Aceita qualquer formato digitado; grava sempre 55 + DDD + número (só dígitos).
-const phoneSchema = z.string().transform(normalizePhoneBR).refine(isValidPhoneBR);
 
 const patchSchema = z
   .object({
@@ -17,7 +18,9 @@ const patchSchema = z
     starts_at: z.string().datetime({ offset: true }).optional(),
     ends_at: z.string().datetime({ offset: true }).optional(),
     patient_name: z.string().trim().min(1).max(120).optional(),
-    patient_phone: phoneSchema.optional(),
+    // Validado em resolvePhonePatch: depende de o appointment ser um compromisso
+    // pessoal (sem telefone) ou um atendimento de cliente (telefone obrigatório).
+    patient_phone: z.string().max(40).optional(),
     notes: z.string().max(2000).nullable().optional(),
     service_id: z.string().uuid().nullable().optional(),
   })
@@ -107,6 +110,33 @@ export async function PATCH(
   }
 
   const { id } = await params;
+  const supabase = createServerClient();
+
+  // Carrega o appointment (sempre filtrando pelo dono) para saber se é um
+  // compromisso pessoal e se o horário mudou.
+  const { data: existing, error: existingError } = await supabase
+    .from('appointments')
+    .select('id, patient_phone, starts_at')
+    .eq('id', id)
+    .eq('professional_id', professionalId)
+    .maybeSingle();
+
+  if (existingError) {
+    console.error('Erro ao buscar agendamento:', existingError);
+    return NextResponse.json(
+      { error: 'Erro ao atualizar agendamento.' },
+      { status: 500 },
+    );
+  }
+
+  if (!existing) {
+    return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 });
+  }
+
+  const phone = resolvePhonePatch(parsed.data.patient_phone, existing.patient_phone);
+  if (!phone.ok) {
+    return NextResponse.json({ error: phone.error }, { status: 400 });
+  }
 
   if (parsed.data.starts_at && parsed.data.ends_at) {
     const conflict = await hasAppointmentConflict(
@@ -128,12 +158,11 @@ export async function PATCH(
   if (parsed.data.starts_at !== undefined) patch.starts_at = parsed.data.starts_at;
   if (parsed.data.ends_at !== undefined) patch.ends_at = parsed.data.ends_at;
   if (parsed.data.patient_name !== undefined) patch.patient_name = parsed.data.patient_name;
-  if (parsed.data.patient_phone !== undefined) patch.patient_phone = parsed.data.patient_phone;
+  if (phone.value !== undefined) patch.patient_phone = phone.value;
   if (parsed.data.notes !== undefined) patch.notes = parsed.data.notes?.trim() || null;
   if (parsed.data.service_id !== undefined) {
     // valida que o serviço pertence ao profissional (ou limpa com null)
     if (parsed.data.service_id) {
-      const supabase = createServerClient();
       const { data: svc } = await supabase
         .from('services')
         .select('id')
@@ -151,7 +180,6 @@ export async function PATCH(
     return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 });
   }
 
-  const supabase = createServerClient();
   const { data, error } = await supabase
     .from('appointments')
     .update(patch)
@@ -172,7 +200,19 @@ export async function PATCH(
     return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 });
   }
 
-  // Reflete a alteração no Google (atualiza horário/paciente ou remove se no_show).
+  // O trigger do banco só cria lembretes no insert/mudança de status: ao mudar o
+  // horário, os pendentes precisam ser reagendados, senão disparam no horário
+  // antigo. Compromisso pessoal não tem lembrete de cliente.
+  if (
+    parsed.data.starts_at !== undefined &&
+    new Date(parsed.data.starts_at).getTime() !==
+      new Date(existing.starts_at).getTime() &&
+    !isPersonalCommitment(data.patient_phone)
+  ) {
+    await rescheduleAppointmentReminders(id, data.starts_at);
+  }
+
+  // Reflete a alteração no Google (atualiza horário/cliente ou remove se no_show).
   await syncAppointmentToGoogle(data);
 
   return NextResponse.json({ ok: true, appointment: data });

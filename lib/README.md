@@ -45,7 +45,7 @@ no client e no server).
 
 **Usado por:** `POST/PATCH /api/patients`, `POST/PATCH /api/appointments`,
 `POST /api/recurrences` (normalização no servidor) e pelos formulários de
-`/pacientes` e `/agenda` (normalização antes do envio + formatação na lista).
+`/clientes` e `/agenda` (normalização antes do envio + formatação na lista).
 
 **Notas:** NÃO usar no webhook do WhatsApp — o número já chega com DDI e pode
 ser internacional ou `@lid`; prefixar 55 corromperia o identificador. Testes em
@@ -80,15 +80,20 @@ mapeamento de status.
 ## Subpastas
 
 - [ai/](./ai/) — integração com Claude API (prompt, processor, executor).
-- [availability/](./availability/) — cálculo de slots (`slots.ts`).
-- [appointments/](./appointments/) — utilitários de domínio (checagem de
-  conflito de horário).
-- [patients/](./patients/) — utilitários de paciente (validação/máscara de CPF).
+- [assistant/](./assistant/) — Assistente pessoal: chat do profissional com a IA
+  (tool use) para agenda e lembretes pessoais (confirmação em duas etapas, limite
+  de uso).
+- [availability/](./availability/) — cálculo de slots (`compute.ts` puro em
+  America/Sao_Paulo + `slots.ts` com as consultas).
+- [appointments/](./appointments/) — utilitários de domínio (conflito de
+  horário, lembretes, regras de compromisso pessoal, quando a declaração de
+  comparecimento pode ser emitida).
+- [patients/](./patients/) — utilitários de cliente (validação/máscara de CPF).
 - [zapi/](./zapi/) — cliente Evolution API (`sendWhatsAppMessage`; demais
   funções entram quando a conexão WhatsApp for implementada).
 - [google/](./google/) — integração Google Calendar mão-dupla (OAuth + push/pull
   de eventos; `syncAppointmentToGoogle` é o gancho chamado pelos endpoints).
-- [recurrences/](./recurrences/) — consultas recorrentes (materialização das
+- [recurrences/](./recurrences/) — atendimentos recorrentes (materialização das
   ocorrências como appointments reais + encerrar série).
 - [conversations/](./conversations/) — estado das conversas (handoff: pausar a
   IA por contato).

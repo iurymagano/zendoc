@@ -1,12 +1,12 @@
 # app/(dashboard)/configuracoes/testar-ia/
 
-Chat de teste que simula um paciente conversando com a IA — sem precisar do
+Chat de teste que simula um cliente conversando com a IA — sem precisar do
 WhatsApp nem de outra pessoa mandando mensagem.
 
 ## page.tsx
 
 **O que faz:** inbox tipo WhatsApp — lista de conversas à esquerda (persistidas),
-chat à direita. Você digita como se fosse o paciente; a IA responde pelo mesmo
+chat à direita. Você digita como se fosse o cliente; a IA responde pelo mesmo
 fluxo de produção (`processWhatsAppMessage`).
 
 **Fluxo:**
@@ -34,7 +34,7 @@ fluxo de produção (`processWhatsAppMessage`).
 
 - **As ações são reais.** Se a IA decidir agendar/cancelar, isso é gravado no
   banco e aparece em `/agenda` — por isso o telefone fake, pra não misturar com
-  pacientes reais.
+  clientes reais.
 - Respeita `ai_enabled` e o plano do profissional (mesmas checagens do fluxo
   real, exceto a validação de WhatsApp conectado — o teste não envia nada).
 - Útil para iterar no prompt/ações da IA gastando só o custo da API (ver

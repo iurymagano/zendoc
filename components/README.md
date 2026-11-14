@@ -3,7 +3,8 @@
 Componentes React. Organizado por domínio:
 
 - [ui/](./ui/) — primitivas shadcn/ui (botão, input, select, etc.)
-- [brand/](./brand/) — logo e elementos de marca IAzen
+- [brand/](./brand/) — logo (símbolo e wordmark em SVG) e geometria da marca IAzen
+- [landing/](./landing/) — balão, conversa, semana, linha do tempo e tom usados na landing e no auth
 - [dashboard/](./dashboard/) — shell do dashboard (navbar, cabeçalho de página)
 - [onboarding/](./onboarding/) — componentes do fluxo de onboarding
 - [availability/](./availability/) — componentes da tela de disponibilidade

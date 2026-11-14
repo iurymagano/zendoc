@@ -14,7 +14,7 @@ sincronizados do Google (`google_busy_events`, read-only).
 
 - `TZ` — `'America/Sao_Paulo'`
 - `BusyEvent` — tipo do evento pessoal do Google vindo de `GET /api/appointments`
-- `tzDateKey(iso): string` — chave de dia `yyyy-MM-dd` no fuso do consultório
+- `tzDateKey(iso): string` — chave de dia `yyyy-MM-dd` no fuso da agenda
 - `tzMinutes(iso): number` — minutos desde a meia-noite no fuso (posicionamento)
 - `formatTime(iso): string` — `HH:mm`
 - `STATUS_LABEL` / `STATUS_BLOCK` — rótulo e classes de cor do bloco por status
@@ -25,10 +25,12 @@ comparadas com `tzDateKey` dos eventos — alinhado para usuários no Brasil.
 
 ---
 
+> Visual (fase 2): cabeçalhos de dia em Inter semibold (sem mono/caixa-alta), popover de busca sem sombra.
+
 ## CalendarMonth.tsx
 
 **O que faz:** grade do mês (6 semanas, segunda a domingo). Cada célula mostra
-até 3 agendamentos + indicador de compromisso Google; "+N mais" no excedente.
+até 3 agendamentos + indicador de compromisso Google (ícones lucide `Lock` para Google/pessoal e `Repeat` para série; sem emoji); "+N mais" no excedente.
 
 **Exporta:** `CalendarMonth(props)` — `{ monthCursor, appointments, busy,
 onSelectAppointment, onSelectDay }`. Clique no dia → criar; clique no bloco → editar.
@@ -41,7 +43,7 @@ onSelectAppointment, onSelectDay }`. Clique no dia → criar; clique no bloco �
 
 **O que faz:** time-grid da semana (7 colunas de dia × linhas de hora). Blocos
 posicionados pelo horário; faixa 7h–20h expandida para caber os eventos.
-Compromissos do Google aparecem tracejados/cinza (read-only).
+Compromissos do Google aparecem tracejados/cinza (read-only). Série usa o ícone `Repeat` e Google/pessoal o `Lock` (lucide, sem emoji).
 
 **Exporta:** `CalendarWeek(props)` — `{ weekStart, appointments, busy,
 onSelectAppointment, onSelectSlot }`. Clique na linha de hora → criar no slot;

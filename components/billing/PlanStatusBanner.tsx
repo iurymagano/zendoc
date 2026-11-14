@@ -16,12 +16,10 @@ type BannerContent = {
 };
 
 const STYLES: Record<BannerVariant, string> = {
-  past_due: 'border-destructive/40 bg-destructive/10 text-destructive',
-  cancelled: 'border-muted-foreground/30 bg-muted text-muted-foreground',
-  trial_ending:
-    'border-amber-500/40 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100',
-  trial_expired:
-    'border-destructive/40 bg-destructive/10 text-destructive',
+  past_due: 'bg-[var(--destructive-soft)] text-destructive',
+  cancelled: 'bg-muted text-foreground',
+  trial_ending: 'bg-[var(--warning-soft)] text-[var(--warning)]',
+  trial_expired: 'bg-[var(--destructive-soft)] text-destructive',
 };
 
 function buildBanner(professional: Professional): BannerContent | null {
@@ -79,9 +77,9 @@ export function PlanStatusBanner({ professional }: { professional: Professional 
   if (!banner) return null;
 
   return (
-    <div className={`rounded-lg border p-4 ${STYLES[banner.variant]}`}>
-      <h2 className="text-sm font-semibold">{banner.title}</h2>
-      <p className="text-sm opacity-90 mt-1">{banner.description}</p>
+    <div className={`rounded-2xl p-5 ${STYLES[banner.variant]}`}>
+      <h2 className="font-display text-lg font-bold tracking-[-0.02em]">{banner.title}</h2>
+      <p className="mt-1 text-sm">{banner.description}</p>
       <BillingButton
         endpoint={banner.cta.endpoint}
         label={banner.cta.label}

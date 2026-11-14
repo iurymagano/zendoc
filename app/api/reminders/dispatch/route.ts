@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { sendWhatsAppMessage } from '@/lib/zapi/client';
+import { isPersonalCommitment } from '@/lib/appointments/personal';
+import {
+  buildPersonalReminderMessage,
+  checkPersonalReminderDelivery,
+} from '@/lib/assistant/reminders';
 import type { ReminderType } from '@/types/database';
 
 const TZ = 'America/Sao_Paulo';
@@ -45,11 +50,110 @@ function buildMessage(
       month: 'long',
     });
     const time = formatBr(startsAt, { hour: '2-digit', minute: '2-digit' });
-    return `Olá! Aqui é do consultório de ${professionalName}. Sua consulta está marcada para ${date} às ${time}. Podemos confirmar?`;
+    return `Olá! Aqui é a secretária de ${professionalName}. Seu atendimento está marcado para ${date} às ${time}. Podemos confirmar?`;
   }
 
   const time = formatBr(startsAt, { hour: '2-digit', minute: '2-digit' });
-  return `Olá! Sua consulta com ${professionalName} é hoje, às ${time}. Estou te esperando.`;
+  return `Olá! Seu atendimento com ${professionalName} é hoje, às ${time}. Estou te esperando.`;
+}
+
+type PersonalReminderRow = {
+  id: string;
+  text: string;
+  remind_at: string;
+  professional_id: string;
+  professional: {
+    phone: string | null;
+    zapi_instance_id: string | null;
+    zapi_token: string | null;
+    whatsapp_connected: boolean;
+    plan_status: string;
+  } | null;
+};
+
+type Counters = { total: number; sent: number; failed: number; skipped: number };
+
+// Lembretes pessoais do Assistente: o aviso vai para o PRÓPRIO profissional
+// (professionals.phone), pelo WhatsApp dele. Mesmo padrão de reserva dos
+// lembretes de cliente (pending → sent antes de enviar).
+async function dispatchPersonalReminders(
+  supabase: ReturnType<typeof createServerClient>,
+  now: string,
+): Promise<Counters & { error?: boolean }> {
+  const counters: Counters = { total: 0, sent: 0, failed: 0, skipped: 0 };
+
+  const { data, error } = await supabase
+    .from('personal_reminders')
+    .select(
+      `
+      id, text, remind_at, professional_id,
+      professional:professionals ( phone, zapi_instance_id, zapi_token, whatsapp_connected, plan_status )
+    `,
+    )
+    .eq('status', 'pending')
+    .lte('remind_at', now)
+    .limit(50);
+
+  if (error) {
+    console.error('Erro ao listar lembretes pessoais:', error);
+    return { ...counters, error: true };
+  }
+
+  const rows = (data ?? []) as unknown as PersonalReminderRow[];
+  counters.total = rows.length;
+
+  for (const row of rows) {
+    const prof = row.professional;
+    const check = prof
+      ? checkPersonalReminderDelivery(prof)
+      : ({ ok: false, reason: 'Profissional ausente' } as const);
+
+    if (!check.ok || !prof) {
+      await supabase
+        .from('personal_reminders')
+        .update({
+          status: 'failed',
+          error_message: check.ok ? 'Profissional ausente' : check.reason,
+        })
+        .eq('id', row.id)
+        .eq('status', 'pending');
+      counters.skipped++;
+      continue;
+    }
+
+    // Reserva antes de enviar (cron roda a cada minuto; duas execuções podem
+    // pegar o mesmo lembrete). Só quem trocar pending → sent envia.
+    const { data: claimed } = await supabase
+      .from('personal_reminders')
+      .update({ status: 'sent', sent_at: new Date().toISOString() })
+      .eq('id', row.id)
+      .eq('status', 'pending')
+      .select('id');
+    if (!claimed || claimed.length === 0) {
+      counters.skipped++;
+      continue;
+    }
+
+    try {
+      await sendWhatsAppMessage(
+        prof.zapi_instance_id!,
+        prof.zapi_token ?? '',
+        check.phone,
+        buildPersonalReminderMessage(row.text),
+      );
+      counters.sent++;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`Falha ao enviar lembrete pessoal ${row.id}:`, message);
+      await supabase
+        .from('personal_reminders')
+        .update({ status: 'failed', error_message: message })
+        .eq('id', row.id);
+      counters.failed++;
+    }
+  }
+
+  return counters;
 }
 
 async function handle(req: NextRequest) {
@@ -105,6 +209,17 @@ async function handle(req: NextRequest) {
       continue;
     }
 
+    // Compromisso pessoal (criado pelo Assistente) não tem cliente: sem
+    // telefone (vazio ou só espaços/símbolos) não há para quem mandar o lembrete.
+    if (isPersonalCommitment(appt.patient_phone)) {
+      await supabase
+        .from('reminders')
+        .update({ status: 'cancelled', error_message: 'Compromisso sem cliente' })
+        .eq('id', reminder.id);
+      skipped++;
+      continue;
+    }
+
     if (!['scheduled', 'confirmed'].includes(appt.status)) {
       await supabase
         .from('reminders')
@@ -141,7 +256,7 @@ async function handle(req: NextRequest) {
       continue;
     }
 
-    // LGPD: respeita a oposição do paciente a mensagens ativas (lembretes).
+    // LGPD: respeita a oposição do cliente a mensagens ativas (lembretes).
     const { data: pat } = await supabase
       .from('patients')
       .select('messaging_opted_out')
@@ -151,7 +266,7 @@ async function handle(req: NextRequest) {
     if (pat?.messaging_opted_out) {
       await supabase
         .from('reminders')
-        .update({ status: 'cancelled', error_message: 'Paciente optou por não receber mensagens' })
+        .update({ status: 'cancelled', error_message: 'Cliente optou por não receber mensagens' })
         .eq('id', reminder.id);
       skipped++;
       continue;
@@ -193,12 +308,20 @@ async function handle(req: NextRequest) {
     }
   }
 
+  const personal = await dispatchPersonalReminders(supabase, now);
+
   return NextResponse.json({
     ok: true,
     total: reminders.length,
     sent,
     failed,
     skipped,
+    personal: {
+      total: personal.total,
+      sent: personal.sent,
+      failed: personal.failed,
+      skipped: personal.skipped,
+    },
   });
 }
 

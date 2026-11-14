@@ -7,7 +7,7 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="min-h-screen bg-background">
       <Sidebar />
       {/* Conteúdo deslocado para a direita da sidebar fixa (desktop). */}
       <div className="md:pl-64">

@@ -31,4 +31,4 @@
 - A UI faz polling deste endpoint a cada 3s enquanto aguarda scan; ao
   `connected = true`, encerra.
 - `zapi_token` pode ser `null` (as chamadas caem para a `EVOLUTION_API_KEY`
-  global) — não bloqueia a consulta.
+  global) — não bloqueia o atendimento.

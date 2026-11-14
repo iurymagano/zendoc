@@ -7,13 +7,15 @@ próprio centralizado com o branding do IAzen.
 
 **O que faz:** layout split-screen (desktop) para login e cadastro.
 
-- Lado esquerdo (`.dark`, só em `lg:`): fundo preto IAzen com gradientes
-  radiais azul+violeta, [`<Logo size="lg">`](../../components/brand/README.md),
-  tagline gradiente e lista de bullets de proposta de valor
-- Lado direito: card com o formulário, centralizado, fundo `bg-muted/30`;
-  em mobile o `<Logo>` aparece no topo como fallback
+- Lado esquerdo (`.dark`, só em `lg:`): Void liso com o símbolo gigante cortado pela borda
+  (variante `mono`, Void 2), [`<Logo size="lg">`](../../components/brand/README.md), a promessa
+  "Você atende. Ela agenda." e uma conversa curta (`Bubble`)
+- Lado direito: Névoa com o formulário num card branco de raio 24, centralizado; em mobile o
+  `<Logo>` aparece no topo
 
-**Depende de:** `@/components/brand/Logo`.
+**Depende de:** `@/components/brand/Logo`, `@/components/landing/Bubble`.
+
+**Notas:** sem gradiente, sem depoimento nem número de eficácia (não há como provar).
 
 ## login/page.tsx
 

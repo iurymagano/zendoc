@@ -12,7 +12,7 @@ export type BusyEvent = {
   all_day: boolean;
 };
 
-/** Chave de dia (yyyy-MM-dd) de um ISO, no fuso do consultório. */
+/** Chave de dia (yyyy-MM-dd) de um ISO, no fuso da agenda. */
 export function tzDateKey(iso: string): string {
   return new Intl.DateTimeFormat('sv-SE', {
     timeZone: TZ,
@@ -22,7 +22,7 @@ export function tzDateKey(iso: string): string {
   }).format(new Date(iso));
 }
 
-/** Minutos desde a meia-noite (no fuso do consultório) de um ISO. */
+/** Minutos desde a meia-noite (no fuso da agenda) de um ISO. */
 export function tzMinutes(iso: string): number {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: TZ,
@@ -73,7 +73,7 @@ export const STATUS_BLOCK: Record<AppointmentStatus, string> = {
     'bg-destructive/10 text-destructive ring-1 ring-destructive/30 hover:bg-destructive/20',
 };
 
-/** Agrupa appointments por dia (chave yyyy-MM-dd no fuso do consultório). */
+/** Agrupa appointments por dia (chave yyyy-MM-dd no fuso da agenda). */
 export function groupByDay(appointments: Appointment[]): Map<string, Appointment[]> {
   const map = new Map<string, Appointment[]>();
   for (const a of appointments) {

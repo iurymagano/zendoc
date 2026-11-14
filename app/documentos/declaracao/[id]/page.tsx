@@ -1,7 +1,10 @@
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
+import { declarationEligibility } from '@/lib/appointments/declaration';
 import { PrintButton } from '@/components/documents/PrintButton';
+import { buttonVariants } from '@/components/ui/button';
 import type { Appointment, Professional } from '@/types/database';
 
 const TZ = 'America/Sao_Paulo';
@@ -27,6 +30,10 @@ function time(iso: string): string {
  * Declaração de comparecimento (imprimível). Gerada a partir de um appointment
  * do profissional logado. Rota fora do grupo (dashboard) — sem navbar, layout
  * limpo pra impressão/PDF (window.print()).
+ *
+ * Só emite o documento se o atendimento já começou e não foi cancelado nem
+ * marcado como falta (declarationEligibility): o texto afirma que o cliente
+ * "compareceu". Caso contrário mostra um aviso no lugar do documento.
  */
 export default async function DeclaracaoPage({
   params,
@@ -54,10 +61,38 @@ export default async function DeclaracaoPage({
     .maybeSingle<Appointment>();
   if (!appointment) notFound();
 
+  const eligibility = declarationEligibility(appointment);
+  if (!eligibility.ok) {
+    return (
+      <div className="min-h-screen bg-[var(--ia-mist)] px-4 py-8">
+        <div className="mx-auto flex max-w-xl flex-col gap-6">
+          <h1 className="font-display text-lg font-semibold">
+            Declaração de comparecimento
+          </h1>
+          <div
+            role="status"
+            className="rounded-2xl bg-white p-6 text-sm leading-relaxed ring-1 ring-border"
+          >
+            <p className="font-medium">{eligibility.message}</p>
+            <p className="mt-2 text-muted-foreground">
+              Volte à agenda e gere a declaração depois que o atendimento
+              acontecer.
+            </p>
+          </div>
+          <div>
+            <Link href="/agenda" className={buttonVariants({ variant: 'outline' })}>
+              Voltar para a agenda
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const emitidoEm = longDate(new Date().toISOString());
 
   return (
-    <div className="min-h-screen bg-muted/30 px-4 py-8 print:bg-white print:p-0">
+    <div className="min-h-screen bg-[var(--ia-mist)] px-4 py-8 print:min-h-0 print:bg-white print:p-0">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div className="flex items-center justify-between print:hidden">
           <h1 className="font-display text-lg font-semibold">
@@ -67,31 +102,31 @@ export default async function DeclaracaoPage({
         </div>
 
         {/* Documento */}
-        <article className="mx-auto w-full bg-white p-12 text-[#0a0a0f] shadow-sm ring-1 ring-border print:p-0 print:shadow-none print:ring-0">
+        <article className="mx-auto w-full bg-white p-12 text-[#0a0a0f] rounded-2xl ring-1 ring-border print:rounded-none print:p-0 print:ring-0">
           <header className="mb-10 text-center">
             <h2 className="font-display text-xl font-bold tracking-tight">
               {professional.name}
             </h2>
             {professional.specialty && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#4b5563]">
                 {professional.specialty}
               </p>
             )}
             {professional.address && (
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 text-xs text-[#4b5563]">
                 {professional.address}
               </p>
             )}
           </header>
 
-          <h3 className="mb-8 text-center text-base font-semibold uppercase tracking-[0.18em]">
+          <h3 className="mb-8 text-center text-base font-semibold uppercase tracking-[0.12em]">
             Declaração de comparecimento
           </h3>
 
           <p className="text-justify leading-[1.9]">
             Declaro, para os devidos fins, que{' '}
             <strong>{appointment.patient_name}</strong> compareceu a atendimento
-            neste consultório no dia <strong>{longDate(appointment.starts_at)}</strong>
+            com <strong>{professional.name}</strong> no dia <strong>{longDate(appointment.starts_at)}</strong>
             , no horário das <strong>{time(appointment.starts_at)}</strong> às{' '}
             <strong>{time(appointment.ends_at)}</strong>.
           </p>
@@ -102,7 +137,7 @@ export default async function DeclaracaoPage({
             <div className="w-72 border-t border-[#0a0a0f]" />
             <p className="mt-2 text-sm font-medium">{professional.name}</p>
             {professional.specialty && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-[#4b5563]">
                 {professional.specialty}
               </p>
             )}

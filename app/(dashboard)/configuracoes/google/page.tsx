@@ -117,8 +117,8 @@ function GoogleCalendarSettings() {
         <CardHeader>
           <CardTitle>Conexão</CardTitle>
           <CardDescription>
-            Conecte a conta Google do consultório. O IAzen cria/atualiza um evento
-            no seu Google Agenda para cada consulta, e lê seus compromissos
+            Conecte a sua conta Google. O IAzen cria/atualiza um evento
+            no seu Google Agenda para cada atendimento, e lê seus compromissos
             pessoais para bloquear esses horários na disponibilidade da IA.
           </CardDescription>
         </CardHeader>
