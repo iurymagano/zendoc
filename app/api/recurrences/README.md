@@ -25,6 +25,8 @@ Séries de consultas recorrentes (semanal/quinzenal). A regra fica em
 
 - `start_date`/`weekday`/`start_time`/`end_time` são derivados do `starts_at`
   (ISO sempre `-03:00` → slice exato); início e fim devem ser no mesmo dia.
+- `patient_phone` é normalizado no servidor (`normalizePhoneBR`, `55` + DDD +
+  número), igual ao booking.
 - Reaproveita/cria o paciente por telefone (igual ao booking).
 
 **Retorno:** `{ ok, recurrence, created, skipped }`. 401/404/400 nos casos usuais.

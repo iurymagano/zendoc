@@ -53,7 +53,7 @@ services:
       # Versão do WhatsApp Web anunciada pelo Baileys. Se ficar desatualizada,
       # o WhatsApp recusa o handshake e o QR nunca é gerado (loop de reconexão).
       # Valor atual em: https://github.com/WhiskeySockets/Baileys/blob/master/src/Defaults/baileys-version.json
-      CONFIG_SESSION_PHONE_VERSION: ${WA_VERSION:-2.3000.1035194821}
+      CONFIG_SESSION_PHONE_VERSION: ${WA_VERSION:-2.3000.1043857760}
     volumes:
       - evolution_instances:/evolution/instances
 

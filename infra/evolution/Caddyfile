@@ -1,0 +1,7 @@
+# Proxy reverso da Evolution com HTTPS automático. {$DOMAIN} vem do .env
+# (ex.: 130-211-208-101.sslip.io — o sslip.io resolve o IP embutido no nome,
+# então dá para ter HTTPS sem comprar domínio).
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy evolution-api:8080
+}

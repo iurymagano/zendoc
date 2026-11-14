@@ -237,6 +237,8 @@ EVOLUTION_WEBHOOK_URL=                       # opcional; URL que a Evolution usa
                                              # (dev: http://host.docker.internal:3000). Cai no NEXT_PUBLIC_URL se vazio.
 
 # Cron (lembretes + sync do Google Calendar) — Authorization: Bearer ${CRON_SECRET}
+# Lembretes (1 min) e sync (10 min) são chamados pelo cron-job.org: o plano
+# grátis da Vercel só aceita cron diário. Ver README raiz, seção "Crons".
 CRON_SECRET=
 
 # App
@@ -244,7 +246,7 @@ NEXT_PUBLIC_URL=http://localhost:3000   # em produção, https público: além d
                                         # Stripe, habilita o push (watch) do
                                         # Google Calendar. Em http/localhost o
                                         # sync vem do botão "Sincronizar agora"
-                                        # + cron a cada 30 min.
+                                        # + cron a cada 10 min.
 ```
 
 ---

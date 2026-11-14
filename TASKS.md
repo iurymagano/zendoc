@@ -35,7 +35,11 @@ Legenda:
 - [x] Onboarding passo 2 — perfil do consultório (`app/onboarding/step-2/page.tsx`)
 - [x] `POST /api/onboarding/profile`
 - [x] Dashboard base (`app/(dashboard)/dashboard/page.tsx`)
-- [ ] Deploy na Vercel (primeiro deploy de validação)
+- [x] Deploy na Vercel (primeiro deploy de validação)
+  - [x] Produção beta em https://iazen.vercel.app (projeto `zendoc`, scope
+    iurymaganos-projects, publicado pela CLI a partir da branch do PR #1)
+  - [ ] Ligar o repositório do GitHub ao projeto da Vercel depois do merge do
+    PR #1 (antes disso, push na main falharia pelos crons de 15/30 min)
 
 ---
 
@@ -96,7 +100,11 @@ Legenda:
 - [x] Cron de lembretes (Vercel Cron Jobs, agendado em `vercel.json`)
 - [x] `GET|POST /api/reminders/dispatch` — dispara `24h` e `2h` pendentes
 - [x] `lib/zapi/client.ts` — `sendWhatsAppMessage` (stub testável)
-- [ ] Configurar `CRON_SECRET` em produção (Vercel env vars)
+- [x] Configurar `CRON_SECRET` em produção (Vercel env vars)
+- [x] Crons frequentes fora do `vercel.json` (plano grátis da Vercel só aceita
+  diário): lembretes a cada 1 min e sync do Google a cada 10 min pelo cron-job.org
+- [x] Dispatch reserva o lembrete antes de enviar (sem envio em dobro com cron de 1 min)
+- [x] **Operacional:** criar os jobs no cron-job.org com o header `Authorization: Bearer`
 
 ---
 
@@ -126,6 +134,17 @@ Legenda:
   - [x] Componente `components/billing/PlanStatusBanner` (past_due, cancelled,
     trial_ending ≤3 dias, trial_expired)
   - [x] Integrado no `/dashboard`
+- [x] Correções da homologação em produção
+  - [x] Login com Google: a sessão guardava o id aleatório do NextAuth em vez do
+    id do Supabase Auth, e o onboarding falhava com FK em `professionals.user_id`
+    (`auth.ts` agora resolve o id pelo e-mail, inclusive em sessões antigas)
+  - [x] Paciente duplicado: telefone normalizado para 55 + DDD + número em todas
+    as rotas que gravam `patients.phone`/`appointments.patient_phone`
+    (helper [lib/phone.ts](lib/phone.ts), com testes via `npm test`)
+  - [x] `/configuracoes/whatsapp`: botão "Cancelar" no estado "Aguardando scan"
+    (remove a instância pendurada na Evolution via `POST /api/whatsapp/disconnect`)
+  - [x] Saudação do dashboard pula título (Dr./Dra./Prof.) — "Olá, Teste"
+  - [x] Barra de progresso do onboarding em cor sólida `#4F6EF7` (sem gradiente)
 - [ ] Onboarding de 5 beta testers reais
 - [ ] Coleta de feedback estruturada
 
@@ -204,8 +223,11 @@ Legenda:
 - [x] Testar end-to-end no dev (4242…): checkout → webhook `[200]` →
   `stripe_subscription_id` + `trial_ends_at` gravados, `plan_status='trialing'`
   (correto: assinatura nasce em trial). Falta validar a transição trial→active.
-- [ ] Operacional (produção): configurar o endpoint de webhook no painel Stripe
+- [x] Operacional (produção): configurar o endpoint de webhook no painel Stripe
   e setar as envs na Vercel (`STRIPE_*`, `NEXT_PUBLIC_URL` = domínio público)
+  (feito em modo de teste: endpoint `/api/webhooks/stripe` em iazen.vercel.app)
+- [ ] Trocar o Stripe para as chaves live (e novo webhook) quando o beta virar
+  venda paga
 
 ---
 
@@ -228,6 +250,7 @@ Legenda:
   - [x] `GET /api/appointments` devolve `googleBusy` na janela
   - [x] UI calendário Mês + Semana (`components/agenda/`) + tela `/configuracoes/google`
   - [x] Cron de sync em `vercel.json` (a cada 30 min) como fallback do webhook
+    (movido para o cron-job.org a cada 10 min — plano grátis da Vercel)
   - [ ] **Operacional:** cadastrar o redirect URI
     `${NEXT_PUBLIC_URL}/api/google/calendar/callback` no Google Cloud Console
     (OAuth client) e habilitar a **Google Calendar API** no projeto
@@ -417,9 +440,17 @@ Legenda:
   a 2.4.x exige licença). `senderIdentifier()` no webhook trata `@lid` x `@s.whatsapp.net`
 - [x] **Testar end-to-end local: conectar (criar instância + QR), mensagem de
   número externo, resposta da IA entregue e persistência** ✅
-- [ ] Produção: hospedar servidor Evolution (Railway/VPS) e setar
+- [x] Produção: hospedar servidor Evolution (Railway/VPS) e setar
   `EVOLUTION_API_URL`/`EVOLUTION_API_KEY`/`WEBHOOK_SECRET` na Vercel
-- [ ] Em produção, `NEXT_PUBLIC_URL` = domínio público (não `host.docker.internal`)
+  - [x] Servidor Evolution na VM e2-micro grátis do Google Cloud (Docker +
+    Caddy com HTTPS em `130-211-208-101.sslip.io`; ver `infra/evolution/README.md`)
+  - [x] Setar as três envs na Vercel
+- [x] Em produção, `NEXT_PUBLIC_URL` = domínio público (não `host.docker.internal`)
+- [ ] Reservar IP fixo para a VM da Evolution (hoje é efêmero: se a VM for
+  recriada o IP muda e `EVOLUTION_API_URL` precisa mudar; conferir o preço antes)
+- [ ] Google OAuth está em modo "Testando": adicionar o Gmail de cada beta
+  tester como usuário de teste (ou publicar o app, que pede verificação por
+  causa do escopo do Google Agenda)
 
 ### Cadastro rico de paciente
 

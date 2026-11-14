@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
+import { formatPhoneBR, isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import type { Patient } from '@/types/database';
 
 type FormState = {
@@ -36,20 +37,6 @@ const EMPTY_FORM: FormState = {
   notes: '',
   messaging_opted_out: false,
 };
-
-function formatPhone(raw: string): string {
-  const d = raw.replace(/\D/g, '');
-  if (d.length === 13) {
-    return `+${d.slice(0, 2)} (${d.slice(2, 4)}) ${d.slice(4, 9)}-${d.slice(9)}`;
-  }
-  if (d.length === 12) {
-    return `+${d.slice(0, 2)} (${d.slice(2, 4)}) ${d.slice(4, 8)}-${d.slice(8)}`;
-  }
-  if (d.length === 11) {
-    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-  }
-  return raw;
-}
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -79,7 +66,7 @@ export default function PatientsPage() {
     return patients.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
-        p.phone.toLowerCase().includes(q) ||
+        (!!digits && p.phone.includes(digits)) ||
         (!!digits && !!p.cpf && p.cpf.includes(digits)),
     );
   }, [patients, search]);
@@ -123,9 +110,9 @@ export default function PatientsPage() {
     e.preventDefault();
     setError(null);
 
-    const phone = form.phone.replace(/\D/g, '');
-    if (phone.length < 11 || phone.length > 13) {
-      setError('Telefone deve ter 11 a 13 dígitos (com DDI e DDD).');
+    const phone = normalizePhoneBR(form.phone);
+    if (!isValidPhoneBR(phone)) {
+      setError('Informe um telefone válido com DDD (ex.: (11) 91111-2222).');
       return;
     }
     if (!form.name.trim()) {
@@ -347,7 +334,7 @@ export default function PatientsPage() {
                         )}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {formatPhone(p.phone)}
+                        {formatPhoneBR(p.phone)}
                         {p.cpf ? ` · CPF ${formatCpf(p.cpf)}` : ''}
                         {p.notes ? ` · ${p.notes}` : ''}
                       </span>

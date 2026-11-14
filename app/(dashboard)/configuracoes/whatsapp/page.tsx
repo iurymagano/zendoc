@@ -118,17 +118,37 @@ export default function WhatsAppConfigPage() {
     }
   }
 
+  async function disconnect() {
+    stopPolling();
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/whatsapp/disconnect', { method: 'POST' });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(body.error ?? 'Não foi possível desconectar o WhatsApp.');
+        setStatus('error');
+        return;
+      }
+      await fetchStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setStatus('error');
+    }
+  }
+
   async function onDisconnect() {
     const ok = window.confirm(
       'Desconectar WhatsApp? A IA parará de responder as mensagens dos seus pacientes.',
     );
     if (!ok) return;
-    stopPolling();
-    setStatus('loading');
-    const res = await fetch('/api/whatsapp/disconnect', { method: 'POST' });
-    if (res.ok) {
-      await fetchStatus();
-    }
+    await disconnect();
+  }
+
+  // Cancela o pareamento em andamento (QR nunca escaneado): remove a instância
+  // pendurada na Evolution e volta para "Conectar WhatsApp". Sem confirmação —
+  // não há nada conectado a perder.
+  async function onCancel() {
+    await disconnect();
   }
 
   const qrSrc = normalizeQr(qrcode);
@@ -231,14 +251,20 @@ export default function WhatsAppConfigPage() {
                 Aguardando leitura… a tela atualiza automaticamente a cada 3
                 segundos. O QR é renovado periodicamente.
               </p>
+              <Button variant="outline" onClick={onCancel}>
+                Cancelar
+              </Button>
             </CardContent>
           </Card>
         )}
 
         {status === 'waiting_scan' && !qrSrc && (
           <Card>
-            <CardContent className="py-6 text-sm text-muted-foreground">
+            <CardContent className="flex flex-col items-start gap-4 py-6 text-sm text-muted-foreground">
               Buscando QR Code…
+              <Button variant="outline" onClick={onCancel}>
+                Cancelar
+              </Button>
             </CardContent>
           </Card>
         )}

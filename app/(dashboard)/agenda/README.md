@@ -36,6 +36,8 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
   de status no topo (Aprovar/Confirmar/Não compareceu/Cancelar conforme o status).
 - Autocomplete de pacientes (nome OU telefone), campo CPF com máscara, fim
   auto-preenchido em `+50min`. Salva via `POST`/`PATCH /api/appointments`.
+  O telefone é normalizado (`normalizePhoneBR`: `55` + DDD + número) antes do
+  envio — o mesmo número digitado com/sem DDI cai no mesmo paciente.
 
 **Cancelamento:** `window.confirm` + `window.prompt` (motivo) →
 `POST /api/appointments/:id/cancel`.

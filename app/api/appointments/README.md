@@ -50,6 +50,9 @@ Cria um appointment manual (`booked_via = 'manual'`, `status = 'scheduled'`).
 }
 ```
 
+- `patient_phone` é normalizado no servidor (`normalizePhoneBR`: só dígitos,
+  `55` + DDD + número) antes de gravar no appointment e no paciente — evita
+  paciente duplicado quando o mesmo número chega com/sem DDI. `PATCH [id]` idem.
 - Paciente é **reaproveitado por telefone** (upsert em
   `patients(professional_id, phone)`) — mesmo comportamento que o fluxo da IA.
 - `cpf` opcional (validado por checksum). Quando informado, é gravado no

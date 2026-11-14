@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
+import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import { createServerClient } from '@/lib/supabase';
 import { isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
 import { materializeRecurrence } from '@/lib/recurrences/service';
 import type { Recurrence } from '@/types/database';
 
-const phoneRegex = /^\d{11,13}$/;
+// Aceita qualquer formato digitado; grava sempre 55 + DDD + número (só dígitos).
+const phoneSchema = z.string().transform(normalizePhoneBR).refine(isValidPhoneBR);
 // ISO no padrão do app: sempre com offset -03:00 (ver convenções).
 const isoBrRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}-03:00$/;
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -14,7 +16,7 @@ const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const createSchema = z
   .object({
     patient_name: z.string().trim().min(1).max(120),
-    patient_phone: z.string().regex(phoneRegex),
+    patient_phone: phoneSchema,
     cpf: z.string().nullable().optional(),
     starts_at: z.string().regex(isoBrRegex),
     ends_at: z.string().regex(isoBrRegex),

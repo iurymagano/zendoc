@@ -59,7 +59,7 @@ volta. Detalhes em [ai/README.md](./ai/README.md).
 
 Arquivo: [reminders/dispatch/route.ts](./reminders/dispatch/route.ts)
 
-Endpoint chamado pelo Vercel Cron (a cada 15 min) para disparar os lembretes
+Endpoint chamado pelo cron-job.org (a cada 1 min) para disparar os lembretes
 pendentes. Autenticado via `Authorization: Bearer ${CRON_SECRET}`. Detalhes em
 [reminders/README.md](./reminders/README.md).
 

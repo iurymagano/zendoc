@@ -36,7 +36,9 @@ há, senão a global).
   (com o corpo de erro cru do Evolution — facilita debug).
 - `disconnectInstance(instanceName, token): Promise<void>` —
   `DELETE /instance/logout/{name}` + `DELETE /instance/delete/{name}`. Tolerante
-  a falha.
+  a falha: o logout de instância que nunca conectou costuma dar erro na
+  Evolution, e mesmo assim o delete é sempre tentado (falha do delete é só
+  logada).
 
 **Notas:**
 
