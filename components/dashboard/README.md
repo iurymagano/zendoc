@@ -8,7 +8,7 @@ Shell compartilhado pelas páginas autenticadas (grupo `app/(dashboard)/`).
 
 **O que faz:** navegação lateral (estilo app) da área interna — sidebar fixa à
 esquerda no desktop e drawer (gaveta) no mobile. Itens com ícone (lucide),
-divididos em **áreas do dia a dia** (Visão geral, Agenda, Conversas, Pacientes)
+divididos em **áreas do dia a dia** (Visão geral, Assistente, Agenda, Conversas, Clientes)
 e o grupo **Configurações** (Disponibilidade, Serviços, Google Agenda, WhatsApp,
 Testar IA, Assinatura). Rodapé com "Sair".
 

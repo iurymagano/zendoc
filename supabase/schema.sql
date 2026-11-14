@@ -215,3 +215,43 @@ create policy "reminders: own data"
   on reminders for all using (professional_id = my_professional_id());
 create policy "conversation_history: own data"
   on conversation_history for all using (professional_id = my_professional_id());
+
+-- ──────────────────────────────────────────────
+-- ASSISTENTE PESSOAL (migration 0008)
+-- ──────────────────────────────────────────────
+create table personal_reminders (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  text              text not null check (char_length(text) between 1 and 500),
+  remind_at         timestamptz not null,
+  status            text not null default 'pending' check (
+                      status in ('pending','sent','failed','cancelled')
+                    ),
+  sent_at           timestamptz,
+  error_message     text,
+  created_at        timestamptz not null default now()
+);
+create index personal_reminders_due_idx
+  on personal_reminders(remind_at)
+  where status = 'pending';
+create index personal_reminders_professional_idx
+  on personal_reminders(professional_id, remind_at);
+
+create table assistant_messages (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  role              text not null check (role in ('user','assistant')),
+  content           text not null,
+  actions           jsonb,
+  created_at        timestamptz not null default now()
+);
+create index assistant_messages_lookup_idx
+  on assistant_messages(professional_id, created_at desc);
+
+alter table personal_reminders enable row level security;
+alter table assistant_messages enable row level security;
+
+create policy "personal_reminders: own data"
+  on personal_reminders for all using (professional_id = my_professional_id());
+create policy "assistant_messages: own data"
+  on assistant_messages for all using (professional_id = my_professional_id());

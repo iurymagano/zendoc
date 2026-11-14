@@ -15,6 +15,7 @@ import {
   Menu,
   MessageSquare,
   MessagesSquare,
+  Sparkles,
   Tag,
   Users,
   X,
@@ -27,8 +28,9 @@ type Item = { href: string; label: string; icon: ComponentType<{ className?: str
 const PRIMARY: Item[] = [
   { href: '/dashboard', label: 'Visão geral', icon: LayoutDashboard },
   { href: '/agenda', label: 'Agenda', icon: CalendarDays },
+  { href: '/assistente', label: 'Assistente', icon: Sparkles },
   { href: '/conversas', label: 'Conversas', icon: MessagesSquare },
-  { href: '/pacientes', label: 'Pacientes', icon: Users },
+  { href: '/clientes', label: 'Clientes', icon: Users },
 ];
 
 const SETTINGS: Item[] = [

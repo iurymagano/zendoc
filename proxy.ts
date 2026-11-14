@@ -8,8 +8,9 @@ export default auth((req) => {
   const isDashboard =
     path.startsWith('/dashboard') ||
     path.startsWith('/agenda') ||
+    path.startsWith('/assistente') ||
     path.startsWith('/conversas') ||
-    path.startsWith('/pacientes') ||
+    path.startsWith('/clientes') ||
     path.startsWith('/configuracoes') ||
     path.startsWith('/onboarding') ||
     path.startsWith('/documentos');

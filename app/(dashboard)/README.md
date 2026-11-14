@@ -1,7 +1,7 @@
 # app/(dashboard)/
 
 Route group com as páginas protegidas por autenticação (dashboard,
-configurações, agenda, pacientes). O `proxy.ts` (raiz) redireciona para
+configurações, agenda, clientes, assistente). O `proxy.ts` (raiz) redireciona para
 `/login` se não autenticado.
 
 ## layout.tsx
@@ -20,24 +20,25 @@ sidebar lateral (antes era uma navbar no topo).
 ## Subpastas
 
 - [dashboard/](./dashboard/) — visão geral após login.
+- [assistente/](./assistente/) — chat com a IA para gerenciar a agenda e criar lembretes pessoais.
 - [configuracoes/](./configuracoes/) — telas de configuração (disponibilidade,
   exceções, Google Agenda, WhatsApp, assinatura).
-- [pacientes/](./pacientes/) — cadastro e gestão manual de pacientes.
+- [clientes/](./clientes/) — cadastro e gestão manual de clientes.
 - [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) dos agendamentos.
 - [conversas/](./conversas/) — caixa de conversas do WhatsApp + handoff (pausar a IA).
 
 ## dashboard/page.tsx
 
 **O que faz:** Server Component que busca o `professional` vinculado ao usuário
-logado, conta agendamentos futuros, pacientes e blocos semanais ativos. Exibe:
+logado, conta agendamentos futuros, clientes e blocos semanais ativos. Exibe:
 
 - [`<PageHeader>`](../../components/dashboard/README.md) com saudação, plano e
   badge de status (trial/ativo/atraso/cancelado)
 - [`<PlanStatusBanner>`](../../components/billing/README.md) — alerta quando o
   plano exige atenção (past_due, cancelled, trial terminando)
-- Três `StatCard` com métricas (próximas consultas, pacientes, blocos ativos)
+- Três `StatCard` com métricas (próximos atendimentos, clientes, blocos ativos)
 - Card CTA "Configure sua agenda" (quando `availability_weekly` ainda está vazio)
-- Grid 2×2 de `ActionCard` com atalhos para agenda, pacientes, disponibilidade
+- Grid 2×2 de `ActionCard` com atalhos para agenda, clientes, disponibilidade
   e WhatsApp
 
 Redireciona para `/onboarding/step-1` se o perfil ainda não foi criado.

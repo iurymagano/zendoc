@@ -16,8 +16,9 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 | `/configuracoes/disponibilidade`        | página | `(dashboard)/configuracoes/disponibilidade/page.tsx`       |
 | `/configuracoes/excecoes`               | página | `(dashboard)/configuracoes/excecoes/page.tsx`              |
 | `/configuracoes/whatsapp`               | página | `(dashboard)/configuracoes/whatsapp/page.tsx`              |
-| `/pacientes`                            | página | `(dashboard)/pacientes/page.tsx`                           |
-| `/pacientes/[id]`                       | página | `(dashboard)/pacientes/[id]/page.tsx`                      |
+| `/clientes`                             | página | `(dashboard)/clientes/page.tsx` (`/pacientes` redireciona) |
+| `/clientes/[id]`                        | página | `(dashboard)/clientes/[id]/page.tsx`                       |
+| `/assistente`                           | página | `(dashboard)/assistente/page.tsx`                          |
 | `/agenda`                               | página | `(dashboard)/agenda/page.tsx`                              |
 | `/api/auth/*`                           | API    | `api/auth/[...nextauth]/route.ts`                          |
 | `/api/auth/register`                    | API    | `api/auth/register/route.ts`                               |
@@ -27,6 +28,10 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 | `/api/availability/exceptions/[id]`     | API    | `api/availability/exceptions/[id]/route.ts`                |
 | `/api/ai/test`                          | API    | `api/ai/test/route.ts`                                     |
 | `/api/reminders/dispatch`               | API    | `api/reminders/dispatch/route.ts`                          |
+| `/api/assistant/chat`                   | API    | `api/assistant/chat/route.ts`                              |
+| `/api/assistant/messages`               | API    | `api/assistant/messages/route.ts`                          |
+| `/api/assistant/reminders`              | API    | `api/assistant/reminders/route.ts`                         |
+| `/api/assistant/reminders/[id]/cancel`  | API    | `api/assistant/reminders/[id]/cancel/route.ts`             |
 | `/api/patients`                         | API    | `api/patients/route.ts`                                    |
 | `/api/patients/[id]`                    | API    | `api/patients/[id]/route.ts`                               |
 | `/api/appointments`                     | API    | `api/appointments/route.ts`                                |

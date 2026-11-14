@@ -218,6 +218,88 @@ Legenda:
 
 ---
 
+## Sprint 3.6 — Público amplo + Assistente pessoal (em andamento)
+
+> Pedido do Iury (14/11/2026): abrir o IAzen para qualquer pessoa que atende
+> com hora marcada (não só saúde) e ter um chat com a própria IA para cuidar da
+> agenda e dos lembretes de quem usa. Tabelas e colunas **não** foram
+> renomeadas (`patients`, `appointments`...): só o texto visível mudou.
+
+### Público amplo (cliente / atendimento)
+
+- [x] Texto visível em linguagem genérica: "cliente(s)" e "atendimento" no lugar
+  de "paciente" e "consulta"; nunca "consultório" (dashboard, agenda, conversas,
+  configurações, documentos, mensagens de erro das APIs, READMEs)
+- [x] Página `/pacientes` virou `/clientes` (pasta
+  `app/(dashboard)/clientes/`); `next.config.ts` redireciona `/pacientes` e
+  `/pacientes/:id` → `/clientes` (rota de API `/api/patients` mantida)
+- [x] Prompt da secretária do WhatsApp genérico, adaptado à `specialty` do
+  profissional (`lib/ai/prompt-builder.ts` + 4 testes)
+- [x] Onboarding: lista ampla de áreas de atuação (21 opções) + "Outra" com
+  campo livre (até 60 caracteres); `POST /api/onboarding/profile` aceita texto
+  livre em `specialty`
+- [x] Declaração de comparecimento e política de privacidade sem vocabulário de
+  saúde; privacidade passa a citar o Assistente pessoal e os lembretes pessoais
+- [x] Eventos do Google Agenda de compromissos pessoais (sem cliente) usam o
+  título em vez de "paciente — consulta"
+- [ ] Landing: `components/landing/ReminderTimeline.tsx` e `HeroChat.tsx` ainda
+  têm texto de saúde (área da designer — alinhar com ela)
+- [ ] Renomear `patients`/`patient_*` no banco e nas rotas `/api/patients`
+  (decisão adiada: só vale a pena se o custo de manter o nome antigo atrapalhar)
+
+### Assistente pessoal (chat com a IA da própria agenda)
+
+- [x] Migration `supabase/migrations/0008_assistente_pessoal.sql` (tabelas
+  `personal_reminders` e `assistant_messages`, índices, RLS) — **aplicada no
+  Supabase de produção** e espelhada em `supabase/schema.sql`
+- [x] Tipos `PersonalReminder`, `AssistantMessage` em `types/database.ts`
+- [x] `lib/assistant/` — loop de tool use (Claude, limite de 8 iterações), 10
+  ferramentas com validação de entrada (zod), executor sempre filtrando pelo
+  `professional_id` da sessão, prompt em dois blocos (estável cacheado + data/hora
+  atual em America/Sao_Paulo) e 5 suítes de teste
+  - [x] Agenda: listar, ver horários livres, criar atendimento, criar compromisso
+    pessoal, cancelar e remarcar (com `confirmed`), marcar dia de folga
+  - [x] Lembretes: criar, listar e cancelar
+  - [x] Cancelar/remarcar só com confirmação explícita no chat; o cliente **não**
+    é avisado automaticamente (a resposta lembra disso)
+  - [x] Compromisso pessoal = `appointments` manual com `patient_phone` vazio
+    (sem lembrete para cliente; aparece na agenda e no Google Agenda)
+- [x] `POST /api/assistant/chat` (auth + bloqueio 402 fora de
+  `trialing`/`active`), `GET /api/assistant/messages`,
+  `GET /api/assistant/reminders`, `POST /api/assistant/reminders/[id]/cancel`
+- [x] Página `/assistente` (chat em shadcn + lembretes próximos com cancelar +
+  recentes), item "Assistente" na Sidebar, rota protegida em `proxy.ts`
+- [x] Cron de lembretes (`/api/reminders/dispatch`) também envia os lembretes
+  pessoais vencidos, por WhatsApp, para o telefone do próprio profissional; sem
+  plano ativo / WhatsApp / telefone válido o lembrete vira `failed` com o motivo
+- [x] Teste real do chat com conta de QA (criar atendimento, consultar agenda,
+  lembrete a ~2 min, cancelar com confirmação)
+- [ ] Testar o **envio real** do lembrete pessoal por WhatsApp (a conta de QA
+  não tem instância conectada; só o caminho "falhou com motivo" foi exercitado)
+- [ ] Conferir a página `/assistente` com print (layout desktop e celular)
+- [ ] Testar o bloqueio 402 do chat com plano `past_due`/`cancelled`
+- [ ] Endurecer a confirmação de cancelar/remarcar: hoje é só prompt + flag
+  `confirmed` na ferramenta (guarda "macia"); considerar um token de
+  confirmação emitido pelo servidor
+- [ ] Avisar o cliente (opcional, pedindo OK) quando o atendimento dele for
+  cancelado ou remarcado pelo Assistente
+- [ ] Editar um compromisso pessoal pela agenda: o formulário valida telefone e
+  falharia (cancelar funciona)
+- [ ] Resumo diário/semanal da agenda enviado pelo Assistente por WhatsApp
+- [ ] Recebimento de pedidos pelo WhatsApp do próprio profissional (hoje o chat
+  é só na página `/assistente`)
+
+### Bugs encontrados no caminho (fora do escopo, a corrigir)
+
+- [ ] `lib/availability/slots.ts` usa o fuso do servidor: em produção (UTC) a
+  comparação de conflito/horário ocupado desloca 3 h — padronizar em
+  America/Sao_Paulo (-03:00)
+- [ ] `PATCH /api/appointments/[id]` não reagenda os lembretes pendentes quando
+  `starts_at` muda (já existe o helper `rescheduleAppointmentReminders` em
+  `lib/appointments/reminders.ts`, usado pelo Assistente)
+
+---
+
 ## Sprint 4 — Pagamentos (em andamento)
 
 - [x] Setup Stripe (produto + price R$297/mês) — script `npm run stripe:setup`
@@ -475,7 +557,7 @@ Legenda:
     `POST /api/appointments`): 11 dígitos + checksum opcional
     (em [lib/patients/cpf.ts](lib/patients/cpf.ts))
   - [x] Input com máscara `000.000.000-00` em
-    [/pacientes](app/(dashboard)/pacientes/page.tsx) e no form de
+    [/pacientes](app/(dashboard)/clientes/page.tsx) e no form de
     [/agenda](app/(dashboard)/agenda/page.tsx)
   - [x] Exibir CPF na lista de pacientes e no autocomplete
   - [x] Atualizar o schema completo em [CLAUDE.md](CLAUDE.md)

@@ -463,7 +463,48 @@ create policy "reminders: own data"
   on reminders for all using (professional_id = my_professional_id());
 create policy "conversation_history: own data"
   on conversation_history for all using (professional_id = my_professional_id());
+
+-- ASSISTENTE PESSOAL (migration 0008 — chat do dono com a IA + lembretes pessoais)
+create table personal_reminders (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  text              text not null check (char_length(text) between 1 and 500),
+  remind_at         timestamptz not null,
+  status            text not null default 'pending' check (
+                      status in ('pending','sent','failed','cancelled')
+                    ),
+  sent_at           timestamptz,
+  error_message     text,
+  created_at        timestamptz not null default now()
+);
+create index personal_reminders_due_idx
+  on personal_reminders(remind_at) where status = 'pending';
+create index personal_reminders_professional_idx
+  on personal_reminders(professional_id, remind_at);
+
+create table assistant_messages (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  role              text not null check (role in ('user','assistant')),
+  content           text not null,
+  actions           jsonb,            -- ações executadas no turno (só no assistant)
+  created_at        timestamptz not null default now()
+);
+create index assistant_messages_lookup_idx
+  on assistant_messages(professional_id, created_at desc);
+
+alter table personal_reminders enable row level security;
+alter table assistant_messages enable row level security;
+create policy "personal_reminders: own data"
+  on personal_reminders for all using (professional_id = my_professional_id());
+create policy "assistant_messages: own data"
+  on assistant_messages for all using (professional_id = my_professional_id());
 ```
+
+> As demais tabelas do projeto (`services`, `recurrences`, `google_*`...) vivem em
+> `supabase/schema.sql` e `supabase/migrations/`; este bloco mostra o núcleo.
+> O vocabulário da interface é "cliente"/"atendimento", mas as tabelas seguem
+> `patients`/`appointments` (sem renomear).
 
 ---
 
@@ -586,6 +627,30 @@ export interface ConversationMessage {
   created_at: string;
 }
 
+export type PersonalReminderStatus = 'pending' | 'sent' | 'failed' | 'cancelled';
+
+// Lembrete pessoal criado pelo Assistente e enviado pelo cron (types/database.ts)
+export interface PersonalReminder {
+  id: string;
+  professional_id: string;
+  text: string;
+  remind_at: string;
+  status: PersonalReminderStatus;
+  sent_at: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
+// Mensagem do chat do Assistente pessoal (tabela assistant_messages)
+export interface AssistantMessage {
+  id: string;
+  professional_id: string;
+  role: ConversationRole;
+  content: string;
+  actions: string[] | null;
+  created_at: string;
+}
+
 // Resposta esperada da Claude API — sempre JSON puro
 export interface AIResponse {
   action: AIAction;
@@ -656,8 +721,8 @@ export function buildSystemPrompt(
       ? 'Use linguagem formal e objetiva.'
       : 'Use linguagem amigável e acolhedora.';
 
-  return `Você é a secretária virtual do consultório de ${professional.name}${professional.specialty ? `, ${professional.specialty}` : ''}.
-Nunca se apresente como IA — você é a secretária do consultório.
+  return `Você é a secretária virtual de ${professional.name}${professional.specialty ? `, ${professional.specialty}` : ''}.
+Nunca se apresente como IA — você é a secretária de quem atende.
 ${tone}
 ${professional.address ? `Endereço: ${professional.address}` : ''}
 ${professional.custom_instructions ? `Instruções especiais: ${professional.custom_instructions}` : ''}
@@ -670,7 +735,7 @@ REGRAS:
 - Ao agendar/remarcar, copie EXATAMENTE starts_at e ends_at do horário escolhido
   (na lista). Nunca construa nem altere a data/hora — use o ISO exato, com ano.
 - Responda em no máximo 3 frases.
-- Para cancelamentos, só cancele consultas futuras.
+- Para cancelamentos, só cancele atendimentos futuros.
 
 RESPONDA SEMPRE com JSON puro e válido, sem markdown:
 {
@@ -1076,7 +1141,8 @@ export default auth((req) => {
   const isDashboard =
     path.startsWith('/dashboard') ||
     path.startsWith('/agenda') ||
-    path.startsWith('/pacientes') ||
+    path.startsWith('/clientes') ||
+    path.startsWith('/assistente') ||
     path.startsWith('/configuracoes') ||
     path.startsWith('/onboarding');
   const isAuth = path.startsWith('/login') || path.startsWith('/register');
@@ -1145,6 +1211,36 @@ o webhook do WhatsApp já ignora mensagens fora de `['trialing','active']`.
 - Retorna sempre JSON puro — sem markdown, sem texto fora do JSON
 - Se parse falhar → fallback para `action: reply` com mensagem genérica
 - Histórico limitado a 10 mensagens para controlar custo (~R$2,70/cliente/mês)
+
+**Assistente pessoal (`/assistente`):**
+
+- Chat do PRÓPRIO profissional com a IA (Claude com tool use, modelo `AI_MODEL`);
+  não confundir com a secretária do WhatsApp, que fala com os clientes.
+- O `professional_id` vem sempre da sessão (`auth()`); nenhuma ferramenta aceita
+  `professional_id` na entrada. Toda query filtra por ele (service key ignora RLS).
+- Ferramentas: `list_agenda`, `list_free_slots`, `create_appointment`,
+  `create_personal_event`, `set_day_off`, `cancel_appointment`,
+  `reschedule_appointment`, `create_reminder`, `list_reminders`, `cancel_reminder`.
+  Entrada validada com zod; loop limitado a 8 iterações.
+- Cancelar/remarcar exige confirmação no chat (`confirmed=true` só depois que o
+  usuário confirma). Cancelar/remarcar muda só a agenda: o cliente NÃO é avisado.
+- Compromisso pessoal = `appointments` com `booked_via='manual'` e `patient_phone`
+  vazio (não gera lembrete para cliente; vai para o Google Agenda com o título).
+- Lembrete pessoal vai por WhatsApp para `professionals.phone`, enviado pelo mesmo
+  cron de 1 min (`/api/reminders/dispatch`). Sem plano `trialing`/`active`, sem
+  WhatsApp conectado ou sem telefone válido → `failed` com `error_message`.
+- Plano fora de `trialing`/`active` → `POST /api/assistant/chat` responde 402.
+- Datas sempre em America/Sao_Paulo (-03:00); o prompt recebe data/hora atuais.
+- Histórico em `assistant_messages` (últimas 20 mensagens vão para a IA).
+
+**Endpoints do Assistente (todos começam com `auth()`):**
+
+- `POST /api/assistant/chat` — `{ message }` (1–2000 chars) → `{ reply, actions }`;
+  402 se o plano não estiver `trialing`/`active`. `maxDuration = 60`.
+- `GET /api/assistant/messages` — histórico do chat (`assistant_messages`).
+- `GET /api/assistant/reminders` — `{ pending, recent }` (lembretes pessoais).
+- `POST /api/assistant/reminders/[id]/cancel` — cancela um lembrete pendente.
+- Código em `lib/assistant/` (README com o fluxo completo); UI em `/assistente`.
 
 **Plano:**
 
