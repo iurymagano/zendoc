@@ -6,16 +6,21 @@ import {
   addMinutesToIso,
   buildCalendarHint,
   buildIso,
+  calendarValueToIso,
   dayRangeIso,
   describeNow,
   diffDays,
   formatBrDate,
   formatBrDateTime,
+  formatLongBrDate,
+  formatLongBrDateTime,
   formatTime,
   isValidDate,
   isValidTime,
+  saoPauloInstantMs,
   saoPauloParts,
   toSaoPauloIso,
+  weekdayOfDate,
   weekdayShortOf,
 } from './datetime';
 
@@ -134,4 +139,42 @@ test('buildCalendarHint usa a data de São Paulo, não a UTC', () => {
   // 02:00 UTC de 15/11 ainda é 23:00 de 14/11 em São Paulo.
   const hint = buildCalendarHint(new Date('2026-11-15T02:00:00Z'), 1);
   assert.match(hint, /^- sábado \(hoje\): 2026-11-14/);
+});
+
+test('formatos longos usam o relógio de São Paulo mesmo com o servidor em UTC', () => {
+  const original = process.env.TZ;
+  try {
+    for (const tz of ['UTC', 'Asia/Tokyo', 'America/Los_Angeles']) {
+      process.env.TZ = tz;
+      // 01:30Z de domingo 15/11 = 22:30 de sábado 14/11 em São Paulo.
+      const late = new Date('2026-11-15T01:30:00Z');
+      assert.equal(formatLongBrDate(late), 'sábado, 14 de novembro de 2026');
+      assert.equal(formatLongBrDateTime(late), 'sábado, 14 de novembro de 2026 às 22:30');
+      assert.equal(toSaoPauloIso(late), '2026-11-14T22:30:00-03:00');
+    }
+  } finally {
+    if (original === undefined) delete process.env.TZ;
+    else process.env.TZ = original;
+  }
+});
+
+test('weekdayOfDate e saoPauloInstantMs', () => {
+  assert.equal(weekdayOfDate('2026-11-16'), 1);
+  assert.ok(Number.isNaN(weekdayOfDate('2026-02-30x')));
+  assert.equal(
+    new Date(saoPauloInstantMs('2026-11-16', '08:00:00')).toISOString(),
+    '2026-11-16T11:00:00.000Z',
+  );
+  assert.equal(
+    new Date(saoPauloInstantMs('2026-11-16', '08:00')).toISOString(),
+    '2026-11-16T11:00:00.000Z',
+  );
+  assert.ok(Number.isNaN(saoPauloInstantMs('2026-11-16', '8h')));
+});
+
+test('calendarValueToIso ancora data de dia inteiro à meia-noite de São Paulo', () => {
+  // "2026-11-18" sem hora: meia-noite de SP = 03:00Z (não 00:00Z).
+  assert.equal(calendarValueToIso('2026-11-18'), '2026-11-18T03:00:00.000Z');
+  // Com hora e offset, só normaliza para UTC.
+  assert.equal(calendarValueToIso('2026-11-18T10:00:00-03:00'), '2026-11-18T13:00:00.000Z');
 });

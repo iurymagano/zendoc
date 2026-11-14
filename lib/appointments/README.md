@@ -45,3 +45,25 @@ mudanças num agendamento.
 **Depende de:** `@/lib/supabase`.
 
 **Notas:** best-effort — erros são só logados.
+
+---
+
+## personal.ts
+
+**O que faz:** regras puras sobre **compromisso pessoal** (agendamento manual
+sem cliente: `patient_phone` vazio, título em `patient_name`). Compartilhado por
+API, agenda (tela), cron de lembretes e Assistente.
+
+**Exporta:**
+
+- `isPersonalCommitment(phone): boolean` — `true` se o telefone for vazio ou sem
+  nenhum dígito. Esse tipo de item **nunca** recebe mensagem de WhatsApp.
+- `resolvePhonePatch(input, currentPhone): { ok: true, value: string | undefined } | { ok: false, error }`
+  — decide o telefone no `PATCH /api/appointments/[id]`: `undefined` = não mexe;
+  agendamento de cliente exige telefone válido (normalizado) e não aceita
+  esvaziar; compromisso pessoal aceita telefone vazio (sem mudança) e recusa
+  telefone preenchido (para atender alguém, crie um novo agendamento).
+
+**Depende de:** `@/lib/phone` (via import relativo, para rodar em `node:test`).
+
+**Notas:** coberto por `personal.test.ts`.

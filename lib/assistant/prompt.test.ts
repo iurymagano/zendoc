@@ -18,7 +18,11 @@ test('prompt estável não presume área da saúde', () => {
 
 test('prompt estável inclui as regras de confirmação e o aviso de cliente não notificado', () => {
   const p = buildStablePrompt(PROF, []);
-  assert.match(p, /confirmed=true/);
+  assert.match(p, /prepare_cancel_appointment/);
+  assert.match(p, /prepare_reschedule_appointment/);
+  assert.match(p, /confirm_pending_action/);
+  assert.match(p, /PRÓXIMA mensagem/);
+  assert.doesNotMatch(p, /confirmed=true/);
   assert.match(p, /NÃO é avisado automaticamente/);
 });
 

@@ -18,7 +18,7 @@ lista. Coberto por `prompt-builder.test.ts` (sem vocabulário de saúde).
 
 **Exporta:**
 
-- `buildSystemPrompt(professional, availableSlots, patientContext?, services?): string`
+- `buildSystemPrompt(professional, availableSlots, patientContext?, services?, now = new Date()): string`
   — cada horário é listado com o **ISO exato** (`starts_at`/`ends_at`, com ano e
   offset `-03:00`) para a IA **copiar verbatim** no agendamento, em vez de
   construir a data na mão. Inclui também a data de hoje como âncora. (Sem isso a
@@ -26,12 +26,14 @@ lista. Coberto por `prompt-builder.test.ts` (sem vocabulário de saúde).
   bloco **SERVIÇOS OFERECIDOS** (nome · duração · preço) para a IA responder
   dúvidas de valor/duração sem escalar.
 
-**Depende de:** `@/types/database`, `@/lib/availability/slots` (`Slot`),
-`date-fns`, `date-fns/locale` (pt-BR).
+**Depende de:** `@/types/database`, `@/lib/availability/compute` (`Slot`),
+`@/lib/assistant/datetime` (datas em pt-BR no fuso de São Paulo).
 
 **Notas:**
 
-- Formata a lista de slots em pt-BR (`"segunda-feira, 05 de maio às 10:00"`).
+- Formata a lista de slots em pt-BR (`"segunda-feira, 05 de maio às 10:00"`) e a
+  data de "hoje" **sempre no relógio de São Paulo**, qualquer que seja o `TZ` do
+  servidor (`now` é injetável para teste).
 - Instrui a IA a responder **sempre** em JSON puro (sem markdown). Os erros de
   parse caem no fallback em `processor.ts`.
 - Tom da resposta muda entre `amigável` e `formal` conforme `professional.tone`.

@@ -36,8 +36,10 @@ Os contadores do nível raiz são dos lembretes de atendimento (clientes);
 1. Query busca até 50 lembretes `pending` com `scheduled_for <= now`, já com
    join em `appointment` e `professional`.
 2. Para cada lembrete, decide o desfecho:
-   - Compromisso sem cliente (`patient_phone` vazio — compromisso pessoal criado
-     pelo Assistente) → marca `status = 'cancelled'` ("Compromisso sem cliente").
+   - Compromisso sem cliente (`patient_phone` vazio ou sem dígitos, via
+     `isPersonalCommitment` — compromisso pessoal criado pelo Assistente ou
+     editado na agenda) → marca `status = 'cancelled'` ("Compromisso sem
+     cliente"). Nunca envia mensagem para telefone vazio.
    - Appointment cancelado/no-show → marca `status = 'cancelled'`.
    - Plano `past_due`/`cancelled` → marca `status = 'failed'` com motivo.
    - WhatsApp não conectado → marca `status = 'failed'` com motivo.

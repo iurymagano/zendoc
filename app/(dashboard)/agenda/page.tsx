@@ -40,6 +40,7 @@ import {
   formatTime,
 } from '@/components/agenda/calendar-utils';
 import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
+import { isPersonalCommitment } from '@/lib/appointments/personal';
 import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import type { Appointment, AppointmentStatus, Patient, Service } from '@/types/database';
 
@@ -293,8 +294,10 @@ export default function AgendaPage() {
     e.preventDefault();
     setFormError(null);
 
-    const phone = normalizePhoneBR(form.patient_phone);
-    if (!isValidPhoneBR(phone)) {
+    // Compromisso pessoal (criado pelo Assistente) não tem cliente: sem telefone.
+    const editingPersonal = !!editing && isPersonalCommitment(editing.patient_phone);
+    const phone = editingPersonal ? '' : normalizePhoneBR(form.patient_phone);
+    if (!editingPersonal && !isValidPhoneBR(phone)) {
       setFormError('Informe um telefone válido com DDD (ex.: (11) 91111-2222).');
       return;
     }
@@ -584,7 +587,14 @@ export default function AgendaPage() {
             )}
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Nome do cliente" htmlFor="ap_name">
+                <FormField
+                  label={
+                    editing && isPersonalCommitment(editing.patient_phone)
+                      ? 'Título do compromisso'
+                      : 'Nome do cliente'
+                  }
+                  htmlFor="ap_name"
+                >
                   <div className="relative">
                     <Input
                       id="ap_name"
@@ -599,7 +609,9 @@ export default function AgendaPage() {
                       required
                       maxLength={120}
                     />
-                    {suggestionsOpen && suggestions.length > 0 && (
+                    {suggestionsOpen &&
+                      suggestions.length > 0 &&
+                      !(editing && isPersonalCommitment(editing.patient_phone)) && (
                       <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto rounded-xl bg-popover ring-1 ring-border">
                         {suggestions.map((p) => (
                           <li key={p.id}>
@@ -621,26 +633,30 @@ export default function AgendaPage() {
                     )}
                   </div>
                 </FormField>
-                <FormField label="Telefone" htmlFor="ap_phone">
-                  <Input
-                    id="ap_phone"
-                    value={form.patient_phone}
-                    onChange={(e) => setForm((p) => ({ ...p, patient_phone: e.target.value }))}
-                    placeholder="5511999998888"
-                    required
-                  />
-                </FormField>
-                <FormField label="CPF (opcional)" htmlFor="ap_cpf">
-                  <Input
-                    id="ap_cpf"
-                    value={form.patient_cpf}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, patient_cpf: maskCpfInput(e.target.value) }))
-                    }
-                    placeholder="000.000.000-00"
-                    inputMode="numeric"
-                  />
-                </FormField>
+                {!(editing && isPersonalCommitment(editing.patient_phone)) && (
+                  <>
+                    <FormField label="Telefone" htmlFor="ap_phone">
+                      <Input
+                        id="ap_phone"
+                        value={form.patient_phone}
+                        onChange={(e) => setForm((p) => ({ ...p, patient_phone: e.target.value }))}
+                        placeholder="5511999998888"
+                        required
+                      />
+                    </FormField>
+                    <FormField label="CPF (opcional)" htmlFor="ap_cpf">
+                      <Input
+                        id="ap_cpf"
+                        value={form.patient_cpf}
+                        onChange={(e) =>
+                          setForm((p) => ({ ...p, patient_cpf: maskCpfInput(e.target.value) }))
+                        }
+                        placeholder="000.000.000-00"
+                        inputMode="numeric"
+                      />
+                    </FormField>
+                  </>
+                )}
               </div>
 
               {servicesList.length > 0 && (

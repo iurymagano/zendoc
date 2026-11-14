@@ -282,25 +282,50 @@ Legenda:
   não tem instância conectada; só o caminho "falhou com motivo" foi exercitado)
 - [ ] Conferir a página `/assistente` com print (layout desktop e celular)
 - [ ] Testar o bloqueio 402 do chat com plano `past_due`/`cancelled`
-- [ ] Endurecer a confirmação de cancelar/remarcar: hoje é só prompt + flag
+- [x] Endurecer a confirmação de cancelar/remarcar: hoje é só prompt + flag
   `confirmed` na ferramenta (guarda "macia"); considerar um token de
   confirmação emitido pelo servidor
+  - [x] Feito: `prepare_cancel_appointment`/`prepare_reschedule_appointment`
+    gravam a ação em `assistant_pending_actions` (migration `0009`, **aplicada
+    em produção**, aditiva) e `confirm_pending_action` só a executa numa
+    requisição **posterior** (outra mensagem do usuário), em até 15 min, uma vez
+    (reserva `pending → done` antes de executar) e revalidando conflito/horário;
+    não existe mais ferramenta que cancele/remarque direto (`lib/assistant/pending.ts`
+    + `pending.test.ts`; smoke com a conta de QA: confirmar na mesma requisição é
+    recusado)
+  - [ ] Cobrir `prepare`/`confirm` do executor com teste automatizado (hoje só
+    as regras puras de `pending.ts` têm teste; o fluxo com banco foi smoke manual)
 - [ ] Avisar o cliente (opcional, pedindo OK) quando o atendimento dele for
   cancelado ou remarcado pelo Assistente
-- [ ] Editar um compromisso pessoal pela agenda: o formulário valida telefone e
+  - Nota: **nenhum** fluxo do app avisa o cliente por WhatsApp quando o
+    profissional cancela/remarca (nem `POST /api/appointments/:id/cancel`, nem o
+    `PATCH`, nem o Assistente) — não há código para reaproveitar; o Assistente
+    devolve `client_notified: false` e o prompt manda avisar o profissional disso
+  - [ ] Ao remarcar, o lembrete 24h/2h que **já foi enviado** para o horário
+    antigo não é reenviado para o novo (só os `pending` são recalculados)
+- [x] Editar um compromisso pessoal pela agenda: o formulário valida telefone e
   falharia (cancelar funciona)
+  - Feito: `PATCH /api/appointments/[id]` aceita telefone vazio em compromisso
+    pessoal (`lib/appointments/personal.ts`), a página da agenda esconde
+    telefone/CPF nesse caso e o cron nunca envia para telefone vazio
 - [ ] Resumo diário/semanal da agenda enviado pelo Assistente por WhatsApp
 - [ ] Recebimento de pedidos pelo WhatsApp do próprio profissional (hoje o chat
   é só na página `/assistente`)
 
 ### Bugs encontrados no caminho (fora do escopo, a corrigir)
 
-- [ ] `lib/availability/slots.ts` usa o fuso do servidor: em produção (UTC) a
+- [x] `lib/availability/slots.ts` usa o fuso do servidor: em produção (UTC) a
   comparação de conflito/horário ocupado desloca 3 h — padronizar em
   America/Sao_Paulo (-03:00)
-- [ ] `PATCH /api/appointments/[id]` não reagenda os lembretes pendentes quando
+  - Feito: cálculo puro em `lib/availability/compute.ts` (testes com `TZ=UTC`,
+    Tóquio e Los Angeles); `prompt-builder`, `processor`, `listFreeSlots` do
+    Assistente e eventos de dia inteiro do Google também no relógio de São Paulo
+- [x] `PATCH /api/appointments/[id]` não reagenda os lembretes pendentes quando
   `starts_at` muda (já existe o helper `rescheduleAppointmentReminders` em
   `lib/appointments/reminders.ts`, usado pelo Assistente)
+- [x] `GET /api/professionals` devolve `ai_enabled` (achado do designer)
+  - [ ] Nenhuma tela consome `ai_enabled` ainda (Sidebar/serviços): decidir onde
+    mostrar o indicador "secretária pausada"
 
 ---
 

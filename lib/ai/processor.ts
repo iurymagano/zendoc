@@ -1,6 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { saoPauloParts } from '@/lib/assistant/datetime';
 import { buildSystemPrompt } from './prompt-builder';
 import { executeAction } from './executor';
 import { setNeedsAttention } from '@/lib/conversations/state';
@@ -55,10 +54,15 @@ async function buildPatientContext(
       ['scheduled', 'confirmed', 'pending_approval'].includes(a.status),
   );
 
-  const d = (iso: string) =>
-    format(new Date(iso), "dd/MM/yyyy", { locale: ptBR });
-  const dt = (iso: string) =>
-    format(new Date(iso), "dd/MM 'às' HH:mm", { locale: ptBR });
+  // Relógio de Brasília, não o fuso do servidor.
+  const d = (iso: string) => {
+    const p = saoPauloParts(new Date(iso));
+    return `${String(p.day).padStart(2, '0')}/${String(p.month).padStart(2, '0')}/${p.year}`;
+  };
+  const dt = (iso: string) => {
+    const p = saoPauloParts(new Date(iso));
+    return `${String(p.day).padStart(2, '0')}/${String(p.month).padStart(2, '0')} às ${p.time}`;
+  };
 
   const lines = ['CONTEXTO DO CLIENTE (já cadastrado — personalize o atendimento):'];
   if (patient?.name) lines.push(`- Nome: ${patient.name}`);

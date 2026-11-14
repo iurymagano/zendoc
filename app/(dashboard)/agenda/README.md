@@ -39,6 +39,13 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
   O telefone é normalizado (`normalizePhoneBR`: `55` + DDD + número) antes do
   envio — o mesmo número digitado com/sem DDI cai no mesmo cliente.
 
+**Compromisso pessoal (sem cliente):** ao editar um item com `patient_phone`
+vazio (`isPersonalCommitment`), o form esconde telefone/CPF e a lista de
+clientes, rotula o nome como "Título do compromisso" e envia `patient_phone`
+vazio — o `PATCH` aceita (não exige telefone) e nenhum lembrete é enviado a
+cliente. Ao mudar o horário de um atendimento, o servidor reagenda os lembretes
+24h/2h pendentes.
+
 **Cancelamento:** `window.confirm` + `window.prompt` (motivo) →
 `POST /api/appointments/:id/cancel`.
 
@@ -63,7 +70,7 @@ de uma delas há o aviso da série e o botão "Encerrar série"
 - `@/components/agenda/{CalendarMonth,CalendarWeek,calendar-utils}`
 - `@/components/ui/{button,input,textarea,card,form-field}`
 - `GET /api/appointments`, `POST/PATCH /api/appointments`, `POST /api/appointments/:id/cancel`
-- `@/lib/patients/cpf`, `date-fns`
+- `@/lib/patients/cpf`, `@/lib/appointments/personal`, `date-fns`
 
 **Notas:**
 

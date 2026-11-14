@@ -10,7 +10,7 @@ Artefatos de banco de dados do IAzen para rodar no Supabase.
 
 **Como usar:** Cole o conteúdo no SQL Editor do Supabase (projeto novo) e execute. Depois copie `Project URL`, `anon key` e `service_role key` de Project Settings → API para o `.env.local`.
 
-**Cobre:** `professionals`, `availability_weekly`, `availability_exceptions`, `patients`, `appointments`, `reminders`, `conversation_history`, `personal_reminders` e `assistant_messages` (Assistente pessoal), a função `set_updated_at()`, a função/trigger `create_appointment_reminders()`, a função `my_professional_id()` e as policies RLS por profissional.
+**Cobre:** `professionals`, `availability_weekly`, `availability_exceptions`, `patients`, `appointments`, `reminders`, `conversation_history`, `personal_reminders`, `assistant_messages` e `assistant_pending_actions` (Assistente pessoal), a função `set_updated_at()`, a função/trigger `create_appointment_reminders()`, a função `my_professional_id()` e as policies RLS por profissional.
 
 **Notas:** Referencia `auth.users` e `auth.uid()` do Supabase Auth. Não é totalmente idempotente — feito para projeto novo; rodar duas vezes falha em `create table`/`create policy` já existentes. Já inclui a coluna `patients.cpf` + índice único parcial `patients_professional_cpf_idx`.
 
@@ -28,3 +28,4 @@ Alterações incrementais para bancos **já provisionados** (projeto novo usa s�
 - `0006_conversation_needs_attention.sql` — `needs_attention` em `conversation_state` (badge de conversas).
 - `0007_patient_messaging_optout.sql` — `patients.messaging_opted_out` (LGPD: cliente não recebe lembretes).
 - `0008_assistente_pessoal.sql` — **aditiva**: cria `personal_reminders` (lembretes pessoais enviados pelo cron de 1 min ao WhatsApp do próprio profissional) e `assistant_messages` (histórico do chat do Assistente, com `actions jsonb`), com índices e RLS `professional_id = my_professional_id()`. Tabela de histórico própria porque `conversation_history` é chaveada por telefone de cliente e alimenta `/conversas`.
+- `0009_assistente_confirmacao.sql` — **aditiva**: cria `assistant_pending_actions` (cancelar/remarcar "preparado" pelo Assistente, com `request_id`, validade de 15 min e `status` pending/done/replaced) para o servidor exigir o "sim" numa mensagem posterior. RLS `professional_id = my_professional_id()`.

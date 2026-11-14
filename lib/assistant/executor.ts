@@ -6,17 +6,21 @@
 //  - o input já chegou validado por parseToolInput (tools.ts);
 //  - nunca lança: erro de negócio vira `{ ok: false, error }` (a IA lê e explica
 //    ao usuário); erro inesperado é logado e vira mensagem genérica.
-import { format } from 'date-fns';
 import { createServerClient } from '@/lib/supabase';
 import { getAvailableSlots } from '@/lib/availability/slots';
 import { findConflictingAppointments } from '@/lib/appointments/conflicts';
+import { isPersonalCommitment } from '@/lib/appointments/personal';
 import {
   cancelPendingAppointmentReminders,
   rescheduleAppointmentReminders,
 } from '@/lib/appointments/reminders';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
 import { formatPhoneBR, isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
-import type { Appointment, Professional } from '@/types/database';
+import type {
+  Appointment,
+  AssistantPendingAction,
+  Professional,
+} from '@/types/database';
 import {
   addMinutesToIso,
   buildIso,
@@ -31,12 +35,18 @@ import {
   DEFAULT_APPOINTMENT_MIN,
   DEFAULT_PERSONAL_EVENT_MIN,
 } from './prompt';
+import { checkPendingConfirmable, pendingExpiry } from './pending';
 import { checkPersonalReminderDelivery } from './reminders';
 import type { ToolInput, ToolName } from './tools';
 
 export type ToolContext = {
   /** Profissional dono da sessão (linha completa de `professionals`). */
   professional: Professional;
+  /**
+   * Id desta requisição do chat (uma mensagem do usuário). Cancelar/remarcar só
+   * executam uma ação preparada em OUTRA requisição (ver pending.ts).
+   */
+  requestId: string;
   /** Injetável para teste; padrão = agora. */
   now?: Date;
 };
@@ -53,8 +63,6 @@ export type ToolOutcome =
 
 const MAX_PENDING_REMINDERS = 100;
 const ACTIVE = ['scheduled', 'confirmed', 'pending_approval'];
-const CONFIRM_ERROR =
-  'Falta a confirmação do usuário. Mostre qual item será alterado e peça um "sim" explícito; só então chame de novo com confirmed=true.';
 
 const fail = (error: string): ToolOutcome => ({ ok: false, error });
 
@@ -63,10 +71,14 @@ function ilikeExact(value: string): string {
   return value.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
 
-const isPersonal = (a: { patient_phone: string }) => !a.patient_phone;
+const isPersonal = (a: { patient_phone: string }) =>
+  isPersonalCommitment(a.patient_phone);
 
-function describeItem(a: Pick<Appointment, 'patient_name' | 'starts_at'>): string {
-  return `${a.patient_name} — ${formatBrDateTime(a.starts_at)}`;
+function describeItem(
+  a: Pick<Appointment, 'patient_name' | 'starts_at'>,
+  ref?: Date,
+): string {
+  return `${a.patient_name} — ${formatBrDateTime(a.starts_at, ref)}`;
 }
 
 function conflictError(
@@ -157,19 +169,18 @@ async function listFreeSlots(
   const to = input.date_to ?? '9999-12-31';
   const limit = input.limit ?? 20;
 
-  // Slot.start/end carregam o "relógio da agenda" nos campos locais do Date —
-  // a mesma premissa do prompt de agendamento do WhatsApp (lib/ai).
-  const inRange = slots.filter((s) => {
-    const d = format(s.start, 'yyyy-MM-dd');
-    return d >= from && d <= to;
-  });
+  // Slot.start/end são instantes reais; o relógio da agenda é o de São Paulo.
+  const withParts = slots.map((s) => ({
+    date: saoPauloParts(s.start).date,
+    range: `${formatTime(s.start.toISOString())}-${formatTime(s.end.toISOString())}`,
+  }));
+  const inRange = withParts.filter((s) => s.date >= from && s.date <= to);
 
   const byDate = new Map<string, string[]>();
   for (const s of inRange.slice(0, limit)) {
-    const d = format(s.start, 'yyyy-MM-dd');
-    const list = byDate.get(d) ?? [];
-    list.push(`${format(s.start, 'HH:mm')}-${format(s.end, 'HH:mm')}`);
-    byDate.set(d, list);
+    const list = byDate.get(s.date) ?? [];
+    list.push(s.range);
+    byDate.set(s.date, list);
   }
 
   return {
@@ -448,54 +459,89 @@ async function loadActiveAppointment(
   return { appt };
 }
 
-async function cancelAppointment(
+/**
+ * Guarda a ação preparada (cancelar/remarcar) para ser confirmada numa mensagem
+ * POSTERIOR. Só existe uma por profissional: preparar outra substitui a anterior.
+ */
+async function savePending(
   ctx: ToolContext,
-  input: ToolInput<'cancel_appointment'>,
-): Promise<ToolOutcome> {
-  if (!input.confirmed) return fail(CONFIRM_ERROR);
+  row: {
+    kind: 'cancel' | 'reschedule';
+    appointment_id: string;
+    new_starts_at?: string;
+    new_ends_at?: string;
+    reason?: string | null;
+    summary: string;
+  },
+): Promise<{ ok: true } | { ok: false }> {
   const supabase = createServerClient();
   const profId = ctx.professional.id;
+  const now = ctx.now ?? new Date();
 
-  const loaded = await loadActiveAppointment(profId, input.appointment_id);
-  if ('error' in loaded) return fail(loaded.error);
-
-  const { data, error } = await supabase
-    .from('appointments')
-    .update({
-      status: 'cancelled',
-      cancelled_by: 'professional',
-      cancellation_note: input.reason?.trim() || null,
-    })
-    .eq('id', input.appointment_id)
+  const { error: replaceError } = await supabase
+    .from('assistant_pending_actions')
+    .update({ status: 'replaced' })
     .eq('professional_id', profId)
-    .select()
-    .maybeSingle();
-  if (error || !data) {
-    console.error('assistente: erro ao cancelar:', error);
-    return fail('Erro ao cancelar.');
+    .eq('status', 'pending');
+  if (replaceError) {
+    console.error('assistente: erro ao substituir ações pendentes:', replaceError);
+    return { ok: false };
   }
 
-  await syncAppointmentToGoogle(data as Appointment);
+  const { error } = await supabase.from('assistant_pending_actions').insert({
+    professional_id: profId,
+    kind: row.kind,
+    appointment_id: row.appointment_id,
+    new_starts_at: row.new_starts_at ?? null,
+    new_ends_at: row.new_ends_at ?? null,
+    reason: row.reason ?? null,
+    summary: row.summary,
+    request_id: ctx.requestId,
+    expires_at: pendingExpiry(now).toISOString(),
+  });
+  if (error) {
+    console.error('assistente: erro ao preparar ação:', error);
+    return { ok: false };
+  }
+  return { ok: true };
+}
 
-  const label = describeItem(loaded.appt);
+const NEXT_STEP =
+  'Nada foi alterado ainda. Diga ao usuário exatamente o que será feito e peça confirmação; só chame confirm_pending_action depois que ele responder, na mensagem seguinte.';
+
+async function prepareCancel(
+  ctx: ToolContext,
+  input: ToolInput<'prepare_cancel_appointment'>,
+): Promise<ToolOutcome> {
+  const now = ctx.now ?? new Date();
+  const loaded = await loadActiveAppointment(ctx.professional.id, input.appointment_id);
+  if ('error' in loaded) return fail(loaded.error);
+
+  const summary = `Cancelar ${describeItem(loaded.appt, now)}`;
+  const saved = await savePending(ctx, {
+    kind: 'cancel',
+    appointment_id: loaded.appt.id,
+    reason: input.reason?.trim() || null,
+    summary,
+  });
+  if (!saved.ok) return fail('Erro ao preparar o cancelamento.');
+
   return {
     ok: true,
     data: {
-      cancelled: label,
-      client_notified: false,
+      pending: summary,
       had_client: !isPersonal(loaded.appt),
+      client_notified_automatically: false,
+      next_step: NEXT_STEP,
     },
-    action: `Cancelado: ${label}`,
   };
 }
 
-async function rescheduleAppointment(
+async function prepareReschedule(
   ctx: ToolContext,
-  input: ToolInput<'reschedule_appointment'>,
+  input: ToolInput<'prepare_reschedule_appointment'>,
 ): Promise<ToolOutcome> {
-  if (!input.confirmed) return fail(CONFIRM_ERROR);
   const now = ctx.now ?? new Date();
-  const supabase = createServerClient();
   const profId = ctx.professional.id;
 
   const loaded = await loadActiveAppointment(profId, input.appointment_id);
@@ -513,6 +559,89 @@ async function rescheduleAppointment(
   );
   const endIso = addMinutesToIso(startIso, input.duration_min ?? oldMinutes);
 
+  const conflicts = await findConflictingAppointments(profId, startIso, endIso, old.id);
+  if (conflicts.length > 0) return conflictError(conflicts);
+
+  const summary = `Remarcar ${old.patient_name}: ${formatBrDateTime(old.starts_at, now)} → ${formatBrDateTime(startIso, now)}`;
+  const saved = await savePending(ctx, {
+    kind: 'reschedule',
+    appointment_id: old.id,
+    new_starts_at: startIso,
+    new_ends_at: endIso,
+    summary,
+  });
+  if (!saved.ok) return fail('Erro ao preparar a remarcação.');
+
+  return {
+    ok: true,
+    data: {
+      pending: summary,
+      had_client: !isPersonal(old),
+      client_notified_automatically: false,
+      next_step: NEXT_STEP,
+    },
+  };
+}
+
+async function executeCancel(
+  ctx: ToolContext,
+  pending: AssistantPendingAction,
+): Promise<ToolOutcome> {
+  const supabase = createServerClient();
+  const profId = ctx.professional.id;
+
+  const loaded = await loadActiveAppointment(profId, pending.appointment_id);
+  if ('error' in loaded) return fail(loaded.error);
+
+  const { data, error } = await supabase
+    .from('appointments')
+    .update({
+      status: 'cancelled',
+      cancelled_by: 'professional',
+      cancellation_note: pending.reason?.trim() || null,
+    })
+    .eq('id', pending.appointment_id)
+    .eq('professional_id', profId)
+    .select()
+    .maybeSingle();
+  if (error || !data) {
+    console.error('assistente: erro ao cancelar:', error);
+    return fail('Erro ao cancelar.');
+  }
+
+  await syncAppointmentToGoogle(data as Appointment);
+
+  const label = describeItem(loaded.appt, ctx.now);
+  return {
+    ok: true,
+    data: {
+      cancelled: label,
+      client_notified: false,
+      had_client: !isPersonal(loaded.appt),
+    },
+    action: `Cancelado: ${label}`,
+  };
+}
+
+async function executeReschedule(
+  ctx: ToolContext,
+  pending: AssistantPendingAction,
+): Promise<ToolOutcome> {
+  const now = ctx.now ?? new Date();
+  const supabase = createServerClient();
+  const profId = ctx.professional.id;
+
+  const loaded = await loadActiveAppointment(profId, pending.appointment_id);
+  if ('error' in loaded) return fail(loaded.error);
+  const old = loaded.appt;
+
+  const startIso = pending.new_starts_at!;
+  const endIso = pending.new_ends_at!;
+  if (Date.parse(startIso) < now.getTime() - 60_000) {
+    return fail('Esse horário já passou. Prepare a remarcação de novo com outro horário.');
+  }
+
+  // A agenda pode ter mudado entre a preparação e o "sim".
   const conflicts = await findConflictingAppointments(profId, startIso, endIso, old.id);
   if (conflicts.length > 0) return conflictError(conflicts);
 
@@ -541,6 +670,53 @@ async function rescheduleAppointment(
     },
     action: `Remarcado: ${label}`,
   };
+}
+
+/**
+ * Executa a ação preparada mais recente — exatamente a que o usuário viu. Só
+ * vale se foi preparada numa requisição ANTERIOR e não expirou (pending.ts).
+ */
+async function confirmPendingAction(ctx: ToolContext): Promise<ToolOutcome> {
+  const supabase = createServerClient();
+  const profId = ctx.professional.id;
+  const now = ctx.now ?? new Date();
+
+  const { data, error } = await supabase
+    .from('assistant_pending_actions')
+    .select('*')
+    .eq('professional_id', profId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.error('assistente: erro ao ler ação pendente:', error);
+    return fail('Erro ao confirmar a ação.');
+  }
+  const pending = (data ?? null) as AssistantPendingAction | null;
+
+  const check = checkPendingConfirmable(pending, { requestId: ctx.requestId, now });
+  if (!check.ok || !pending) return fail(check.ok ? 'Ação não encontrada.' : check.error);
+
+  // Reserva antes de executar: duas confirmações simultâneas não repetem a ação.
+  const { data: claimed, error: claimError } = await supabase
+    .from('assistant_pending_actions')
+    .update({ status: 'done' })
+    .eq('id', pending.id)
+    .eq('professional_id', profId)
+    .eq('status', 'pending')
+    .select('id');
+  if (claimError) {
+    console.error('assistente: erro ao reservar ação pendente:', claimError);
+    return fail('Erro ao confirmar a ação.');
+  }
+  if (!claimed || claimed.length === 0) {
+    return fail('Essa ação já foi confirmada ou substituída por outra.');
+  }
+
+  return pending.kind === 'cancel'
+    ? executeCancel(ctx, pending)
+    : executeReschedule(ctx, pending);
 }
 
 async function createReminder(
@@ -660,8 +836,9 @@ const HANDLERS: {
   create_appointment: createAppointment,
   create_personal_event: createPersonalEvent,
   set_day_off: setDayOff,
-  cancel_appointment: cancelAppointment,
-  reschedule_appointment: rescheduleAppointment,
+  prepare_cancel_appointment: prepareCancel,
+  prepare_reschedule_appointment: prepareReschedule,
+  confirm_pending_action: confirmPendingAction,
   create_reminder: createReminder,
   list_reminders: listReminders,
   cancel_reminder: cancelReminder,

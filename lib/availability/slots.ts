@@ -1,63 +1,29 @@
-import {
-  addDays,
-  addMinutes,
-  format,
-  isBefore,
-  setHours,
-  setMinutes,
-  startOfDay,
-} from 'date-fns';
+import { addDaysToDate, saoPauloParts } from '@/lib/assistant/datetime';
 import { createServerClient } from '@/lib/supabase';
 import type {
   AvailabilityException,
   AvailabilityWeekly,
 } from '@/types/database';
+import { computeSlots, type Slot } from './compute';
 
-type BlockSource = { start: string; end: string; duration: number };
+export type { Slot } from './compute';
 
-/** Um horário disponível, com início e fim (para o agendamento copiar verbatim). */
-export type Slot = { start: Date; end: Date };
-
-function buildBlocks(
-  date: Date,
-  weekly: AvailabilityWeekly[] | null,
-  exception: AvailabilityException | undefined,
-): BlockSource[] {
-  if (exception?.type === 'custom_hours' || exception?.type === 'extra_day') {
-    if (!exception.start_time || !exception.end_time) return [];
-    return [
-      {
-        start: exception.start_time,
-        end: exception.end_time,
-        duration: exception.slot_duration ?? 50,
-      },
-    ];
-  }
-
-  const weekday = date.getDay();
-  return (weekly ?? [])
-    .filter((w) => w.weekday === weekday)
-    .map((w) => ({
-      start: w.start_time,
-      end: w.end_time,
-      duration: w.slot_duration,
-    }));
-}
-
+/**
+ * Horários livres dos próximos `days` dias (a partir de amanhã), em
+ * America/Sao_Paulo. Busca os dados e delega a conta a `computeSlots`.
+ */
 export async function getAvailableSlots(
   professionalId: string,
   days = 14,
 ): Promise<Slot[]> {
   const supabase = createServerClient();
   const now = new Date();
-  const slots: Slot[] = [];
 
   const { data: prof } = await supabase
     .from('professionals')
     .select('buffer_min')
     .eq('id', professionalId)
     .maybeSingle();
-  const bufferMs = (prof?.buffer_min ?? 0) * 60_000;
 
   const { data: weekly } = await supabase
     .from('availability_weekly')
@@ -66,8 +32,10 @@ export async function getAvailableSlots(
     .eq('is_active', true)
     .neq('block_type', 'lunch');
 
-  const from = format(now, 'yyyy-MM-dd');
-  const to = format(addDays(now, days), 'yyyy-MM-dd');
+  // Datas de calendário no fuso de São Paulo (e não do servidor).
+  const today = saoPauloParts(now).date;
+  const from = today;
+  const to = addDaysToDate(today, days);
 
   const { data: exceptions } = await supabase
     .from('availability_exceptions')
@@ -90,43 +58,12 @@ export async function getAvailableSlots(
     .eq('professional_id', professionalId)
     .gte('ends_at', now.toISOString());
 
-  const busy = [...(existing ?? []), ...(googleBusy ?? [])];
-
-  for (let i = 1; i <= days; i++) {
-    const date = addDays(now, i);
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const exception = exceptions?.find((e) => e.date === dateStr);
-
-    if (exception?.type === 'day_off') continue;
-
-    for (const block of buildBlocks(date, weekly, exception)) {
-      const [sh, sm] = block.start.split(':').map(Number);
-      const [eh, em] = block.end.split(':').map(Number);
-      const base = startOfDay(date);
-      let slot = setMinutes(setHours(base, sh), sm);
-      const blockEnd = setMinutes(setHours(base, eh), em);
-
-      while (true) {
-        const slotEnd = addMinutes(slot, block.duration);
-        const fitsInBlock =
-          isBefore(slotEnd, blockEnd) || slotEnd.getTime() === blockEnd.getTime();
-        if (!fitsInBlock) break;
-
-        // Buffer: expande cada compromisso por `buffer_min` dos dois lados,
-        // garantindo o intervalo mínimo entre atendimentos nos slots oferecidos.
-        const hasConflict = busy.some((a) => {
-          const s = new Date(a.starts_at).getTime() - bufferMs;
-          const e = new Date(a.ends_at).getTime() + bufferMs;
-          return slot.getTime() < e && slotEnd.getTime() > s;
-        });
-
-        if (!hasConflict && slot > now) {
-          slots.push({ start: new Date(slot), end: new Date(slotEnd) });
-        }
-        slot = addMinutes(slot, block.duration);
-      }
-    }
-  }
-
-  return slots;
+  return computeSlots({
+    now,
+    days,
+    weekly: (weekly ?? []) as AvailabilityWeekly[],
+    exceptions: (exceptions ?? []) as AvailabilityException[],
+    busy: [...(existing ?? []), ...(googleBusy ?? [])],
+    bufferMin: prof?.buffer_min ?? 0,
+  });
 }

@@ -46,14 +46,16 @@ todos os `tool_result` num único turno de usuário e repete.
 
 ## tools.ts
 
-**O que faz:** define as 10 ferramentas (schemas zod → JSON Schema da API) e valida cada chamada.
+**O que faz:** define as 11 ferramentas (schemas zod → JSON Schema da API) e valida cada chamada.
 
 **Exporta:**
 
 - `ASSISTANT_TOOLS` — lista enviada ao modelo: `list_agenda`, `list_free_slots`,
   `create_appointment`, `create_personal_event`, `set_day_off`,
-  `cancel_appointment`, `reschedule_appointment`, `create_reminder`,
-  `list_reminders`, `cancel_reminder`.
+  `prepare_cancel_appointment`, `prepare_reschedule_appointment`,
+  `confirm_pending_action`, `create_reminder`, `list_reminders`,
+  `cancel_reminder`. Não existe ferramenta que cancele/remarque direto: é sempre
+  **preparar** (não altera nada) e **confirmar** (executa) — ver `pending.ts`.
 - `parseToolInput(name, input): { ok, name, input } | { ok: false, error }` —
   valida com zod (datas `YYYY-MM-DD`, horas `HH:MM`, uuid, telefone).
 - `toolSchemas`, `TOOL_NAMES`, `MAX_AGENDA_DAYS = 31`, tipos `ToolName`/`ToolInput`.
@@ -62,16 +64,29 @@ todos os `tool_result` num único turno de usuário e repete.
 
 **O que faz:** executa cada ferramenta no banco, **sempre filtrando por `professional_id`**.
 
-**Exporta:** `runTool(ctx, name, input): Promise<ToolOutcome>` (`{ ok, data, action? }` ou `{ ok: false, error }`).
+**Exporta:** `runTool(ctx, name, input): Promise<ToolOutcome>` (`{ ok, data, action? }` ou `{ ok: false, error }`). `ctx` = `{ professional, requestId, now? }`; o `requestId` identifica **uma mensagem do usuário** (`chat.ts` gera um por requisição) e é o que impede preparar e confirmar no mesmo turno.
 
-**Depende de:** `@/lib/supabase`, `@/lib/availability/slots`, `@/lib/appointments/{conflicts,reminders}`, `@/lib/google/calendar`, `datetime.ts`, `reminders.ts`.
+**Depende de:** `@/lib/supabase`, `@/lib/availability/slots`, `@/lib/appointments/{conflicts,personal,reminders}`, `@/lib/google/calendar`, `datetime.ts`, `pending.ts`, `reminders.ts`.
 
 **Notas:**
 
 - Atendimento de cliente = `appointments` com `booked_via='manual'` (cria/reaproveita o cliente por telefone, checa conflito).
 - **Compromisso pessoal / bloqueio de agenda** = `appointment` manual **sem cliente** (`patient_phone` vazio, título em `patient_name`); ocupa o horário nos slots da IA do WhatsApp sem criar tabela nova. `set_day_off` grava uma exceção `day_off`.
-- Cancelar/remarcar exigem `confirmed=true` (a IA só passa depois de o usuário confirmar no chat — guarda leve: prompt + flag). **O cliente não é avisado** (resultado traz `client_notified: false`).
+- **Cancelar/remarcar em dois passos, impostos pelo servidor:** `prepare_*` valida (item ativo, horário futuro, sem conflito), grava a ação em `assistant_pending_actions` (uma por profissional; preparar outra marca a anterior como `replaced`) e **não altera a agenda**. `confirm_pending_action` só executa a ação preparada em **outra** requisição (outra mensagem do usuário) e dentro de 15 min; reserva a linha (`pending → done`) antes de executar, revalida item/conflito/horário passado e então aplica. A IA não escolhe qual ação nem passa flag de confirmação: executa-se exatamente o que foi preparado e mostrado ao usuário.
+- Remarcar remarca os lembretes pendentes do cliente (`rescheduleAppointmentReminders`); compromisso pessoal não tem lembrete de cliente. **O cliente não é avisado** (resultado traz `client_notified: false`; não existe aviso automático ao cliente em nenhum fluxo do app).
 - Lembrete exige data/hora futura; o resultado traz `warning` se o WhatsApp/telefone do profissional impedem a entrega.
+
+## pending.ts
+
+**O que faz:** regras puras da confirmação em duas etapas (sem banco), usadas por `executor.ts`.
+
+**Exporta:**
+
+- `PENDING_TTL_MS = 15 min`, `pendingExpiry(now): Date`.
+- `checkPendingConfirmable(pending | null, { requestId, now }): { ok: true } | { ok: false, error }` — recusa, nessa ordem: sem ação pendente, preparada na **mesma requisição**, expirada.
+- `NO_PENDING_ERROR`, `SAME_REQUEST_ERROR`, `EXPIRED_ERROR` — mensagens devolvidas ao modelo.
+
+**Notas:** o histórico do chat guarda só texto (`assistant_messages`), então um token passado pelo modelo entre turnos seria impossível; por isso o estado fica no servidor (tabela `assistant_pending_actions`, migration `0009`).
 
 ## prompt.ts
 
@@ -85,7 +100,7 @@ todos os `tool_result` num único turno de usuário e repete.
 
 **O que faz:** helpers de data/hora **independentes do fuso do servidor** (Vercel roda em UTC), sempre `America/Sao_Paulo` com offset fixo `-03:00`.
 
-**Exporta:** `saoPauloParts`, `toSaoPauloIso`, `buildIso(date, time)`, `addMinutesToIso`, `addDaysToDate`, `diffDays`, `dayRangeIso`, `weekdayShortOf`, `formatBrDate`, `formatBrDateTime`, `formatTime`, `describeNow`, `buildCalendarHint`, `isValidDate`, `isValidTime`, `TZ`, `OFFSET`.
+**Exporta:** `saoPauloParts`, `toSaoPauloIso`, `buildIso(date, time)`, `addMinutesToIso`, `addDaysToDate`, `diffDays`, `dayRangeIso`, `weekdayShortOf`, `formatBrDate`, `formatBrDateTime`, `formatTime`, `formatLongBrDate`, `formatLongBrDateTime`, `weekdayOfDate`, `saoPauloInstantMs`, `calendarValueToIso`, `describeNow`, `buildCalendarHint`, `isValidDate`, `isValidTime`, `TZ`, `OFFSET`.
 
 ## reminders.ts
 
@@ -106,5 +121,5 @@ todos os `tool_result` num único turno de usuário e repete.
 
 ## Testes
 
-`datetime.test.ts`, `tools.test.ts`, `reminders.test.ts`, `prompt.test.ts` e
-`loop.test.ts` (modelo falso) — `node:test`, rodam com `npm test`.
+`datetime.test.ts`, `tools.test.ts`, `reminders.test.ts`, `pending.test.ts`,
+`prompt.test.ts` e `loop.test.ts` (modelo falso) — `node:test`, rodam com `npm test`.

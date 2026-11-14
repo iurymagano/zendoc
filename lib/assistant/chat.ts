@@ -1,5 +1,6 @@
 // Orquestra um turno do chat do Assistente pessoal: histórico → prompt →
 // loop de tool use → persistência. O profissional vem sempre da sessão.
+import { randomUUID } from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServerClient } from '@/lib/supabase';
 import type { Professional } from '@/types/database';
@@ -21,6 +22,9 @@ export async function runAssistantChat(
 ): Promise<AssistantTurn> {
   const supabase = createServerClient();
   const startedAt = new Date();
+  // Identifica ESTA mensagem do usuário: confirmar uma ação preparada na mesma
+  // requisição é recusado pelo servidor (ver pending.ts).
+  const requestId = randomUUID();
 
   const { data: rows } = await supabase
     .from('assistant_messages')
@@ -68,7 +72,11 @@ export async function runAssistantChat(
         { role: 'user' as const, content: userMessage },
       ],
       execute: async (name, input) => {
-        const outcome = await runTool({ professional, now: startedAt }, name, input);
+        const outcome = await runTool(
+          { professional, requestId, now: startedAt },
+          name,
+          input,
+        );
         if (outcome.ok && outcome.action) actions.push(outcome.action);
         return outcome;
       },

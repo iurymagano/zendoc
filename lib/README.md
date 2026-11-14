@@ -82,9 +82,10 @@ mapeamento de status.
 - [ai/](./ai/) — integração com Claude API (prompt, processor, executor).
 - [assistant/](./assistant/) — Assistente pessoal: chat do profissional com a IA
   (tool use) para agenda e lembretes pessoais.
-- [availability/](./availability/) — cálculo de slots (`slots.ts`).
-- [appointments/](./appointments/) — utilitários de domínio (checagem de
-  conflito de horário).
+- [availability/](./availability/) — cálculo de slots (`compute.ts` puro em
+  America/Sao_Paulo + `slots.ts` com as consultas).
+- [appointments/](./appointments/) — utilitários de domínio (conflito de
+  horário, lembretes, regras de compromisso pessoal).
 - [patients/](./patients/) — utilitários de cliente (validação/máscara de CPF).
 - [zapi/](./zapi/) — cliente Evolution API (`sendWhatsAppMessage`; demais
   funções entram quando a conexão WhatsApp for implementada).

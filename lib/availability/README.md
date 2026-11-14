@@ -3,20 +3,41 @@
 Cálculo de slots disponíveis a partir da rotina semanal + exceções, descontando
 agendamentos existentes.
 
+## compute.ts
+
+**O que faz:** cálculo **puro** dos slots (sem banco/rede), sempre no relógio de
+`America/Sao_Paulo` (offset fixo `-03:00`), **independente do fuso do servidor**
+(a Vercel roda em UTC; um bloco 08:00–12:00 antes gerava 05:00 no servidor).
+
+**Exporta:**
+
+- `computeSlots({ now, days, weekly, exceptions, busy, bufferMin? }): Slot[]` —
+  `busy` junta atendimentos ativos + eventos ocupados do Google; devolve os
+  `Slot` (`start`/`end` como instantes) em ordem. Datas/horas usam
+  `lib/assistant/datetime.ts` (nada de `getHours()` local).
+- `type Slot = { start: Date; end: Date }`
+
+**Notas:** coberto por `compute.test.ts`, que roda com vários `TZ` (UTC,
+America/Sao_Paulo, Asia/Tokyo, America/Los_Angeles) e confere que o bloco
+08:00–12:00 gera `08:00-03:00` e que existe conflito com um agendamento.
+
+---
+
 ## slots.ts
 
 **O que faz:** calcula os horários livres para agendamento a partir de hoje +
 `days` dias (default 14), usado pelo prompt da IA e pelas telas de agenda.
+Faz só as consultas ao banco e delega o cálculo a `compute.ts`.
 
 **Exporta:**
 
-- `type Slot = { start: Date; end: Date }`
+- `type Slot = { start: Date; end: Date }` (reexportado por `slots.ts`)
 - `getAvailableSlots(professionalId: string, days = 14): Promise<Slot[]>` —
   lista de `Slot` (início + fim) em ordem cronológica. O fim vem do
   `slot_duration` do bloco; o prompt da IA usa os dois ISOs para o agendamento
   copiar verbatim (evita a IA chutar ano/horário).
 
-**Depende de:** `@/lib/supabase`, `@/types/database`, `date-fns`.
+**Depende de:** `@/lib/supabase`, `@/types/database`, `./compute`.
 
 **Regras críticas:**
 

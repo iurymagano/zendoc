@@ -18,6 +18,20 @@ const WEEKDAYS_FULL = [
   'sábado',
 ];
 const WEEKDAYS_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const MONTHS_FULL = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
 
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -143,6 +157,40 @@ export function formatBrDateTime(iso: string, ref: Date = new Date()): string {
 /** "14:00" a partir de um ISO. */
 export function formatTime(iso: string): string {
   return saoPauloParts(new Date(iso)).time;
+}
+
+/** "sábado, 14 de novembro de 2026" no fuso de São Paulo (o que o servidor vê não importa). */
+export function formatLongBrDate(instant: Date): string {
+  const p = saoPauloParts(instant);
+  return `${WEEKDAYS_FULL[p.weekday]}, ${pad(p.day)} de ${MONTHS_FULL[p.month - 1]} de ${p.year}`;
+}
+
+/** "sábado, 14 de novembro de 2026 às 16:57" no fuso de São Paulo. */
+export function formatLongBrDateTime(instant: Date): string {
+  return `${formatLongBrDate(instant)} às ${saoPauloParts(instant).time}`;
+}
+
+/** Dia da semana (0 = domingo) de uma data YYYY-MM-DD de calendário; NaN se inválida. */
+export function weekdayOfDate(date: string): number {
+  const m = DATE_RE.exec(date);
+  if (!m) return NaN;
+  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))).getUTCDay();
+}
+
+/** Instante (ms) de "data + HH:mm[:ss]" no relógio de São Paulo; NaN se inválido. */
+export function saoPauloInstantMs(date: string, time: string): number {
+  const hm = /^(\d{2}):(\d{2})(?::\d{2})?$/.exec(time);
+  if (!hm || !isValidDate(date)) return NaN;
+  return Date.parse(`${date}T${hm[1]}:${hm[2]}:00${OFFSET}`);
+}
+
+/**
+ * Valor de data do Google Agenda → ISO UTC. Evento de dia inteiro vem só com
+ * "YYYY-MM-DD" (sem hora/fuso): `new Date("2026-11-18")` seria meia-noite UTC
+ * (21h do dia anterior em São Paulo), então ancora à meia-noite de São Paulo.
+ */
+export function calendarValueToIso(value: string): string {
+  return new Date(DATE_RE.test(value) ? `${value}T00:00:00${OFFSET}` : value).toISOString();
 }
 
 /** "sábado, 14/11/2026, 16:57" — âncora de "agora" para o system prompt. */

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { sendWhatsAppMessage } from '@/lib/zapi/client';
+import { isPersonalCommitment } from '@/lib/appointments/personal';
 import {
   buildPersonalReminderMessage,
   checkPersonalReminderDelivery,
@@ -209,8 +210,8 @@ async function handle(req: NextRequest) {
     }
 
     // Compromisso pessoal (criado pelo Assistente) não tem cliente: sem
-    // telefone não há para quem mandar o lembrete.
-    if (!appt.patient_phone) {
+    // telefone (vazio ou só espaços/símbolos) não há para quem mandar o lembrete.
+    if (isPersonalCommitment(appt.patient_phone)) {
       await supabase
         .from('reminders')
         .update({ status: 'cancelled', error_message: 'Compromisso sem cliente' })

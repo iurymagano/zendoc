@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { createServerClient } from '@/lib/supabase';
 import { getAccessToken } from '@/lib/google/auth';
+import { calendarValueToIso } from '@/lib/assistant/datetime';
 import type { Appointment, Professional } from '@/types/database';
 
 const CAL_BASE = 'https://www.googleapis.com/calendar/v3';
@@ -221,8 +222,8 @@ export async function syncBusyEvents(
           professional_id: professional.id,
           google_event_id: ev.id,
           summary: ev.summary ?? null,
-          starts_at: new Date(startsAt).toISOString(),
-          ends_at: new Date(endsAt).toISOString(),
+          starts_at: calendarValueToIso(startsAt),
+          ends_at: calendarValueToIso(endsAt),
           all_day: allDay,
           updated_at: new Date().toISOString(),
         },

@@ -27,12 +27,22 @@ Regras:
 - `starts_at` e `ends_at` precisam vir juntos. Quando presentes, é feita a
   checagem de sobreposição via `hasAppointmentConflict` (ignorando o próprio
   registro).
+- **Telefone** (`patient_phone`): em agendamento de cliente é obrigatório e
+  validado/normalizado (`5511...`; vazio ou inválido → 400). Em **compromisso
+  pessoal** (sem cliente, `patient_phone` vazio) o campo pode vir vazio e nada
+  muda; preenchê-lo é recusado (400) — para atender alguém, crie um novo
+  agendamento. Regra em `lib/appointments/personal.ts` (`resolvePhonePatch`).
+- **Lembretes:** quando `starts_at` muda, os lembretes `pending` (24h/2h) são
+  recalculados para o novo horário (`rescheduleAppointmentReminders`); o trigger
+  do banco só cria lembretes no insert/mudança de status. Compromisso pessoal
+  não tem lembrete de cliente. Lembrete já enviado não é reenviado.
+- Depois do update o evento é sincronizado com o Google Agenda (best-effort).
 - Para **cancelar** um appointment use
   [POST /api/appointments/:id/cancel](./cancel/README.md) — cancelamento
   passa por lá porque grava `cancelled_by = 'professional'` e aceita
   `cancellation_note`.
 
-**Erros:** `400` (validação), `401`, `404`, `409` (conflito), `500`.
+**Erros:** `400` (validação, telefone), `401`, `404`, `409` (conflito), `500`.
 
 ## Subpastas
 

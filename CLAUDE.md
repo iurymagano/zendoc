@@ -984,6 +984,13 @@ todas as instâncias — uma por profissional.
 
 ## Cálculo de slots (lib/availability/slots.ts)
 
+> **Fuso horário (regra do servidor):** todo cálculo de data/hora no servidor
+> (slots, prompt da IA, Assistente, Google) é feito em **America/Sao_Paulo
+> (`-03:00` fixo)**, nunca no fuso do processo — a Vercel roda em UTC e
+> `date-fns` (`setHours`, `startOfDay`, `getDay`) usa o fuso local. O código real
+> está em `lib/availability/compute.ts` (puro, testado com `TZ=UTC`) e nos
+> helpers de `lib/assistant/datetime.ts`; o trecho abaixo é o desenho original.
+
 ```typescript
 import { createServerClient } from '@/lib/supabase';
 import {
@@ -1303,6 +1310,7 @@ O checklist detalhado de cada sprint fica em [TASKS.md](TASKS.md).
 - `SUPABASE_SERVICE_KEY` apenas em API Routes (server-side)
 - `SUPABASE_ANON_KEY` apenas em componentes client-side
 - Datas: `timestamptz` no banco, ISO 8601 com `-03:00` no código
+- Datas no servidor: nunca `getHours()`/`startOfDay()` locais; usar `lib/assistant/datetime.ts` (America/Sao_Paulo)
 - Telefones: `5511999999999` (sem +, sem traços, sem espaços)
 - `'use client'` apenas quando necessário (hooks, event handlers)
 - Erros: `console.error(...)` + status HTTP adequado

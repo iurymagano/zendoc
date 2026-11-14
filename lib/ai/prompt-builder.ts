@@ -1,31 +1,30 @@
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import type { Professional, Service } from '@/types/database';
-import type { Slot } from '@/lib/availability/slots';
+import type { Slot } from '../availability/compute';
+import {
+  formatLongBrDate,
+  formatLongBrDateTime,
+  toSaoPauloIso,
+} from '../assistant/datetime';
 
 function formatPrice(cents: number | null): string {
   if (cents == null) return 'valor a confirmar';
   return `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 }
 
-// O sistema assume horário de Brasília (-03:00) — mesma premissa do resto do app
-// (agenda e cálculo de slots). Formata o ISO com esse offset fixo.
-function toIso(d: Date): string {
-  return `${format(d, "yyyy-MM-dd'T'HH:mm:ss")}-03:00`;
-}
+// Datas e horas sempre no relógio de Brasília (-03:00), independente do fuso do
+// servidor (a Vercel roda em UTC): usa os helpers de lib/assistant/datetime.
 
 export function buildSystemPrompt(
   professional: Professional,
   availableSlots: Slot[],
   patientContext?: string | null,
   services?: Service[],
+  now: Date = new Date(),
 ): string {
   const slotList = availableSlots
     .map((s) => {
-      const label = format(s.start, "EEEE, dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
-        locale: ptBR,
-      });
-      return `- ${label} (starts_at=${toIso(s.start)} ends_at=${toIso(s.end)})`;
+      const label = formatLongBrDateTime(s.start);
+      return `- ${label} (starts_at=${toSaoPauloIso(s.start)} ends_at=${toSaoPauloIso(s.end)})`;
     })
     .join('\n');
 
@@ -44,9 +43,7 @@ export function buildSystemPrompt(
     ? `Instruções especiais: ${professional.custom_instructions}`
     : '';
 
-  const hoje = format(new Date(), "EEEE, dd 'de' MMMM 'de' yyyy", {
-    locale: ptBR,
-  });
+  const hoje = formatLongBrDate(now);
 
   const patientBlock = patientContext ? `\n${patientContext}\n` : '';
 

@@ -20,25 +20,29 @@ test('toda ferramenta tem definição para a API com input_schema de objeto', ()
   assert.deepEqual(
     [...TOOL_NAMES].sort(),
     [
-      'cancel_appointment',
       'cancel_reminder',
+      'confirm_pending_action',
       'create_appointment',
       'create_personal_event',
       'create_reminder',
       'list_agenda',
       'list_free_slots',
       'list_reminders',
-      'reschedule_appointment',
+      'prepare_cancel_appointment',
+      'prepare_reschedule_appointment',
       'set_day_off',
     ],
   );
 });
 
-test('ferramentas destrutivas exigem o campo confirmed no schema', () => {
-  for (const name of ['cancel_appointment', 'reschedule_appointment']) {
+test('nenhuma ferramenta cancela/remarca direto: só preparar + confirmar', () => {
+  assert.ok(!TOOL_NAMES.includes('cancel_appointment' as never));
+  assert.ok(!TOOL_NAMES.includes('reschedule_appointment' as never));
+  for (const name of ['prepare_cancel_appointment', 'prepare_reschedule_appointment']) {
     const tool = ASSISTANT_TOOLS.find((t) => t.name === name)!;
-    const schema = tool.input_schema as { required?: string[] };
-    assert.ok(schema.required?.includes('confirmed'), name);
+    const props = (tool.input_schema as { properties?: Record<string, unknown> }).properties;
+    // O modelo não escolhe se está confirmado: a confirmação é outra ferramenta.
+    assert.ok(!props || !('confirmed' in props), name);
   }
 });
 
@@ -90,40 +94,49 @@ test('create_appointment: recusa hora, duração e nome inválidos', () => {
   assert.equal(parseToolInput('create_appointment', { ...base, service_id: UUID }).ok, true);
 });
 
-test('cancel_appointment: confirmed é obrigatório e precisa ser booleano', () => {
-  assert.equal(parseToolInput('cancel_appointment', { appointment_id: UUID }).ok, false);
+test('prepare_cancel_appointment: exige id uuid; motivo é opcional e limitado', () => {
+  assert.equal(parseToolInput('prepare_cancel_appointment', { appointment_id: UUID }).ok, true);
   assert.equal(
-    parseToolInput('cancel_appointment', { appointment_id: UUID, confirmed: 'true' }).ok,
-    false,
-  );
-  assert.equal(
-    parseToolInput('cancel_appointment', { appointment_id: UUID, confirmed: false }).ok,
+    parseToolInput('prepare_cancel_appointment', { appointment_id: UUID, reason: 'Viagem' }).ok,
     true,
   );
   assert.equal(
-    parseToolInput('cancel_appointment', { appointment_id: 'nao-uuid', confirmed: true }).ok,
+    parseToolInput('prepare_cancel_appointment', { appointment_id: UUID, reason: 'x'.repeat(501) }).ok,
+    false,
+  );
+  assert.equal(parseToolInput('prepare_cancel_appointment', { appointment_id: 'nao-uuid' }).ok, false);
+  // Um "confirmed" enviado pelo modelo não tem efeito: o campo nem existe no schema.
+  const r = parseToolInput('prepare_cancel_appointment', { appointment_id: UUID, confirmed: true });
+  assert.equal(r.ok, true);
+  if (r.ok) assert.ok(!('confirmed' in (r.input as object)));
+});
+
+test('prepare_reschedule_appointment: exige data e hora válidas', () => {
+  assert.equal(
+    parseToolInput('prepare_reschedule_appointment', {
+      appointment_id: UUID,
+      date: '2026-11-19',
+      time: '10:30',
+    }).ok,
+    true,
+  );
+  assert.equal(
+    parseToolInput('prepare_reschedule_appointment', { appointment_id: UUID, date: '2026-11-19' }).ok,
+    false,
+  );
+  assert.equal(
+    parseToolInput('prepare_reschedule_appointment', {
+      appointment_id: UUID,
+      date: '2026-11-19',
+      time: '25:00',
+    }).ok,
     false,
   );
 });
 
-test('reschedule_appointment: exige data, hora e confirmed', () => {
-  assert.equal(
-    parseToolInput('reschedule_appointment', {
-      appointment_id: UUID,
-      date: '2026-11-19',
-      time: '10:30',
-      confirmed: true,
-    }).ok,
-    true,
-  );
-  assert.equal(
-    parseToolInput('reschedule_appointment', {
-      appointment_id: UUID,
-      date: '2026-11-19',
-      confirmed: true,
-    }).ok,
-    false,
-  );
+test('confirm_pending_action: não recebe parâmetros (confirma o que foi preparado)', () => {
+  assert.equal(parseToolInput('confirm_pending_action', {}).ok, true);
+  assert.equal(parseToolInput('confirm_pending_action', undefined).ok, true);
 });
 
 test('create_reminder: texto obrigatório e limitado a 500 caracteres', () => {

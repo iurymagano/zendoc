@@ -102,27 +102,19 @@ export const toolSchemas = {
     note: z.string().trim().max(200).optional().describe('Motivo (opcional).'),
   }),
 
-  cancel_appointment: z.object({
+  prepare_cancel_appointment: z.object({
     appointment_id: uuidField('do atendimento/compromisso (id vindo de list_agenda)'),
-    confirmed: z
-      .boolean()
-      .describe(
-        'true SOMENTE se o usuário confirmou explicitamente, na mensagem mais recente, o cancelamento deste item específico. Na dúvida, false.',
-      ),
     reason: z.string().trim().max(500).optional().describe('Motivo (opcional).'),
   }),
 
-  reschedule_appointment: z.object({
+  prepare_reschedule_appointment: z.object({
     appointment_id: uuidField('do atendimento/compromisso (id vindo de list_agenda)'),
     date: dateField.describe('Nova data YYYY-MM-DD.'),
     time: timeField.describe('Nova hora HH:mm (24h).'),
     duration_min: durationField(5, 1440, ' Omitido = mantém a duração atual.'),
-    confirmed: z
-      .boolean()
-      .describe(
-        'true SOMENTE se o usuário confirmou explicitamente, na mensagem mais recente, esta remarcação (item + novo horário). Na dúvida, false.',
-      ),
   }),
+
+  confirm_pending_action: z.object({}),
 
   create_reminder: z.object({
     text: z
@@ -163,10 +155,12 @@ const DESCRIPTIONS: Record<ToolName, string> = {
     'Bloqueia um horário da agenda com um compromisso pessoal (dentista, reunião, almoço…). Não é cliente: ninguém recebe mensagem. Para o dia inteiro use set_day_off.',
   set_day_off:
     'Marca o dia inteiro como folga: nenhum horário será oferecido pela secretária no WhatsApp. NÃO cancela atendimentos já marcados nesse dia (a resposta informa quantos existem).',
-  cancel_appointment:
-    'Cancela um atendimento/compromisso. AÇÃO DESTRUTIVA: antes de chamar com confirmed=true, mostre ao usuário qual item será cancelado e peça confirmação explícita ("sim", "pode cancelar"). Com confirmed=false nada é alterado.',
-  reschedule_appointment:
-    'Muda o dia/hora de um atendimento/compromisso (verifica conflito). AÇÃO SENSÍVEL: peça confirmação explícita do item e do novo horário antes de chamar com confirmed=true. Com confirmed=false nada é alterado.',
+  prepare_cancel_appointment:
+    'PASSO 1 de 2 para cancelar um atendimento/compromisso: registra o pedido e mostra o que seria cancelado, mas NÃO cancela nada. Depois mostre ao usuário o item e peça confirmação; o cancelamento só acontece com confirm_pending_action, em uma mensagem POSTERIOR do usuário.',
+  prepare_reschedule_appointment:
+    'PASSO 1 de 2 para remarcar um atendimento/compromisso (já verifica conflito no novo horário): NÃO altera nada. Depois mostre ao usuário o item e o novo horário e peça confirmação; a mudança só acontece com confirm_pending_action, em uma mensagem POSTERIOR do usuário.',
+  confirm_pending_action:
+    'PASSO 2 de 2: executa o cancelamento/remarcação que você preparou e o usuário confirmou. Só use depois que o usuário responder "sim" à sua pergunta de confirmação, na mensagem seguinte à que você preparou; o servidor recusa se for na mesma mensagem. Executa exatamente o que foi preparado (não aceita parâmetros). Se o usuário recusar ou mudar de ideia, NÃO chame.',
   create_reminder:
     'Cria um lembrete pessoal: na data/hora indicada o IAzen manda o texto por WhatsApp para o próprio profissional (não para clientes). A data/hora precisa estar no futuro.',
   list_reminders:
