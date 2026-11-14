@@ -194,7 +194,13 @@ Descartadas:
 
 - Conversa do hero, da linha do tempo e do tom são exemplos (nomes Marina, Diego, Camila e Rafael,
   horários fictícios, várias profissões). Trocar por conversas reais autorizadas quando houver beta testers.
-- A conversa do Assistente pessoal na landing é demonstração; o recurso real (`/assistente`) é do
-  dev e ainda não passou pela revisão visual da fase 2.
-- Dashboard, onboarding e páginas internas só recebem a base (cor, fonte, componentes); o
-  redesenho segue as regras acima, na fase 2.
+- A conversa do Assistente pessoal na landing é demonstração; o recurso real (`/assistente`) já tem a
+  cara da marca (fase 2).
+- Fase 2 aplicada: painel, agenda, clientes, conversas, configurações, onboarding, privacidade e declaração.
+  Telas ainda sem print logado: `/clientes/[id]`, `/documentos/declaracao/[id]` (conferir no papel).
+
+### Decisão da fase 2: o momento do Assistente
+
+`/assistente` é o único painel escuro dentro do painel claro: um bloco Void com o logo, a faísca
+"online" pulsando e, ao pensar, três pontos de faísca. É o ponto de personalidade do produto; o resto
+do painel segue claro e calmo (degraus de tom em vez de bordas e sombras).

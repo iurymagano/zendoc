@@ -1,7 +1,8 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, Check, Send, Sparkles, X } from 'lucide-react';
+import { Bell, Check, Send, X } from 'lucide-react';
+import { LogoMark } from '@/components/brand/Logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -207,126 +208,149 @@ export default function AssistentePage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Assistente pessoal"
         title="Assistente"
         description="Converse com a IA para cuidar da sua agenda e dos seus lembretes: marcar, remarcar, cancelar e ser avisado no WhatsApp na hora certa."
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="size-4 text-primary" />
-              Chat
-            </CardTitle>
-            <CardDescription>
-              As ações são reais: o que o assistente marcar ou cancelar acontece
-              na agenda. Clientes não são avisados automaticamente.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <div
-              ref={scrollRef}
-              aria-live="polite"
-              className="flex h-[440px] flex-col gap-3 overflow-y-auto rounded-lg border border-border bg-muted/30 p-4"
-            >
-              {loadingMsgs ? (
-                <div className="m-auto text-sm text-muted-foreground">
-                  Carregando…
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="m-auto max-w-sm text-center text-sm text-muted-foreground">
+        <section
+          aria-label="Conversa com o assistente"
+          className="flex flex-col gap-4 rounded-3xl bg-[var(--ia-void)] p-4 text-[var(--ia-on-void)] sm:p-6"
+        >
+          <div className="flex items-center gap-3">
+            <LogoMark size={32} title={null} />
+            <div className="min-w-0">
+              <h2 className="font-display text-base font-bold tracking-[-0.02em]">
+                Assistente IAzen
+              </h2>
+              <p className="flex items-center gap-1.5 text-sm text-[var(--ia-on-void-muted)]">
+                <span className="ia-spark h-1.5 w-1.5 rounded-full bg-[var(--ia-spark)]" />
+                {sending ? 'pensando…' : 'online'}
+              </p>
+            </div>
+          </div>
+
+          <div
+            ref={scrollRef}
+            aria-live="polite"
+            className="flex h-[440px] flex-col gap-3 overflow-y-auto rounded-2xl bg-[var(--ia-void-1)] p-4"
+          >
+            {loadingMsgs ? (
+              <div className="m-auto text-sm text-[var(--ia-on-void-muted)]">
+                Carregando…
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="m-auto flex max-w-sm flex-col items-center gap-4 text-center">
+                <span className="relative grid size-20 place-items-center">
+                  <span className="ia-spark absolute inset-0 rounded-full bg-[var(--ia-violet)]/20" />
+                  <LogoMark size={44} title={null} className="relative" />
+                </span>
+                <p className="font-display text-lg font-bold tracking-[-0.02em]">
+                  O que você precisa hoje?
+                </p>
+                <p className="text-sm text-[var(--ia-on-void-muted)]">
                   Peça do seu jeito, por exemplo: &ldquo;marca a Maria amanhã às
                   14h&rdquo; ou &ldquo;me lembra de ligar para o contador na
                   sexta às 9h&rdquo;.
-                </div>
-              ) : (
-                messages.map((m) => (
+                </p>
+              </div>
+            ) : (
+              messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={[
+                    'flex flex-col gap-1',
+                    m.role === 'user' ? 'items-end' : 'items-start',
+                  ].join(' ')}
+                >
                   <div
-                    key={m.id}
                     className={[
-                      'flex flex-col gap-1',
-                      m.role === 'user' ? 'items-end' : 'items-start',
+                      'max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm',
+                      m.role === 'user'
+                        ? 'rounded-br-md bg-[var(--ia-violet-action)] text-white'
+                        : m.error
+                          ? 'rounded-bl-md bg-[var(--destructive-soft)] text-destructive'
+                          : 'rounded-bl-md bg-[var(--ia-void-3)] text-[var(--ia-on-void)]',
                     ].join(' ')}
                   >
-                    <div
-                      className={[
-                        'max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm',
-                        m.role === 'user'
-                          ? 'rounded-br-sm bg-primary text-primary-foreground'
-                          : m.error
-                            ? 'rounded-bl-sm bg-destructive/10 text-destructive ring-1 ring-destructive/20'
-                            : 'rounded-bl-sm bg-card ring-1 ring-border',
-                      ].join(' ')}
-                    >
-                      {m.content}
-                    </div>
-                    {m.role === 'assistant' &&
-                      !m.error &&
-                      (m.actions ?? []).map((a, i) => (
-                        <span
-                          key={`${m.id}-${i}`}
-                          className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[11px] text-primary ring-1 ring-primary/20"
-                        >
-                          <Check className="size-3" />
-                          {a}
-                        </span>
-                      ))}
+                    {m.content}
                   </div>
-                ))
-              )}
-
-              {sending && (
-                <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-sm bg-card px-3 py-2 text-sm text-muted-foreground ring-1 ring-border">
-                    pensando…
-                  </div>
+                  {m.role === 'assistant' &&
+                    !m.error &&
+                    (m.actions ?? []).map((a, i) => (
+                      <span
+                        key={`${m.id}-${i}`}
+                        className="inline-flex items-center gap-1 rounded-full bg-[var(--ia-spark)]/15 px-2.5 py-0.5 text-xs font-medium text-[var(--ia-spark)]"
+                      >
+                        <Check className="size-3" />
+                        {a}
+                      </span>
+                    ))}
                 </div>
-              )}
-            </div>
+              ))
+            )}
 
-            <div className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map((s) => (
-                <Button
-                  key={s.label}
-                  type="button"
-                  size="xs"
-                  variant="outline"
-                  disabled={sending}
-                  onClick={() => pickSuggestion(s)}
-                >
-                  {s.label}
-                </Button>
-              ))}
-            </div>
+            {sending && (
+              <div className="flex justify-start" role="status" aria-label="pensando">
+                <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md bg-[var(--ia-void-3)] px-4 py-3">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="ia-spark h-2 w-2 rounded-full bg-[var(--ia-spark)]"
+                      style={{ animationDelay: `${i * 160}ms` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
-            <form onSubmit={onSubmit} className="flex items-center gap-2">
-              <Input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Escreva o que você precisa…"
-                aria-label="Mensagem para o assistente"
-                maxLength={2000}
+          <div className="flex flex-wrap gap-2">
+            {SUGGESTIONS.map((s) => (
+              <button
+                key={s.label}
+                type="button"
                 disabled={sending}
-                autoComplete="off"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                aria-label="Enviar"
-                disabled={sending || input.trim().length === 0}
+                onClick={() => pickSuggestion(s)}
+                className="min-h-9 rounded-full bg-[var(--ia-void-2)] px-3.5 text-sm font-medium text-[var(--ia-on-void)] transition-colors hover:bg-[var(--ia-void-3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ia-spark)] disabled:opacity-50"
               >
-                <Send />
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={onSubmit} className="flex items-center gap-2">
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Escreva o que você precisa…"
+              aria-label="Mensagem para o assistente"
+              maxLength={2000}
+              disabled={sending}
+              autoComplete="off"
+              className="h-11 border-transparent bg-[var(--ia-void-2)] text-[var(--ia-on-void)] placeholder:text-[var(--ia-on-void-muted)]"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              aria-label="Enviar"
+              className="size-11"
+              disabled={sending || input.trim().length === 0}
+            >
+              <Send />
+            </Button>
+          </form>
+          <p className="text-xs text-[var(--ia-on-void-muted)]">
+            As ações são reais: o que o assistente marcar ou cancelar acontece
+            na agenda. Clientes não são avisados automaticamente.
+          </p>
+        </section>
 
         <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Bell className="size-4 text-primary" />
+              <Bell className="size-4 text-[var(--ia-violet-ink)]" />
               Lembretes
             </CardTitle>
             <CardDescription>
@@ -353,11 +377,11 @@ export default function AssistentePage() {
                 {pending.map((r) => (
                   <li
                     key={r.id}
-                    className="flex items-start justify-between gap-2 rounded-lg border border-border bg-card p-3"
+                    className="flex items-start justify-between gap-2 rounded-xl bg-muted p-3"
                   >
                     <div className="min-w-0">
                       <p className="break-words text-sm font-medium">{r.text}</p>
-                      <p className="font-mono text-xs text-muted-foreground">
+                      <p className="tabular text-sm text-muted-foreground">
                         {formatBrDateTime(r.remind_at)}
                       </p>
                     </div>
@@ -378,14 +402,14 @@ export default function AssistentePage() {
 
             {recent.length > 0 && (
               <div className="flex flex-col gap-2">
-                <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                <span className="text-sm font-semibold text-foreground">
                   Últimos
                 </span>
                 <ul className="flex flex-col gap-2">
                   {recent.map((r) => (
                     <li key={r.id} className="text-sm">
                       <span className="break-words">{r.text}</span>
-                      <span className="block font-mono text-xs text-muted-foreground">
+                      <span className="tabular block text-sm text-muted-foreground">
                         {formatBrDateTime(r.remind_at)} ·{' '}
                         {r.status === 'sent' ? 'enviado' : 'falhou'}
                       </span>

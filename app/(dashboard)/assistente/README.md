@@ -19,6 +19,8 @@ Tela do Assistente pessoal: chat do profissional com a IA para consultar a agend
 - Lembretes: lista os pendentes (próximos primeiro) com botão **Cancelar** (`POST /api/assistant/reminders/[id]/cancel`) e os 5 últimos enviados/falhados (com o motivo da falha, ex.: "WhatsApp não conectado"). Atualiza depois de cada resposta do chat.
 - Erro de rede/IA vira bolha de erro na conversa; plano inativo (402) mostra a mensagem da API.
 
+**Visual:** o chat é um painel Void (`rounded-3xl`) com o logo, status "online" com a faísca pulsando e balões em degraus de Void (usuário em violeta de ação). Estado "pensando" = três pontos da faísca (`ia-spark`, só transform/opacity, desligado com reduced-motion) e o cabeçalho troca para "pensando…". Tela vazia com o símbolo e a pergunta "O que você precisa hoje?". Lembretes ficam num card claro ao lado.
+
 **Depende de:** `@/components/ui/*` (shadcn), `@/components/dashboard/{PageHeader,EmptyState}`, `@/lib/assistant/datetime` (`formatBrDateTime`), `app/api/assistant/*`.
 
 **Notas:** `'use client'` porque usa estado e `fetch`. A página não conhece a regra de plano — quem bloqueia é a API.

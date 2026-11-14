@@ -178,8 +178,9 @@ Legenda:
 - [x] Login e cadastro com o lado de marca
 - [x] `CLAUDE.md` e READMEs atualizados
 - [x] `app/apple-icon` (ícone iOS)
-- [ ] Fase 2: dashboard (Sidebar, PageHeader, cards de métrica, tabelas, agenda, estados vazios)
-- [ ] Fase 2: onboarding (tirar o halo radial) e `app/privacidade`
+- [x] Fase 2: dashboard (Sidebar, PageHeader, cards de métrica, tabelas, agenda, estados vazios)
+- [x] Fase 2: onboarding (tirar o halo radial) e `app/privacidade`
+- [x] Fase 2: `/assistente` com a cara da marca (painel Void, faísca como "pensando")
 - [ ] Trocar as conversas de exemplo da landing por conversas reais autorizadas
 
 ### Identidade visual

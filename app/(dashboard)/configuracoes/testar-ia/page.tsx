@@ -336,7 +336,7 @@ export default function TestarIaPage() {
                         {m.content}
                       </div>
                       {m.role === 'assistant' && m.action && !m.error && (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-primary ring-1 ring-primary/20">
+                        <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-[var(--ia-violet-ink)]">
                           {ACTION_LABEL[m.action]}
                         </span>
                       )}

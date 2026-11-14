@@ -25,6 +25,8 @@ comparadas com `tzDateKey` dos eventos — alinhado para usuários no Brasil.
 
 ---
 
+> Visual (fase 2): cabeçalhos de dia em Inter semibold (sem mono/caixa-alta), popover de busca sem sombra.
+
 ## CalendarMonth.tsx
 
 **O que faz:** grade do mês (6 semanas, segunda a domingo). Cada célula mostra

@@ -74,7 +74,7 @@ export function CalendarWeek({
               key={day.toISOString()}
               className={`border-r border-border px-2 py-2 text-center ${today ? 'bg-primary/5' : ''}`}
             >
-              <div className="text-xs font-mono uppercase tracking-[0.1em] text-muted-foreground">
+              <div className="text-xs font-semibold capitalize text-muted-foreground">
                 {format(day, 'EEE', { locale: ptBR })}
               </div>
               <div

@@ -15,7 +15,7 @@ Testar IA, Assinatura). Rodapé com "Sair".
 **Exporta:**
 
 - `<Sidebar />` — client component, lê `usePathname()` para destacar o item ativo
-  (barra de acento à esquerda + fundo `bg-primary/10`).
+  (barra violeta à esquerda + `bg-sidebar-accent`; fundo Void, sem sombra nem borda).
 
 **Comportamentos:**
 
@@ -28,7 +28,7 @@ Testar IA, Assinatura). Rodapé com "Sair".
 **Depende de:** `next/link`, `next/navigation`, `next-auth/react` (`signOut`),
 `lucide-react` (ícones), `@/components/brand/Logo`, `@/lib/utils`.
 
-- **Rodapé com perfil:** avatar com iniciais (gradiente azul→violeta) + nome e
+- **Rodapé com perfil:** avatar com iniciais (violeta de ação, sem gradiente) + nome e
   especialidade (`GET /api/professionals`), acima do "Sair".
 
 **Notas:** renderizada pelo `app/(dashboard)/layout.tsx` (que aplica `md:pl-64`
@@ -39,8 +39,8 @@ incluí-la em `PRIMARY` ou `SETTINGS`. Usa os tokens `--sidebar-*` do tema.
 
 ## EmptyState.tsx
 
-**O que faz:** estado vazio padronizado — ícone num círculo, título, descrição
-opcional e slot de ação (`children`). Usado em listas sem itens (conversas,
+**O que faz:** estado vazio padronizado — símbolo do logo em mono como único ornamento, título, descrição
+opcional e slot de ação (`children`). A prop `icon` é aceita por compatibilidade e não é desenhada. Usado em listas sem itens (conversas,
 serviços, …).
 
 **Exporta:** `<EmptyState icon title description? children? />`.
@@ -49,7 +49,7 @@ serviços, …).
 
 ## PageHeader.tsx
 
-**O que faz:** cabeçalho padronizado das páginas internas — eyebrow (font-mono, uppercase), título em Space Grotesk e descrição + área opcional de ações.
+**O que faz:** cabeçalho padronizado das páginas internas — eyebrow (texto simples em violeta tinta, sem caixa-alta), título em Sora e descrição + área opcional de ações.
 
 **Exporta:**
 

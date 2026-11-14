@@ -192,7 +192,11 @@ export default function OnboardingStep2() {
           />
         </FormField>
 
-        {error && <span className="text-sm text-destructive">{error}</span>}
+        {error && (
+          <span role="alert" className="text-sm font-medium text-destructive">
+            {error}
+          </span>
+        )}
 
         <div className="flex gap-3">
           <Button

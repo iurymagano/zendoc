@@ -14,20 +14,19 @@ export const metadata: Metadata = {
 export default function PrivacidadePage() {
   const updated = '09/06/2026';
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="border-b border-border/70 bg-background/80 backdrop-blur-md">
+    <div className="min-h-screen bg-background">
+      <header className="bg-[var(--ia-void)] text-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <Logo size="md" href="/" />
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+          <Link href="/" className="text-sm text-[var(--ia-on-void-muted)] hover:text-white">
             Voltar ao site
           </Link>
         </div>
       </header>
 
       <main className="mx-auto max-w-3xl px-6 py-10">
-        <span className="mb-2 block h-1 w-10 rounded-full bg-gradient-to-r from-[#4f6ef7] to-[#7c3aed]" />
         <h1
-          className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
           style={{ letterSpacing: '-0.03em' }}
         >
           Política de Privacidade

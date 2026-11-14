@@ -64,7 +64,7 @@ export default function OnboardingStep1() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ex.: Dra. Ana Silva"
+            placeholder="Ex.: Ana Silva"
           />
         </FormField>
         <FormField label="WhatsApp" htmlFor="phone">
@@ -77,7 +77,11 @@ export default function OnboardingStep1() {
             placeholder="(11) 99999-9999"
           />
         </FormField>
-        {error && <span className="text-sm text-destructive">{error}</span>}
+        {error && (
+          <span role="alert" className="text-sm font-medium text-destructive">
+            {error}
+          </span>
+        )}
         <Button type="submit" size="lg">
           Continuar
         </Button>

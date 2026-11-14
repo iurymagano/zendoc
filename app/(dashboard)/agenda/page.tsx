@@ -600,7 +600,7 @@ export default function AgendaPage() {
                       maxLength={120}
                     />
                     {suggestionsOpen && suggestions.length > 0 && (
-                      <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto rounded-md border bg-popover shadow-md">
+                      <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto rounded-xl bg-popover ring-1 ring-border">
                         {suggestions.map((p) => (
                           <li key={p.id}>
                             <button
