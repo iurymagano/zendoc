@@ -1,6 +1,6 @@
 # app/api/reminders/dispatch/
 
-Endpoint chamado pelo Vercel Cron a cada 15 minutos — processa lembretes
+Endpoint chamado por um cron externo (cron-job.org) a cada 1 minuto — processa lembretes
 pendentes cujo `scheduled_for` já passou.
 
 ## route.ts
@@ -8,8 +8,8 @@ pendentes cujo `scheduled_for` já passou.
 **Endpoint:** `GET|POST /api/reminders/dispatch`
 
 **Autenticação:** header `Authorization: Bearer ${CRON_SECRET}`. Sem isso,
-retorna 401. O Vercel Cron injeta esse header automaticamente quando
-`CRON_SECRET` está definido nas env vars do projeto.
+retorna 401. O job no cron-job.org precisa mandar esse header
+(campo "Headers" do job).
 
 **Resposta 200:**
 
@@ -53,7 +53,13 @@ independentemente do fuso da runtime (Vercel gru1 é UTC por padrão).
 
 **Notas:**
 
-- A cron do Vercel está agendada em [vercel.json](../../../../vercel.json) para
-  rodar a cada 15 minutos (`*/15 * * * *`).
+- Agendado **fora** do `vercel.json`: o plano grátis da Vercel (Hobby) não
+  aceita cron mais frequente que diário. O cron-job.org (grátis) chama este
+  endpoint a cada 1 minuto, então o lembrete sai no máximo ~1 min depois do
+  `scheduled_for`. Passos no [README raiz](../../../../README.md#crons-cron-joborg).
+- **Sem envio em dobro:** antes de enviar, cada lembrete é reservado com um
+  update condicional (`pending → sent` onde `status = 'pending'`). Se duas
+  execuções se sobrepõem, só a que conseguiu a troca envia; a outra conta como
+  `skipped`. Se o envio falha, o lembrete é regravado como `failed`.
 - Para testar localmente, chame manualmente com o header Bearer:
   `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/reminders/dispatch`.

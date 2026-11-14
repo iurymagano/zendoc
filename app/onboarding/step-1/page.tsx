@@ -15,12 +15,16 @@ export default function OnboardingStep1() {
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // Restaura o rascunho do sessionStorage depois de montar (no servidor ele
+  // não existe; ler no useState inicial quebraria a hidratação).
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+      /* eslint-disable react-hooks/set-state-in-effect -- sincroniza com armazenamento externo após o mount */
       setName(parsed.name ?? '');
       setPhone(parsed.phone ?? '');
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, []);
 

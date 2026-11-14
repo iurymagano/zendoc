@@ -97,6 +97,10 @@ Legenda:
 - [x] `GET|POST /api/reminders/dispatch` — dispara `24h` e `2h` pendentes
 - [x] `lib/zapi/client.ts` — `sendWhatsAppMessage` (stub testável)
 - [ ] Configurar `CRON_SECRET` em produção (Vercel env vars)
+- [x] Crons frequentes fora do `vercel.json` (plano grátis da Vercel só aceita
+  diário): lembretes a cada 1 min e sync do Google a cada 10 min pelo cron-job.org
+- [x] Dispatch reserva o lembrete antes de enviar (sem envio em dobro com cron de 1 min)
+- [ ] **Operacional:** criar os jobs no cron-job.org com o header `Authorization: Bearer`
 
 ---
 
@@ -228,6 +232,7 @@ Legenda:
   - [x] `GET /api/appointments` devolve `googleBusy` na janela
   - [x] UI calendário Mês + Semana (`components/agenda/`) + tela `/configuracoes/google`
   - [x] Cron de sync em `vercel.json` (a cada 30 min) como fallback do webhook
+    (movido para o cron-job.org a cada 10 min — plano grátis da Vercel)
   - [ ] **Operacional:** cadastrar o redirect URI
     `${NEXT_PUBLIC_URL}/api/google/calendar/callback` no Google Cloud Console
     (OAuth client) e habilitar a **Google Calendar API** no projeto

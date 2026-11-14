@@ -54,14 +54,30 @@ para o contexto completo do projeto e [TASKS.md](./TASKS.md) para o backlog vivo
 2. Em *Settings → Environment Variables*, preencha todas as chaves de
    `.env.example` para os ambientes **Production**, **Preview** e **Development**.
 3. Em *Settings → Domains*, configure o domínio (ex.: `app.iazen.com.br`).
-4. Push na branch `master` → deploy automático de produção. Outras branches geram
+4. Push na branch `main` → deploy automático de produção. Outras branches geram
    deploys de preview.
 
 Arquivos relevantes:
 
-- [vercel.json](./vercel.json) — região `gru1` (São Paulo) + cron de lembretes
-  em `/api/reminders/dispatch` (endpoint será criado na Sprint 2).
+- [vercel.json](./vercel.json) — região `gru1` (São Paulo) + cron diário de
+  `/api/recurrences/materialize` (o único que cabe no plano grátis, que só
+  aceita cron 1 vez por dia).
 - [.env.example](./.env.example) — lista completa de variáveis.
+
+### Crons (cron-job.org)
+
+O plano grátis da Vercel (Hobby) só roda cron 1 vez por dia, então os crons
+frequentes ficam no [cron-job.org](https://cron-job.org) (grátis, até de 1 em
+1 minuto). Crie um job para cada linha, método `GET`, com o header
+`Authorization: Bearer <CRON_SECRET>` (o mesmo valor da env na Vercel):
+
+| Endpoint | Intervalo | Para quê |
+| --- | --- | --- |
+| `/api/reminders/dispatch` | 1 min | lembretes de 24h e 2h antes da consulta |
+| `/api/google/calendar/sync` | 10 min | puxar compromissos do Google Agenda |
+
+O `/api/recurrences/materialize` segue no `vercel.json` (diário). As respostas
+do robô no WhatsApp **não** dependem de cron: chegam na hora, pelo webhook.
 
 ### Supabase
 

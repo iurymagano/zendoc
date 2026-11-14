@@ -4,14 +4,6 @@
   "regions": ["gru1"],
   "crons": [
     {
-      "path": "/api/reminders/dispatch",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/google/calendar/sync",
-      "schedule": "*/30 * * * *"
-    },
-    {
       "path": "/api/recurrences/materialize",
       "schedule": "0 6 * * *"
     }

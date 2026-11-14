@@ -15,4 +15,4 @@
 
 **Depende de:** `auth`, `lib/supabase`, `lib/google/calendar` (`syncBusyEvents`, `setupWatch`).
 
-**Notas:** agendado em `vercel.json` a cada 30 min.
+**Notas:** chamado pelo cron-job.org a cada 10 min (fora do `vercel.json`: o plano grátis da Vercel só aceita cron diário).

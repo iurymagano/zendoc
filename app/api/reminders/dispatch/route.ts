@@ -159,6 +159,21 @@ async function handle(req: NextRequest) {
 
     const text = buildMessage(reminder.type, prof.name, appt.starts_at);
 
+    // Reserva o lembrete ANTES de enviar: o cron externo roda a cada minuto e
+    // duas execuções podem pegar o mesmo lembrete. Só quem conseguir trocar
+    // pending → sent envia; a outra execução pula. Se o envio falhar, o
+    // catch abaixo regrava como failed.
+    const { data: claimed } = await supabase
+      .from('reminders')
+      .update({ status: 'sent', sent_at: new Date().toISOString() })
+      .eq('id', reminder.id)
+      .eq('status', 'pending')
+      .select('id');
+    if (!claimed || claimed.length === 0) {
+      skipped++;
+      continue;
+    }
+
     try {
       await sendWhatsAppMessage(
         prof.zapi_instance_id,
@@ -166,10 +181,6 @@ async function handle(req: NextRequest) {
         appt.patient_phone,
         text,
       );
-      await supabase
-        .from('reminders')
-        .update({ status: 'sent', sent_at: new Date().toISOString() })
-        .eq('id', reminder.id);
       sent++;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

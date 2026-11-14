@@ -7,4 +7,4 @@ appointment entra em status `scheduled`/`confirmed` (24h e 2h antes).
 ## Subpastas
 
 - [dispatch/](./dispatch/) — `POST|GET /api/reminders/dispatch`, chamado pelo
-  Vercel Cron a cada 15 minutos (config em [vercel.json](../../../vercel.json)).
+  cron-job.org a cada 1 minuto (fora do `vercel.json`: o plano grátis só aceita cron diário).
