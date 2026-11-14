@@ -295,6 +295,33 @@ Legenda:
     recusado)
   - [ ] Cobrir `prepare`/`confirm` do executor com teste automatizado (hoje só
     as regras puras de `pending.ts` têm teste; o fluxo com banco foi smoke manual)
+  - [x] Achado do qa (PR #2, alta): ao responder "Sim, confirmo" a IA preparava
+    de novo e a ação nunca executava (6 de 6 tentativas). Corrigido por dois
+    lados: o chat injeta a ação pendente no prompt dinâmico (a IA vai direto ao
+    `confirm_pending_action`) **e** repetir o mesmo `prepare_*` não substitui a
+    ação pendente (mantém o `request_id`, `decidePendingSave`). Reproduzido com a
+    conta de QA e o modelo real: cancelar e remarcar terminam em `done` no banco
+    e o atendimento muda
+  - [x] Se a execução falha (conflito, horário que passou, erro/exceção), a ação
+    volta a `pending` em vez de ficar `done` sem ter sido feita
+  - [x] `ilike` do nome de cliente escapa `%`, `_` e `\` (`lib/assistant/ilike.ts`
+    + teste)
+- [x] Limite de uso do chat: 30 mensagens/10 min e 200/dia por profissional
+  (`POST /api/assistant/chat` → 429 com mensagem amigável e `Retry-After`;
+  `lib/assistant/rate-limit.ts` + teste; a tela já mostra o `error` retornado)
+  - [ ] Hoje conta só turnos concluídos (a linha do usuário é gravada no fim) e
+    requisições paralelas passam juntas; se virar problema, gravar a linha antes
+    de chamar o modelo ou usar contador atômico
+- [x] Declaração de comparecimento (`/documentos/declaracao/[id]`) só é emitida
+  se o atendimento já começou e não está cancelado/falta; futuro mostra "A
+  declaração fica disponível depois do atendimento"
+  (`lib/appointments/declaration.ts` + teste)
+  - [ ] Esconder o botão "Declaração" na `/agenda` para atendimento futuro (hoje
+    só some para cancelado; a página já bloqueia, mas o botão leva a um aviso)
+- [x] `supabase/migrations/README.md` com uma linha por migration (0001–0009)
+- [ ] `app/api/patients/route.ts` monta o filtro `.or()` da busca com o texto
+  cru: `%`, `_`, `,` e `)` do usuário alteram/quebram o filtro (só afeta a busca
+  do próprio profissional); escapar
 - [ ] Avisar o cliente (opcional, pedindo OK) quando o atendimento dele for
   cancelado ou remarcado pelo Assistente
   - Nota: **nenhum** fluxo do app avisa o cliente por WhatsApp quando o

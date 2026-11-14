@@ -1,7 +1,10 @@
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
+import { declarationEligibility } from '@/lib/appointments/declaration';
 import { PrintButton } from '@/components/documents/PrintButton';
+import { buttonVariants } from '@/components/ui/button';
 import type { Appointment, Professional } from '@/types/database';
 
 const TZ = 'America/Sao_Paulo';
@@ -27,6 +30,10 @@ function time(iso: string): string {
  * Declaração de comparecimento (imprimível). Gerada a partir de um appointment
  * do profissional logado. Rota fora do grupo (dashboard) — sem navbar, layout
  * limpo pra impressão/PDF (window.print()).
+ *
+ * Só emite o documento se o atendimento já começou e não foi cancelado nem
+ * marcado como falta (declarationEligibility): o texto afirma que o cliente
+ * "compareceu". Caso contrário mostra um aviso no lugar do documento.
  */
 export default async function DeclaracaoPage({
   params,
@@ -53,6 +60,34 @@ export default async function DeclaracaoPage({
     .eq('professional_id', professional.id)
     .maybeSingle<Appointment>();
   if (!appointment) notFound();
+
+  const eligibility = declarationEligibility(appointment);
+  if (!eligibility.ok) {
+    return (
+      <div className="min-h-screen bg-[var(--ia-mist)] px-4 py-8">
+        <div className="mx-auto flex max-w-xl flex-col gap-6">
+          <h1 className="font-display text-lg font-semibold">
+            Declaração de comparecimento
+          </h1>
+          <div
+            role="status"
+            className="rounded-2xl bg-white p-6 text-sm leading-relaxed ring-1 ring-border"
+          >
+            <p className="font-medium">{eligibility.message}</p>
+            <p className="mt-2 text-muted-foreground">
+              Volte à agenda e gere a declaração depois que o atendimento
+              acontecer.
+            </p>
+          </div>
+          <div>
+            <Link href="/agenda" className={buttonVariants({ variant: 'outline' })}>
+              Voltar para a agenda
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const emitidoEm = longDate(new Date().toISOString());
 

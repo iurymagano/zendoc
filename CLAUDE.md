@@ -1226,24 +1226,35 @@ o webhook do WhatsApp já ignora mensagens fora de `['trialing','active']`.
 - O `professional_id` vem sempre da sessão (`auth()`); nenhuma ferramenta aceita
   `professional_id` na entrada. Toda query filtra por ele (service key ignora RLS).
 - Ferramentas: `list_agenda`, `list_free_slots`, `create_appointment`,
-  `create_personal_event`, `set_day_off`, `cancel_appointment`,
-  `reschedule_appointment`, `create_reminder`, `list_reminders`, `cancel_reminder`.
-  Entrada validada com zod; loop limitado a 8 iterações.
-- Cancelar/remarcar exige confirmação no chat (`confirmed=true` só depois que o
-  usuário confirma). Cancelar/remarcar muda só a agenda: o cliente NÃO é avisado.
+  `create_personal_event`, `set_day_off`, `prepare_cancel_appointment`,
+  `prepare_reschedule_appointment`, `confirm_pending_action`, `create_reminder`,
+  `list_reminders`, `cancel_reminder`. Entrada validada com zod; loop limitado a
+  8 iterações.
+- Cancelar/remarcar é em **dois passos impostos pelo servidor**: `prepare_*` só
+  grava a ação em `assistant_pending_actions` (uma por profissional, validade de
+  15 min, não altera a agenda) e `confirm_pending_action` só executa a ação
+  preparada numa requisição POSTERIOR (outra mensagem do usuário), uma única vez;
+  se a execução falhar, a ação volta a `pending`. Como o histórico guarda só
+  texto, o chat injeta a ação pendente no prompt dinâmico, e repetir o mesmo
+  `prepare_*` não a substitui. Cancelar/remarcar muda só a agenda: o cliente NÃO
+  é avisado.
 - Compromisso pessoal = `appointments` com `booked_via='manual'` e `patient_phone`
   vazio (não gera lembrete para cliente; vai para o Google Agenda com o título).
 - Lembrete pessoal vai por WhatsApp para `professionals.phone`, enviado pelo mesmo
   cron de 1 min (`/api/reminders/dispatch`). Sem plano `trialing`/`active`, sem
   WhatsApp conectado ou sem telefone válido → `failed` com `error_message`.
 - Plano fora de `trialing`/`active` → `POST /api/assistant/chat` responde 402.
+- Limite de uso por profissional (custo na Anthropic): 30 mensagens em 10 min e
+  200 em 24h (conta `role='user'` em `assistant_messages`); acima disso responde
+  429 com mensagem amigável e `Retry-After` (`lib/assistant/rate-limit.ts`).
 - Datas sempre em America/Sao_Paulo (-03:00); o prompt recebe data/hora atuais.
 - Histórico em `assistant_messages` (últimas 20 mensagens vão para a IA).
 
 **Endpoints do Assistente (todos começam com `auth()`):**
 
 - `POST /api/assistant/chat` — `{ message }` (1–2000 chars) → `{ reply, actions }`;
-  402 se o plano não estiver `trialing`/`active`. `maxDuration = 60`.
+  402 se o plano não estiver `trialing`/`active`; 429 acima do limite de uso.
+  `maxDuration = 60`.
 - `GET /api/assistant/messages` — histórico do chat (`assistant_messages`).
 - `GET /api/assistant/reminders` — `{ pending, recent }` (lembretes pessoais).
 - `POST /api/assistant/reminders/[id]/cancel` — cancela um lembrete pendente.

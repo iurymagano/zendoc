@@ -18,7 +18,7 @@ Artefatos de banco de dados do IAzen para rodar no Supabase.
 
 ## migrations/
 
-Alterações incrementais para bancos **já provisionados** (projeto novo usa só `schema.sql`). Rodar em ordem no SQL Editor.
+Alterações incrementais para bancos **já provisionados** (projeto novo usa só `schema.sql`). Rodar em ordem no SQL Editor. Índice completo (um item por migration) em [migrations/README.md](migrations/README.md).
 
 - `0001_patients_cpf.sql` — adiciona `patients.cpf` + índice único parcial por profissional. Idempotente (`if not exists`).
 - `0002_google_calendar.sql` — colunas de conexão Google em `professionals`, `appointments.google_event_id` e `google_busy_events` (compromissos do Google que bloqueiam horários).

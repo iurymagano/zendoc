@@ -26,6 +26,21 @@ Intervalos que apenas se tocam na borda (ex.: um termina 15:00 e outro começa
 
 ---
 
+## declaration.ts
+
+**O que faz:** decide se a declaração de comparecimento pode ser emitida para um atendimento (PURO, sem banco).
+
+**Exporta:**
+
+- `declarationEligibility(appointment: { starts_at, status }, now?): { ok: true } | { ok: false, reason: 'future' | 'cancelled' | 'no_show', message }` — só libera se o atendimento já começou e não está cancelado nem como falta.
+- `DECLARATION_MESSAGES` — textos pt-BR de cada motivo (o de `future` é "A declaração fica disponível depois do atendimento.").
+
+**Usado por:** `app/documentos/declaracao/[id]/page.tsx`.
+
+**Notas:** cancelado/falta têm precedência sobre "futuro" (motivo mais específico). Testado em `declaration.test.ts`.
+
+---
+
 ## reminders.ts
 
 **O que faz:** mantém os lembretes (tabela `reminders`, 24h/2h) coerentes com

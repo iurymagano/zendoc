@@ -35,7 +35,13 @@ import {
   DEFAULT_APPOINTMENT_MIN,
   DEFAULT_PERSONAL_EVENT_MIN,
 } from './prompt';
-import { checkPendingConfirmable, pendingExpiry } from './pending';
+import { escapeIlike } from './ilike';
+import {
+  checkPendingConfirmable,
+  decidePendingSave,
+  pendingExpiry,
+  type PendingForSave,
+} from './pending';
 import { checkPersonalReminderDelivery } from './reminders';
 import type { ToolInput, ToolName } from './tools';
 
@@ -65,11 +71,6 @@ const MAX_PENDING_REMINDERS = 100;
 const ACTIVE = ['scheduled', 'confirmed', 'pending_approval'];
 
 const fail = (error: string): ToolOutcome => ({ ok: false, error });
-
-/** Escapa curingas do ilike para casar o nome literalmente. */
-function ilikeExact(value: string): string {
-  return value.replace(/[\\%_]/g, (c) => `\\${c}`);
-}
 
 const isPersonal = (a: { patient_phone: string }) =>
   isPersonalCommitment(a.patient_phone);
@@ -269,7 +270,7 @@ async function createAppointment(
       .from('patients')
       .select('id, name, phone')
       .eq('professional_id', profId)
-      .ilike('name', ilikeExact(input.client_name))
+      .ilike('name', escapeIlike(input.client_name))
       .limit(3);
     if (!matches || matches.length === 0) {
       return fail(
@@ -461,7 +462,10 @@ async function loadActiveAppointment(
 
 /**
  * Guarda a ação preparada (cancelar/remarcar) para ser confirmada numa mensagem
- * POSTERIOR. Só existe uma por profissional: preparar outra substitui a anterior.
+ * POSTERIOR. Só existe uma por profissional: preparar outra DIFERENTE substitui
+ * a anterior. Preparar de novo a MESMA ação (ex.: a IA repete o prepare ao ouvir
+ * "sim") não grava nada e mantém o request_id original — senão a confirmação
+ * nunca chegaria a executar (decidePendingSave, pending.ts).
  */
 async function savePending(
   ctx: ToolContext,
@@ -473,10 +477,36 @@ async function savePending(
     reason?: string | null;
     summary: string;
   },
-): Promise<{ ok: true } | { ok: false }> {
+): Promise<{ ok: true; carriedOver: boolean } | { ok: false }> {
   const supabase = createServerClient();
   const profId = ctx.professional.id;
   const now = ctx.now ?? new Date();
+
+  const { data: current, error: readError } = await supabase
+    .from('assistant_pending_actions')
+    .select('kind, appointment_id, new_starts_at, new_ends_at, request_id, status, expires_at')
+    .eq('professional_id', profId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (readError) {
+    console.error('assistente: erro ao ler ação pendente:', readError);
+    return { ok: false };
+  }
+  const decision = decidePendingSave(
+    (current ?? null) as PendingForSave | null,
+    {
+      kind: row.kind,
+      appointment_id: row.appointment_id,
+      new_starts_at: row.new_starts_at ?? null,
+      new_ends_at: row.new_ends_at ?? null,
+    },
+    { requestId: ctx.requestId, now },
+  );
+  if (decision.action === 'reuse') {
+    return { ok: true, carriedOver: decision.carriedOver };
+  }
 
   const { error: replaceError } = await supabase
     .from('assistant_pending_actions')
@@ -503,11 +533,15 @@ async function savePending(
     console.error('assistente: erro ao preparar ação:', error);
     return { ok: false };
   }
-  return { ok: true };
+  return { ok: true, carriedOver: false };
 }
 
 const NEXT_STEP =
   'Nada foi alterado ainda. Diga ao usuário exatamente o que será feito e peça confirmação; só chame confirm_pending_action depois que ele responder, na mensagem seguinte.';
+
+// Mesma ação já preparada numa mensagem anterior (o usuário já viu o resumo).
+const CARRIED_OVER_STEP =
+  'Esta ação JÁ estava preparada e o usuário já viu o resumo na mensagem anterior; nada foi alterado ainda. Se a mensagem atual dele é a confirmação (sim, confirmo, pode), chame confirm_pending_action agora; se não, pergunte de novo se ele confirma.';
 
 async function prepareCancel(
   ctx: ToolContext,
@@ -532,7 +566,7 @@ async function prepareCancel(
       pending: summary,
       had_client: !isPersonal(loaded.appt),
       client_notified_automatically: false,
-      next_step: NEXT_STEP,
+      next_step: saved.carriedOver ? CARRIED_OVER_STEP : NEXT_STEP,
     },
   };
 }
@@ -578,7 +612,7 @@ async function prepareReschedule(
       pending: summary,
       had_client: !isPersonal(old),
       client_notified_automatically: false,
-      next_step: NEXT_STEP,
+      next_step: saved.carriedOver ? CARRIED_OVER_STEP : NEXT_STEP,
     },
   };
 }
@@ -675,6 +709,8 @@ async function executeReschedule(
 /**
  * Executa a ação preparada mais recente — exatamente a que o usuário viu. Só
  * vale se foi preparada numa requisição ANTERIOR e não expirou (pending.ts).
+ * Reserva (pending→done) antes de executar e devolve a pending se a execução
+ * falhar.
  */
 async function confirmPendingAction(ctx: ToolContext): Promise<ToolOutcome> {
   const supabase = createServerClient();
@@ -714,9 +750,37 @@ async function confirmPendingAction(ctx: ToolContext): Promise<ToolOutcome> {
     return fail('Essa ação já foi confirmada ou substituída por outra.');
   }
 
-  return pending.kind === 'cancel'
-    ? executeCancel(ctx, pending)
-    : executeReschedule(ctx, pending);
+  let outcome: ToolOutcome;
+  try {
+    outcome =
+      pending.kind === 'cancel'
+        ? await executeCancel(ctx, pending)
+        : await executeReschedule(ctx, pending);
+  } catch (err) {
+    console.error('assistente: erro inesperado ao executar a ação pendente:', err);
+    outcome = fail('Erro ao executar a ação. Nada foi confirmado; tente de novo.');
+  }
+
+  // Falhou (conflito, horário que passou, erro de banco…): a ação NÃO foi feita,
+  // então devolve a reserva para "pending" e o usuário pode tentar de novo dentro
+  // do prazo. Só vira "done" de verdade quando executou. Continua de uso único:
+  // enquanto executa, o status é "done" e nenhuma outra confirmação reserva.
+  if (!outcome.ok) await releasePending(profId, pending.id);
+  return outcome;
+}
+
+/** Devolve a ação reservada (done) para pending depois de uma execução que falhou. */
+async function releasePending(professionalId: string, id: string): Promise<void> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from('assistant_pending_actions')
+    .update({ status: 'pending' })
+    .eq('id', id)
+    .eq('professional_id', professionalId)
+    .eq('status', 'done');
+  if (error) {
+    console.error('assistente: erro ao devolver ação pendente após falha:', error);
+  }
 }
 
 async function createReminder(

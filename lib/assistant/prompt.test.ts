@@ -54,3 +54,31 @@ test('contexto dinâmico traz agora e a tabela de datas (fora do bloco cacheáve
   // O bloco estável não pode conter a hora (senão o cache nunca acerta).
   assert.doesNotMatch(buildStablePrompt(PROF, []), /2026/);
 });
+
+test('contexto dinâmico sem ação pendente não menciona confirmação', () => {
+  const ctx = buildContextPrompt(new Date('2026-11-14T19:57:00Z'));
+  assert.doesNotMatch(ctx, /AÇÃO PREPARADA/);
+  assert.equal(ctx, buildContextPrompt(new Date('2026-11-14T19:57:00Z'), null));
+});
+
+test('ação pendente vai no bloco dinâmico (nunca no estável) e manda confirmar sem preparar de novo', () => {
+  const now = new Date('2026-11-14T19:57:00Z');
+  const ctx = buildContextPrompt(now, {
+    kind: 'reschedule',
+    summary: 'Remarcar Ana: qua, 18/11 às 10:00 → qui, 19/11 às 11:00',
+    expires_at: '2026-11-14T20:12:00.000Z',
+  });
+  assert.match(ctx, /AÇÃO PREPARADA AGUARDANDO CONFIRMAÇÃO \(REMARCAR\)/);
+  assert.match(ctx, /Remarcar Ana: qua, 18\/11 às 10:00 → qui, 19\/11 às 11:00 \(vale até 17:12\)/);
+  assert.match(ctx, /chame confirm_pending_action/);
+  assert.match(ctx, /NÃO chame prepare_cancel_appointment nem prepare_reschedule_appointment de novo/);
+  // o bloco cacheável não pode carregar dado volátil
+  assert.doesNotMatch(buildStablePrompt(PROF, []), /vale até|Remarcar Ana: qua/);
+});
+
+test('regra estável orienta ir direto ao confirm quando há ação preparada no contexto', () => {
+  assert.match(
+    buildStablePrompt(PROF, []),
+    /AÇÃO PREPARADA AGUARDANDO CONFIRMAÇÃO e ela disser sim, vá direto para confirm_pending_action/,
+  );
+});

@@ -6,6 +6,7 @@ import { createServerClient } from '@/lib/supabase';
 import type { Professional } from '@/types/database';
 import { runTool } from './executor';
 import { runToolLoop } from './loop';
+import type { PendingForPrompt } from './pending';
 import { buildContextPrompt, buildStablePrompt } from './prompt';
 import { ASSISTANT_TOOLS } from './tools';
 
@@ -15,6 +16,33 @@ export const HISTORY_LIMIT = 20;
 export type AssistantTurn = { reply: string; actions: string[] };
 
 type StoredRole = 'user' | 'assistant';
+
+/**
+ * Ação de cancelar/remarcar preparada numa mensagem anterior e ainda válida.
+ * Vai para o prompt dinâmico: o histórico só tem texto, então sem isso a IA não
+ * sabe que "Sim, confirmo" é a resposta a uma ação já preparada. Falha de leitura
+ * não derruba o chat (segue sem a dica; o servidor continua exigindo o fluxo).
+ */
+async function loadPendingForPrompt(
+  professionalId: string,
+  now: Date,
+): Promise<PendingForPrompt | null> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('assistant_pending_actions')
+    .select('kind, summary, expires_at')
+    .eq('professional_id', professionalId)
+    .eq('status', 'pending')
+    .gt('expires_at', now.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.error('assistente: erro ao ler ação pendente para o prompt:', error);
+    return null;
+  }
+  return (data ?? null) as PendingForPrompt | null;
+}
 
 export async function runAssistantChat(
   professional: Professional,
@@ -46,6 +74,8 @@ export async function runAssistantChat(
     .order('name')
     .limit(30);
 
+  const pending = await loadPendingForPrompt(professional.id, startedAt);
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const model = process.env.AI_MODEL ?? 'claude-sonnet-4-6';
 
@@ -64,7 +94,7 @@ export async function runAssistantChat(
           text: buildStablePrompt(professional, services ?? []),
           cache_control: { type: 'ephemeral' },
         },
-        { type: 'text', text: buildContextPrompt(startedAt) },
+        { type: 'text', text: buildContextPrompt(startedAt, pending) },
       ],
       tools: ASSISTANT_TOOLS,
       messages: [
