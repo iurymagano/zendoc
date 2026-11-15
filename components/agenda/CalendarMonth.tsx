@@ -178,7 +178,7 @@ export function CalendarMonth({
                   <button
                     type="button"
                     onClick={() => onOpenDay(key)}
-                    className="pointer-events-auto self-start rounded-md px-1 py-0.5 text-[11px] font-semibold leading-tight text-muted-foreground outline-none transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    className="pointer-events-auto self-start rounded-md bg-secondary px-1.5 py-0.5 text-xs font-bold leading-tight text-foreground outline-none transition-colors duration-150 hover:bg-[var(--ia-violet-ink)] hover:text-white focus-visible:ring-2 focus-visible:ring-ring"
                     aria-label={`Mais ${hidden} neste dia: ver o dia ${dayLabel}`}
                   >
                     +{hidden}

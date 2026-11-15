@@ -106,9 +106,11 @@ export function Sidebar() {
     name: string;
     specialty: string | null;
     aiEnabled: boolean | null;
+    whatsappConnected: boolean | null;
   } | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,6 +125,10 @@ export function Sidebar() {
             specialty: body.professional.specialty ?? null,
             aiEnabled:
               typeof body.professional.ai_enabled === 'boolean' ? body.professional.ai_enabled : null,
+            whatsappConnected:
+              typeof body.professional.whatsapp_connected === 'boolean'
+                ? body.professional.whatsapp_connected
+                : null,
           });
         }
       } catch {
@@ -161,7 +167,8 @@ export function Sidebar() {
     };
   }, [pathname]);
 
-  // Drawer: Esc fecha, a rolagem da página trava e o foco vai para o botão de fechar.
+  // Drawer: Esc fecha, Tab fica preso dentro dele, a rolagem da página trava e o foco vai
+  // para o botão de fechar (e volta ao botão do menu ao fechar).
   useEffect(() => {
     if (!open) return;
     const menuButton = menuRef.current;
@@ -169,7 +176,32 @@ export function Sidebar() {
     document.body.style.overflow = 'hidden';
     closeRef.current?.focus();
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const drawer = drawerRef.current;
+      if (!drawer) return;
+      const focusable = Array.from(
+        drawer.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (!active || !drawer.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
     document.addEventListener('keydown', onKey);
     return () => {
@@ -185,6 +217,15 @@ export function Sidebar() {
   }
 
   const close = () => setOpen(false);
+
+  // Online só com a IA ligada E o WhatsApp conectado (igual ao card "Sua secretária").
+  const online = profile?.aiEnabled === true && profile.whatsappConnected !== false;
+  const statusLabel =
+    profile?.aiEnabled === false
+      ? 'Secretária IA pausada'
+      : profile?.whatsappConnected === false
+        ? 'WhatsApp desconectado'
+        : 'Secretária IA online';
 
   const nav = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -205,9 +246,9 @@ export function Sidebar() {
           ))}
         </nav>
 
-        <nav aria-labelledby="sidebar-config" className="flex flex-col gap-0.5 rounded-2xl bg-[var(--ia-void-1)] p-1.5">
+        <nav aria-label="Configurações" className="flex flex-col gap-0.5 rounded-2xl bg-[var(--ia-void-1)] p-1.5">
           <div
-            id="sidebar-config"
+            aria-hidden="true"
             className="px-3 pb-1 pt-2 text-xs font-semibold text-[var(--ia-on-void-muted)]"
           >
             Configurações
@@ -241,12 +282,10 @@ export function Sidebar() {
                     aria-hidden="true"
                     className={cn(
                       'size-1.5 shrink-0 rounded-full',
-                      profile.aiEnabled ? 'ia-spark bg-[var(--ia-spark)]' : 'bg-[var(--ia-on-void-muted)]',
+                      online ? 'ia-spark bg-[var(--ia-spark)]' : 'bg-[var(--ia-on-void-muted)]',
                     )}
                   />
-                  <span className="truncate">
-                    {profile.aiEnabled ? 'Secretária IA online' : 'Secretária IA pausada'}
-                  </span>
+                  <span className="truncate">{statusLabel}</span>
                 </div>
               ) : (
                 profile.specialty && (
@@ -324,6 +363,7 @@ export function Sidebar() {
           )}
         />
         <aside
+          ref={drawerRef}
           id="menu-lateral"
           role="dialog"
           aria-modal="true"

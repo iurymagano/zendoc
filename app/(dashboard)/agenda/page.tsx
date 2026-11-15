@@ -19,6 +19,7 @@ import { ResponsiveOverlay } from '@/components/agenda/ResponsiveOverlay';
 import { useMediaQuery } from '@/components/agenda/useMediaQuery';
 import {
   buildAvailability,
+  routineBounds,
   isoToLocal,
   periodLabel,
   rangeFor,
@@ -179,6 +180,7 @@ export default function AgendaPage() {
     () => Object.fromEntries(allServices.map((s) => [s.id, s.name])),
     [allServices],
   );
+  const routine = useMemo(() => routineBounds(weekly), [weekly]);
   const availability = useMemo(
     () => buildAvailability(weekly, exceptions),
     [weekly, exceptions],
@@ -359,7 +361,7 @@ export default function AgendaPage() {
       )}
 
       {loading ? (
-        <AgendaSkeleton />
+        <AgendaSkeleton view={view} />
       ) : (
         <>
           {empty && (
@@ -383,6 +385,7 @@ export default function AgendaPage() {
               appointments={appointments}
               busy={busy}
               availability={availability}
+              routine={routine}
               serviceNames={serviceNames}
               onSelectAppointment={openDetails}
               onSelectSlot={(key, hour) => openCreateAt(key, hour)}

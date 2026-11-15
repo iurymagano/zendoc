@@ -13,8 +13,8 @@ Shell compartilhado pelas páginas autenticadas (grupo `app/(dashboard)/`).
 **Comportamentos:**
 
 - **Badge de notificação** em "Conversas": conversas que precisam de resposta (`GET /api/conversations/attention-count`, poll 30s), com texto para leitor de tela. No celular também aparece um ponto no botão do menu.
-- **Drawer** (`role="dialog"`, `aria-modal`): sempre montado e `inert` quando fechado, para animar sem 150-250ms de salto; fecha com Escape, no X, fora ou ao escolher um item; trava o scroll do corpo; o foco vai ao botão fechar ao abrir e volta ao botão do menu ao fechar. Respeita `prefers-reduced-motion`.
-- **Perfil no rodapé:** avatar com iniciais, nome e o sinal "Secretária IA online/pausada" (ponto Faísca pulsando quando online), lido de `GET /api/professionals` (`ai_enabled`); sem o campo, mostra a especialidade. Acima do "Sair".
+- **Drawer** (`role="dialog"`, `aria-modal`): sempre montado e `inert` quando fechado, para animar sem 150-250ms de salto; fecha com Escape, no X, fora ou ao escolher um item; **prende o foco** (Tab e Shift+Tab ciclam dentro dele); trava o scroll do corpo; o foco vai ao botão fechar ao abrir e volta ao botão do menu ao fechar. Respeita `prefers-reduced-motion`.
+- **Perfil no rodapé:** avatar com iniciais, nome e o sinal da secretária: "online" (ponto Faísca pulsando) só com a IA ligada **e** o WhatsApp conectado; senão "Secretária IA pausada" ou "WhatsApp desconectado" (mesma regra do card "Sua secretária"), lido de `GET /api/professionals` (`ai_enabled`, `whatsapp_connected`); sem o campo, mostra a especialidade. Acima do "Sair".
 - **Sino** ([components/notifications](../notifications/README.md)): `variant="sheet"` na barra superior, `variant="popover"` no topo da sidebar.
 
 **Depende de:** `next/link`, `next/navigation`, `next-auth/react`, `lucide-react`, `@/components/brand/Logo`, `@/lib/utils`.

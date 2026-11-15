@@ -1,5 +1,4 @@
-import type { Appointment, AppointmentStatus } from '@/types/database';
-import { STATUS, STATUS_ORDER } from '@/components/appointments/status';
+import type { Appointment } from '@/types/database';
 
 export const TZ = 'America/Sao_Paulo';
 
@@ -36,6 +35,15 @@ export function tzMinutes(iso: string): number {
   return h * 60 + m;
 }
 
+/**
+ * Minutos do FIM de um atendimento dentro do dia em que ele começa. Quem termina
+ * à meia-noite (ou depois) dá 0 em `tzMinutes`; aqui vira 1440, o fim da coluna.
+ */
+export function tzEndMinutes(startIso: string, endIso: string): number {
+  if (tzDateKey(endIso) !== tzDateKey(startIso)) return 24 * 60;
+  return tzMinutes(endIso);
+}
+
 export function formatTime(iso: string): string {
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: TZ,
@@ -43,19 +51,6 @@ export function formatTime(iso: string): string {
     minute: '2-digit',
   }).format(new Date(iso));
 }
-
-/** Rótulo, swatch da legenda e bloco do calendário por status: vêm de components/appointments/status.ts. */
-export const STATUS_LABEL = Object.fromEntries(
-  STATUS_ORDER.map((s) => [s, STATUS[s].label]),
-) as Record<AppointmentStatus, string>;
-
-export const STATUS_DOT = Object.fromEntries(
-  STATUS_ORDER.map((s) => [s, STATUS[s].swatch]),
-) as Record<AppointmentStatus, string>;
-
-export const STATUS_BLOCK = Object.fromEntries(
-  STATUS_ORDER.map((s) => [s, STATUS[s].block]),
-) as Record<AppointmentStatus, string>;
 
 /** Agrupa appointments por dia (chave yyyy-MM-dd no fuso da agenda). */
 export function groupByDay(appointments: Appointment[]): Map<string, Appointment[]> {

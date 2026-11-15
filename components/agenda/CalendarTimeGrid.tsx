@@ -9,6 +9,7 @@ import {
   BusyEvent,
   formatTime,
   tzDateKey,
+  tzEndMinutes,
   tzMinutes,
 } from '@/components/agenda/calendar-utils';
 import { STATUS } from '@/components/appointments/status';
@@ -37,12 +38,19 @@ type Props = {
   days: Date[];
   appointments: Appointment[];
   busy: BusyEvent[];
+  /** Menor início e maior fim da rotina semanal inteira (min); mantém a faixa de horas estável. */
+  routine?: MinuteRange | null;
   /** Faixas dentro da rotina para o dia; `null` = rotina não cadastrada. */
   availability: (dateKey: string) => MinuteRange[] | null;
   serviceNames: Record<string, string>;
   onSelectAppointment: (a: Appointment) => void;
   onSelectSlot: (dateKey: string, hour: number) => void;
 };
+
+/** Só a primeira letra em maiúscula ("segunda-feira" vira "Segunda-feira"). */
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
 function hourLabel(h: number): string {
   return `${String(h).padStart(2, '0')}:00`;
@@ -59,6 +67,7 @@ export function CalendarTimeGrid({
   appointments,
   busy,
   availability,
+  routine,
   serviceNames,
   onSelectAppointment,
   onSelectSlot,
@@ -73,16 +82,21 @@ export function CalendarTimeGrid({
   const [startHour, endHour] = useMemo(() => {
     let min = 7;
     let max = 20;
+    // A rotina inteira (não só a dos dias em tela) mantém a faixa igual de uma semana para outra.
+    if (routine) {
+      min = Math.min(min, Math.floor(routine[0] / 60));
+      max = Math.max(max, Math.ceil(routine[1] / 60));
+    }
     const inView = new Set(keys);
     for (const e of appointments) {
       if (!inView.has(tzDateKey(e.starts_at))) continue;
       min = Math.min(min, Math.floor(tzMinutes(e.starts_at) / 60));
-      max = Math.max(max, Math.ceil(tzMinutes(e.ends_at) / 60));
+      max = Math.max(max, Math.ceil(tzEndMinutes(e.starts_at, e.ends_at) / 60));
     }
     for (const e of busy) {
       if (e.all_day || !inView.has(tzDateKey(e.starts_at))) continue;
       min = Math.min(min, Math.floor(tzMinutes(e.starts_at) / 60));
-      max = Math.max(max, Math.ceil(tzMinutes(e.ends_at) / 60));
+      max = Math.max(max, Math.ceil(tzEndMinutes(e.starts_at, e.ends_at) / 60));
     }
     for (const key of keys) {
       for (const [s, e] of availability(key) ?? []) {
@@ -91,7 +105,7 @@ export function CalendarTimeGrid({
       }
     }
     return [Math.max(0, min), Math.min(24, Math.max(max, min + 1))];
-  }, [appointments, busy, availability, keys]);
+  }, [appointments, busy, availability, routine, keys]);
 
   const hours = useMemo(
     () => Array.from({ length: endHour - startHour }, (_, i) => startHour + i),
@@ -138,7 +152,11 @@ export function CalendarTimeGrid({
       <div style={{ minWidth }}>
         {/* Cabeçalho dos dias (fixo no topo) */}
         <div
-          className="sticky top-0 z-30 grid border-b border-border bg-card"
+          className={cn(
+            'sticky top-0 z-30 grid border-b border-border bg-card',
+            // Dia no celular: a faixa de 7 dias já mostra o dia, então o cabeçalho some.
+            days.length === 1 && 'max-md:hidden',
+          )}
           style={{ gridTemplateColumns: columns }}
         >
           <div className="sticky left-0 z-10 bg-card" />
@@ -157,7 +175,7 @@ export function CalendarTimeGrid({
               >
                 <span
                   className={cn(
-                    'text-xs font-medium capitalize',
+                    'text-xs font-medium',
                     today ? 'text-primary' : 'text-muted-foreground',
                   )}
                 >
@@ -166,7 +184,7 @@ export function CalendarTimeGrid({
                     {WEEKDAY_SHORT[days[i].getDay()]}
                   </span>
                   <span className={days.length > 1 ? 'hidden lg:inline' : undefined}>
-                    {format(days[i], 'EEEE', { locale: ptBR })}
+                    {capitalize(format(days[i], 'EEEE', { locale: ptBR }))}
                   </span>
                 </span>
                 <span
@@ -221,7 +239,7 @@ export function CalendarTimeGrid({
                 .map((a) => ({
                   a,
                   start: tzMinutes(a.starts_at),
-                  end: tzMinutes(a.ends_at),
+                  end: tzEndMinutes(a.starts_at, a.ends_at),
                 })),
             );
             const dayLabel = format(day, "EEE dd/MM", { locale: ptBR });
@@ -272,7 +290,7 @@ export function CalendarTimeGrid({
                   const top = px(tzMinutes(b.starts_at));
                   const h = Math.max(
                     22,
-                    px(tzMinutes(b.ends_at)) - top,
+                    px(tzEndMinutes(b.starts_at, b.ends_at)) - top,
                   );
                   return (
                     <div

@@ -22,7 +22,7 @@ export default function DashboardLayout({
         </div>
       </div>
       {/* Avisos de notificações novas (polling do provider). */}
-      <Toaster position="top-right" closeButton />
+      <Toaster position="bottom-right" closeButton />
     </NotificationsProvider>
   );
 }

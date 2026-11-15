@@ -17,7 +17,7 @@ Fundo `bg-muted/40`.
 
 **Notificações:** o layout envolve tudo em `<NotificationsProvider>` (polling único
 das notificações do sino) e renderiza o `<Toaster>` (toasts de notificações novas,
-canto superior direito). O sino em si fica na `Sidebar`.
+canto inferior direito, para não cobrir o "Novo agendamento" do cabeçalho). O sino em si fica na `Sidebar`.
 
 **Notas:** cada `page.tsx` dentro de `(dashboard)/` renderiza só o conteúdo —
 não precisa repetir wrapper de `min-h-screen` nem padding. A navegação ficou na

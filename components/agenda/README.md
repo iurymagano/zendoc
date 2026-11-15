@@ -18,8 +18,8 @@ appointments e os compromissos pessoais sincronizados do Google
 - `BusyEvent` — tipo do evento pessoal do Google vindo de `GET /api/appointments`
 - `tzDateKey(iso): string` — chave de dia `yyyy-MM-dd` no fuso da agenda
 - `tzMinutes(iso): number` — minutos desde a meia-noite no fuso (posicionamento)
+- `tzEndMinutes(startIso, endIso): number` — minutos do FIM dentro do dia em que o atendimento começa; quem termina à meia-noite (ou depois) vira 1440 (e não 0)
 - `formatTime(iso): string` — `HH:mm`
-- `STATUS_LABEL` / `STATUS_DOT` / `STATUS_BLOCK` — derivados de `components/appointments/status.ts`
 - `groupByDay(appointments)` / `groupBusyByDay(busy)` — agrupam por dia
 
 **Notas:** `AppointmentCard` (dashboard) importa `formatTime` daqui. As chaves de dia
@@ -39,6 +39,7 @@ dos eventos — alinhado para usuários no Brasil.
 - `rangeFor(view, cursor)` — janela buscada: Dia e Semana usam a semana do cursor (segunda a domingo); Mês usa a grade completa
 - `periodLabel(view, cursor)` — texto do período na barra
 - `buildAvailability(weekly, exceptions)` — `(dateKey) => intervalos em minutos | null` com a rotina do dia; exceção vence a semanal, `lunch` nunca conta, `day_off` = vazio, sem rotina cadastrada = `null` (nada hachurado)
+- `routineBounds(weekly)` — menor início e maior fim da rotina semanal inteira (ativa, sem almoço), `null` sem rotina; dá a faixa de horas estável da grade
 - `complementRanges(ranges, from, to)` — o que sobra de uma faixa depois de tirar os intervalos (usado para hachurar o "fora da rotina")
 
 ---
@@ -75,17 +76,17 @@ dos eventos — alinhado para usuários no Brasil.
 
 **O que faz:** grade de horas compartilhada por **Dia** (1 coluna) e **Semana** (7). Cabeçalho e corpo usam o mesmo `gridTemplateColumns` (sem desalinhar em 390/768), cabeçalho e coluna de horas fixos ao rolar, dia atual destacado, linha de agora (violeta, com ponto Faísca), hover por faixa, horas fora da rotina hachuradas, compromissos do Google tracejados com cadeado e blocos de atendimento em tom suave com barra lateral de 3px, hora em mono, cliente, serviço (se couber) e ícone + texto do status.
 
-**Exporta:** `CalendarTimeGrid({ days, appointments, busy, availability, serviceNames, onSelectAppointment, onSelectSlot })`
+**Exporta:** `CalendarTimeGrid({ days, appointments, busy, availability, routine?, serviceNames, onSelectAppointment, onSelectSlot })`
 
 **Depende de:** `calendar-utils`, `agenda-utils`, `time-grid-layout`, `useNow`, `components/appointments/status`.
 
-**Notas:** altura da hora `HOUR_PX = 56`; faixa padrão 7h–20h, expandida para caber eventos e rotina; rola sozinha para "agora" (ou o 1º evento) ao trocar o período. Eventos que se sobrepõem ficam lado a lado.
+**Notas:** altura da hora `HOUR_PX = 56`; faixa padrão 7h–20h, expandida para caber a **rotina semanal inteira** (`routine`, para a faixa não mudar de uma semana para outra) e os eventos/exceções do período em tela (um atendimento fora da rotina continua visível, então só esse caso muda a faixa); no **Dia em celular** o cabeçalho da grade some (a faixa de 7 dias já mostra o dia); nome do dia só com a primeira letra maiúscula ("Segunda-feira"); **os botões de hora têm `tabIndex={-1}` de propósito**: são 14 por coluna, o teclado cairia num mar de botões e o caminho acessível para criar é o "Novo agendamento" do cabeçalho (o aria-label segue para leitor de tela); rola sozinha para "agora" (ou o 1º evento) ao trocar o período. Eventos que se sobrepõem ficam lado a lado.
 
 ---
 
 ## CalendarMonth.tsx
 
-**O que faz:** grade do mês (6 semanas, segunda a domingo). Cada célula mostra até 3 chips (2 abaixo de 640px, onde mostram só o ícone do status) sem estourar a célula; o excedente vira o botão "+N", que abre a visão Dia.
+**O que faz:** grade do mês (6 semanas, segunda a domingo). Cada célula mostra até 3 chips (2 abaixo de 640px, onde mostram só o ícone do status) sem estourar a célula; o excedente vira o botão "+N" (12px, negrito, em pílula `secondary` para ter contraste), que abre a visão Dia.
 
 **Exporta:** `CalendarMonth({ monthCursor, appointments, busy, onSelectAppointment, onSelectDay, onOpenDay })` — clique no fundo da célula → criar; número do dia ou "+N" → `onOpenDay`; chip → detalhes.
 
@@ -99,7 +100,7 @@ dos eventos — alinhado para usuários no Brasil.
 
 ## AgendaSkeleton.tsx
 
-**O que faz:** esqueleto com a forma da agenda (barra opcional + grade), `role="status"`. **Exporta:** `AgendaSkeleton({ toolbar?, className? })`.
+**O que faz:** esqueleto com a forma da agenda (barra opcional + grade), `role="status"`. **Exporta:** `AgendaSkeleton({ toolbar?, view?, className? })`. `view` (`day`/`week`/`month`/`auto`) ajusta colunas e altura à visão ativa (Dia = 1 coluna), com a mesma altura da grade real para a página não pular; `auto` (no `loading.tsx`) segue o padrão: Dia abaixo de `md`, Semana acima.
 
 ---
 

@@ -80,7 +80,7 @@ Usado nos estados de carregando (agenda, conversas).
 ## sonner.tsx
 
 **O que faz:** `<Toaster />` (toast do shadcn sobre a lib `sonner`). Montado uma vez no
-`app/(dashboard)/layout.tsx` (`position="top-center"`); qualquer tela do painel dispara
+`app/(dashboard)/layout.tsx` (`position="bottom-right"`, para o toast não cobrir os botões do cabeçalho); qualquer tela do painel dispara
 `toast.success(...)` importando `toast` de `sonner`.
 
 **Notas:** o CLI gerou `import { cn } from "cn"` e dependia de `next-themes`; foi

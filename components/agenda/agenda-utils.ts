@@ -138,6 +138,20 @@ export function buildAvailability(
   };
 }
 
+/**
+ * Menor início e maior fim (em minutos) da rotina semanal INTEIRA (todos os dias
+ * ativos, sem o almoço). A grade usa isso para a faixa de horas não mudar de uma
+ * semana para outra; `null` quando a rotina não está cadastrada.
+ */
+export function routineBounds(weekly: AvailabilityWeekly[]): MinuteRange | null {
+  const active = weekly.filter((b) => b.is_active && b.block_type !== 'lunch');
+  if (active.length === 0) return null;
+  return [
+    Math.min(...active.map((b) => toMinutes(b.start_time))),
+    Math.max(...active.map((b) => toMinutes(b.end_time))),
+  ];
+}
+
 /** Faixas de [from, to] que NÃO estão cobertas por `ranges` (o fora da rotina). */
 export function complementRanges(
   ranges: MinuteRange[],
