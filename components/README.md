@@ -12,7 +12,7 @@ Componentes React. Organizado por domínio:
 - [notifications/](./notifications/) — sino de notificações do painel (provider com polling, lista, popover/sheet)
 - [onboarding/](./onboarding/) — componentes do fluxo de onboarding
 - [availability/](./availability/) — componentes da tela de disponibilidade
-- [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) da página /agenda
+- [agenda/](./agenda/) — calendário da página /agenda: toolbar, visões Dia, Semana e Mês, faixa de 7 dias no celular, formulário e detalhes em Dialog/Sheet (`ResponsiveOverlay`)
 - [documents/](./documents/) — apoio a documentos imprimíveis (declaração de comparecimento)
 
 Componentes de UI transversais: `ui/skeleton.tsx` (placeholder de carregamento)

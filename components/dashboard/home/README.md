@@ -11,7 +11,7 @@ Blocos da página inicial `/dashboard`. Todos são Server Components, menos `App
 
 ## DashboardHeader.tsx
 
-**O que faz:** cabeçalho compacto: saudação (Sora), data por extenso com o resumo do dia e o botão "Novo agendamento" (leva à agenda).
+**O que faz:** cabeçalho compacto: saudação (Sora), data por extenso com o resumo do dia e o botão "Novo agendamento" (abre o formulário em `/agenda?novo=1`).
 **Exporta:** `DashboardHeader({ data, firstName })`.
 
 ## Metrics.tsx

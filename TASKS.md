@@ -395,8 +395,8 @@ Legenda:
 - [x] Etapa 1 — Fundação: tokens (status, movimento, raios, sombra), `components/appointments/status.ts`,
   `PageContainer`, `PageHeader` sem eyebrow, `SectionHeader`, `MetricCard`, `StatusBadge`,
   `AppointmentCard`, `LoadingSkeleton`, `SearchInput`, `FilterBar`, shadcn `dialog`/`tabs`/`dropdown-menu`/`tooltip`/`badge`/`table`
-- [ ] Etapa 2 — Início (`/dashboard`): trocar `SectionLabel`/`Panel` por `SectionHeader`/`MetricCard`, raio 16, limpar `eyebrow` das páginas
-- [ ] Etapa 3 — Agenda: calendário, linha de "agora" (violeta, faísca só no ponto), formulário em `Dialog`
+- [x] Etapa 2 — Início (`/dashboard`): trocar `SectionLabel`/`Panel` por `SectionHeader`/`MetricCard`, raio 16, limpar `eyebrow` das páginas
+- [x] Etapa 3 — Agenda: calendário, linha de "agora" (violeta, faísca só no ponto), formulário em `Dialog`
 - [ ] Etapa 4 — Listas (clientes, conversas) com `FilterBar`, `SearchInput` e `LoadingSkeleton`
 - [ ] Etapa 5 — Configurações e assistente: `Tabs`, `Table`, estados vazios e revisão final em 390/768/1440
 

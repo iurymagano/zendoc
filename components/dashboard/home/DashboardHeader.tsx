@@ -44,7 +44,7 @@ export function DashboardHeader({ data, firstName }: { data: DashboardData; firs
           {capitalize(formatLongBrDate(now))} · {summaryLine(data)}
         </p>
       </div>
-      <Link href="/agenda" className={buttonVariants({ className: 'min-h-11 sm:min-h-10' })}>
+      <Link href="/agenda?novo=1" className={buttonVariants({ className: 'min-h-11 sm:min-h-10' })}>
         <CalendarPlus className="size-4" aria-hidden="true" />
         Novo agendamento
       </Link>
