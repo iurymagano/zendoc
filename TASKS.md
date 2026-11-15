@@ -368,7 +368,7 @@ Legenda:
 ### Notificações no app (sino do painel)
 
 - [x] Migration `0010_notifications.sql` + `supabase/schema.sql` (tabela `notifications`, RLS, dedupe)
-  - [ ] Aplicar `0010` no Supabase de produção (SQL Editor) — ainda NÃO aplicada; sem a tabela os avisos só geram `console.error`
+  - [x] Aplicar `0010` no Supabase de produção (SQL Editor) — aplicada em 14/11/2026; sem a tabela os avisos só geram `console.error`
 - [x] `lib/notifications/`: `createNotification` (nunca derruba o fluxo), builders puros testados, dedupe, datas em São Paulo
 - [x] Cancelou/remarcou em todos os caminhos, com quem fez: cliente via IA, profissional (agenda), Assistente, série recorrente encerrada
 - [x] IA agendou pelo WhatsApp / pedido aguardando aprovação / cliente confirmou presença
@@ -379,7 +379,7 @@ Legenda:
 - [x] API: `GET /api/notifications` (`?since=`), `POST /api/notifications/[id]/read`, `POST /api/notifications/read-all`
 - [x] UI: sino no painel (popover no desktop, sheet no celular), selo, lista, "marcar todas", estado vazio, toast nas novas, polling 20 s
 - [x] Link de cada aviso abre o assunto (agenda no dia / conversa do contato / tela do WhatsApp)
-- [ ] Testar no navegador com a tabela aplicada (gerar eventos reais, prints 1440 px e iPhone)
+- [x] Testar no navegador com a tabela aplicada (gerar eventos reais, prints 1440 px e iPhone)
 - [ ] Sugestão: aviso "atendimento daqui a 2 h" para o dono (precisa de cron próprio, não há gatilho hoje)
 - [ ] Sugestão: aviso de "não compareceu" (hoje o dono marca à mão; sem gatilho automático)
 - [ ] Sugestão: aviso quando a agenda do Google muda/cancela um atendimento do IAzen (hoje o sync só lê eventos de fora)

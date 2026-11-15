@@ -36,10 +36,18 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [status, setStatus] = useState<NotificationsStatus>('loading');
 
+  // Espelho síncrono de `items`: o markRead precisa saber, na hora, se o aviso
+  // estava não lido (o updater de setState só roda depois, no render).
+  const itemsRef = useRef<AppNotificationItem[]>([]);
   const seenIds = useRef<Set<string> | null>(null); // null = ainda não carregou
   const inFlight = useRef(false);
   const stopped = useRef(false); // sessão expirou: para de tentar
   const openRef = useRef<(n: AppNotificationItem) => void>(() => {});
+
+  const commitItems = useCallback((next: AppNotificationItem[]) => {
+    itemsRef.current = next;
+    setItems(next);
+  }, []);
 
   const announceNew = useCallback((fresh: AppNotificationItem[]) => {
     if (fresh.length === 0) return;
@@ -86,7 +94,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         announceNew(fresh.filter((n) => n.read_at === null));
       }
 
-      setItems(body.notifications);
+      commitItems(body.notifications);
       setUnreadCount(body.unreadCount);
       setStatus('ready');
     } catch (err) {
@@ -96,7 +104,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } finally {
       inFlight.current = false;
     }
-  }, [announceNew]);
+  }, [announceNew, commitItems]);
 
   // Polling a cada 20s com a aba visível + refresh ao voltar para a aba.
   useEffect(() => {
@@ -120,15 +128,12 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   const markRead = useCallback(
     async (id: string) => {
-      let wasUnread = false;
-      setItems((prev) =>
-        prev.map((n) => {
-          if (n.id !== id || n.read_at !== null) return n;
-          wasUnread = true;
-          return { ...n, read_at: new Date().toISOString() };
-        }),
-      );
-      if (wasUnread) setUnreadCount((c) => Math.max(0, c - 1));
+      const current = itemsRef.current;
+      if (current.some((n) => n.id === id && n.read_at === null)) {
+        const now = new Date().toISOString();
+        commitItems(current.map((n) => (n.id === id ? { ...n, read_at: now } : n)));
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
       try {
         const res = await fetch(`/api/notifications/${encodeURIComponent(id)}/read`, {
           method: 'POST',
@@ -139,12 +144,12 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         void refresh(); // desfaz o otimismo com o estado real do servidor
       }
     },
-    [refresh],
+    [commitItems, refresh],
   );
 
   const markAllRead = useCallback(async () => {
     const now = new Date().toISOString();
-    setItems((prev) => prev.map((n) => (n.read_at === null ? { ...n, read_at: now } : n)));
+    commitItems(itemsRef.current.map((n) => (n.read_at === null ? { ...n, read_at: now } : n)));
     setUnreadCount(0);
     try {
       const res = await fetch('/api/notifications/read-all', { method: 'POST' });
@@ -153,7 +158,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       console.error('Erro ao marcar todas como lidas:', err);
       void refresh();
     }
-  }, [refresh]);
+  }, [commitItems, refresh]);
 
   const open = useCallback(
     (n: AppNotificationItem) => {

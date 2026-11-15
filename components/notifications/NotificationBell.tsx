@@ -69,7 +69,7 @@ export function NotificationBell({
         <SheetTrigger aria-label={label} className={cn(TRIGGER_CLASS, className)}>
           <BellFace />
         </SheetTrigger>
-        <SheetContent side="right" showCloseButton className="w-full gap-0 sm:max-w-sm">
+        <SheetContent side="right" showCloseButton className="gap-0 data-[side=right]:w-full sm:max-w-sm">
           <SheetHeader className="sr-only">
             <SheetTitle>Notificações</SheetTitle>
             <SheetDescription>Avisos sobre a sua agenda e o WhatsApp.</SheetDescription>
