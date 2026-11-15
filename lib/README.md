@@ -158,6 +158,8 @@ mapeamento de status.
 - [appointments/](./appointments/) — utilitários de domínio (conflito de
   horário, lembretes, regras de compromisso pessoal, quando a declaração de
   comparecimento pode ser emitida).
+- [dashboard/](./dashboard/) — contas do painel inicial (`/dashboard`): dia, semana,
+  ocupação, comparecimento, checklist de configuração e o carregamento dos dados.
 - [patients/](./patients/) — utilitários de cliente (validação/máscara de CPF).
 - [zapi/](./zapi/) — cliente Evolution API (`sendWhatsAppMessage`; demais
   funções entram quando a conexão WhatsApp for implementada).

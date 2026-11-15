@@ -30,9 +30,10 @@ export type ExceptionInput = {
 
 export type BusyRange = { starts_at: string; ends_at: string };
 
-type Block = { start: string; end: string; duration: number };
+export type Block = { start: string; end: string; duration: number };
 
-function buildBlocks(
+/** Blocos de atendimento de um dia (exceção tem prioridade sobre a rotina semanal). */
+export function buildBlocks(
   date: string,
   weekly: WeeklyBlockInput[],
   exception: ExceptionInput | undefined,
