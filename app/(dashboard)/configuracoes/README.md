@@ -20,3 +20,7 @@ Route group com as páginas de configuração da agenda (protegidas por login).
 **Futuras telas:**
 
 - `conta/` — dados pessoais, cancelamento.
+
+## loading.tsx
+
+**O que faz:** esqueleto da rota enquanto a página carrega (`PageContainer` + `LoadingSkeleton`, layout list, largura padrão).

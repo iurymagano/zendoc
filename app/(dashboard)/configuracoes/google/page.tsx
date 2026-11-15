@@ -91,7 +91,6 @@ function GoogleCalendarSettings() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Integrações"
         title="Google Agenda"
         description="Sincronize seus agendamentos do IAzen com o Google Calendar — em mão dupla."
       />

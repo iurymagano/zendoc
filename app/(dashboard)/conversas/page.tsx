@@ -142,7 +142,6 @@ export default function ConversasPage() {
         <UrlParamEffect name="phone" onChange={setSelected} />
       </Suspense>
       <PageHeader
-        eyebrow="Atendimento"
         title="Conversas"
         description="Acompanhe as conversas do WhatsApp. Pause a IA para assumir um atendimento manualmente."
         actions={

@@ -12,9 +12,11 @@ export default function DashboardLayout({
     <NotificationsProvider>
       <div className="min-h-screen bg-background">
         <Sidebar />
-        {/* Conteúdo deslocado para a direita da sidebar fixa (desktop). */}
-        <div className="md:pl-64">
-          <main className="mx-auto w-full max-w-5xl px-5 py-8 md:px-8">
+        {/* Conteúdo deslocado para a direita da sidebar fixa (a partir de 1024px).
+            Abaixo disso a navegação é o drawer. A largura de leitura de cada página
+            quem decide é o PageContainer; aqui só há um teto de 1280px. */}
+        <div className="lg:pl-64">
+          <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             {children}
           </main>
         </div>

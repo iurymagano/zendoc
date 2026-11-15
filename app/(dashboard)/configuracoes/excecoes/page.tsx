@@ -117,7 +117,6 @@ export default function ExceptionsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Configurações"
         title="Exceções de agenda"
         description="Bloqueie feriados, configure horários diferentes em dias pontuais ou abra a agenda em dias que normalmente não atende. Exceções têm prioridade sobre a rotina semanal."
       />

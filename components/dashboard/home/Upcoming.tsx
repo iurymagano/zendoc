@@ -1,12 +1,16 @@
-import Link from 'next/link';
-import { formatTime } from '@/lib/assistant/datetime';
 import { isPersonalCommitment } from '@/lib/appointments/personal';
+import { saoPauloParts } from '@/lib/assistant/datetime';
 import type { UpcomingGroup } from '@/lib/dashboard/summary';
+import { AppointmentCard } from '@/components/appointments/AppointmentCard';
+import { SectionHeader } from '@/components/layout/SectionHeader';
 import { ApproveButton } from './ApproveButton';
-import { OriginChip, StatusChip } from './chips';
-import { EmptyState, Panel } from './Panel';
+import { OriginChip } from './chips';
+import { EmptyState, PanelLink } from './Panel';
 
-/** Próximos atendimentos, agrupados por dia, com a origem e o status de cada um. */
+/**
+ * Próximos atendimentos, agrupados por dia, no mesmo cartão da agenda: horário, cliente,
+ * serviço, status e origem. Cada linha abre o dia na agenda; Confirmar fica nos agendados.
+ */
 export function Upcoming({
   groups,
   serviceNames,
@@ -15,49 +19,50 @@ export function Upcoming({
   serviceNames: Record<string, string>;
 }) {
   return (
-    <Panel
-      label="Próximos"
-      title="O que vem aí"
-      action={
-        <Link href="/agenda" className="text-sm font-medium text-[var(--ia-violet-ink)] underline underline-offset-4">
-          Abrir agenda
-        </Link>
-      }
-    >
+    <section aria-label="Próximos atendimentos" className="flex flex-col gap-3">
+      <SectionHeader
+        title="Próximos atendimentos"
+        action={<PanelLink href="/agenda">Abrir agenda</PanelLink>}
+      />
       {groups.length === 0 ? (
-        <EmptyState title="Nenhum atendimento por vir." href="/agenda" cta="Marcar um atendimento">
-          Assim que a IA marcar alguém pelo WhatsApp, ou você marcar na agenda, o horário
-            aparece aqui.
+        <EmptyState
+          title="Nenhum atendimento por vir."
+          href="/agenda"
+          cta="Marcar um atendimento"
+          className="bg-card"
+        >
+          Assim que a IA marcar alguém pelo WhatsApp, ou você marcar na agenda, o horário aparece aqui.
         </EmptyState>
       ) : (
         groups.map((g) => (
-          <div key={g.date} className="flex flex-col gap-2">
-            <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              {g.label}
-            </h3>
-            <ul className="flex flex-col gap-2">
+          <div key={g.date} className="flex flex-col gap-1.5">
+            <h3 className="px-1 text-[13px] font-semibold text-muted-foreground">{g.label}</h3>
+            <ul className="flex flex-col gap-1.5">
               {g.items.map((a) => {
                 const personal = isPersonalCommitment(a.patient_phone);
                 const service = a.service_id ? serviceNames[a.service_id] : null;
                 return (
-                  <li
-                    key={a.id}
-                    className="flex flex-col gap-2 rounded-2xl bg-background p-3 sm:flex-row sm:items-center sm:gap-4 sm:px-4"
-                  >
-                    <span className="font-mono text-base font-medium tabular-nums sm:w-14">
-                      {formatTime(a.starts_at)}
-                    </span>
-                    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                      <p className="truncate font-medium">
-                        {a.patient_name}
-                        {service && <span className="font-normal text-muted-foreground"> · {service}</span>}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        <OriginChip via={a.booked_via} personal={personal} />
-                        {!personal && <StatusChip status={a.status} />}
-                      </div>
-                    </div>
-                    {!personal && a.status === 'scheduled' && <ApproveButton id={a.id} mode="confirm" />}
+                  <li key={a.id}>
+                    <AppointmentCard
+                      startsAt={a.starts_at}
+                      endsAt={a.ends_at}
+                      title={a.patient_name}
+                      detail={personal ? 'Compromisso pessoal' : (service ?? 'Sem serviço definido')}
+                      status={personal ? undefined : a.status}
+                      href={`/agenda?date=${saoPauloParts(new Date(a.starts_at)).date}`}
+                      badges={
+                        <span className="hidden sm:contents">
+                          <OriginChip via={a.booked_via} personal={personal} />
+                        </span>
+                      }
+                      actions={
+                        !personal && a.status === 'scheduled' ? (
+                          <span className="hidden sm:block">
+                            <ApproveButton id={a.id} mode="confirm" />
+                          </span>
+                        ) : undefined
+                      }
+                    />
                   </li>
                 );
               })}
@@ -65,6 +70,6 @@ export function Upcoming({
           </div>
         ))
       )}
-    </Panel>
+    </section>
   );
 }

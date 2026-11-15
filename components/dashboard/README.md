@@ -6,38 +6,20 @@ Shell compartilhado pelas páginas autenticadas (grupo `app/(dashboard)/`).
 
 ## Sidebar.tsx
 
-**O que faz:** navegação lateral (estilo app) da área interna — sidebar fixa à
-esquerda no desktop e drawer (gaveta) no mobile. Itens com ícone (lucide),
-divididos em **áreas do dia a dia** (Visão geral, Assistente, Agenda, Conversas, Clientes)
-e o grupo **Configurações** (Disponibilidade, Serviços, Google Agenda, WhatsApp,
-Testar IA, Assinatura). Rodapé com "Sair".
+**O que faz:** navegação da área interna: sidebar fixa à esquerda de `lg` (1024px) para cima; abaixo disso, barra superior com logo, sino e menu que abre um drawer. Itens com ícone (lucide): áreas do dia a dia (Visão geral, Agenda, Assistente, Conversas, Clientes) e o grupo **Configurações** (Disponibilidade, Serviços, Google Agenda, WhatsApp, Testar IA, Assinatura) num painel um degrau acima do Void, com itens menores.
 
-**Exporta:**
-
-- `<Sidebar />` — client component, lê `usePathname()` para destacar o item ativo
-  (barra violeta à esquerda + `bg-sidebar-accent`; fundo Void, sem sombra nem borda).
+**Exporta:** `<Sidebar />` — client component; `usePathname()` destaca o item ativo (`aria-current="page"`, fundo `--ia-void-2`, sem sombra nem borda).
 
 **Comportamentos:**
 
-- **Badge de notificação** no item "Conversas" — total de conversas que precisam
-  de resposta (`GET /api/conversations/attention-count`, poll 30s). No mobile, um
-  ponto vermelho aparece no ícone do menu (hambúrguer).
-- **Mobile:** barra superior com logo + hambúrguer abre o drawer; fecha ao clicar
-  fora, no X, ou ao escolher um item.
-- **Sino de notificações** ([components/notifications](../notifications/README.md)):
-  `NotificationBell variant="sheet"` na barra superior do mobile e
-  `variant="popover"` no canto superior direito da sidebar no desktop. Ambos leem
-  o mesmo `NotificationsProvider` (um polling só).
+- **Badge de notificação** em "Conversas": conversas que precisam de resposta (`GET /api/conversations/attention-count`, poll 30s), com texto para leitor de tela. No celular também aparece um ponto no botão do menu.
+- **Drawer** (`role="dialog"`, `aria-modal`): sempre montado e `inert` quando fechado, para animar sem 150-250ms de salto; fecha com Escape, no X, fora ou ao escolher um item; trava o scroll do corpo; o foco vai ao botão fechar ao abrir e volta ao botão do menu ao fechar. Respeita `prefers-reduced-motion`.
+- **Perfil no rodapé:** avatar com iniciais, nome e o sinal "Secretária IA online/pausada" (ponto Faísca pulsando quando online), lido de `GET /api/professionals` (`ai_enabled`); sem o campo, mostra a especialidade. Acima do "Sair".
+- **Sino** ([components/notifications](../notifications/README.md)): `variant="sheet"` na barra superior, `variant="popover"` no topo da sidebar.
 
-**Depende de:** `next/link`, `next/navigation`, `next-auth/react` (`signOut`),
-`lucide-react` (ícones), `@/components/brand/Logo`, `@/lib/utils`.
+**Depende de:** `next/link`, `next/navigation`, `next-auth/react`, `lucide-react`, `@/components/brand/Logo`, `@/lib/utils`.
 
-- **Rodapé com perfil:** avatar com iniciais (violeta de ação, sem gradiente) + nome e
-  especialidade (`GET /api/professionals`), acima do "Sair".
-
-**Notas:** renderizada pelo `app/(dashboard)/layout.tsx` (que aplica `md:pl-64`
-no conteúdo para liberar a largura da sidebar fixa). Ao adicionar uma tela, basta
-incluí-la em `PRIMARY` ou `SETTINGS`. Usa os tokens `--sidebar-*` do tema.
+**Notas:** renderizada por `app/(dashboard)/layout.tsx`, que aplica `lg:pl-64` ao conteúdo. Ao adicionar uma tela, inclua-a em `PRIMARY` ou `SETTINGS`. Usa os tokens `--sidebar-*` e `--ia-void-*`.
 
 ---
 
@@ -57,7 +39,7 @@ serviços, …).
 
 **Exporta:**
 
-- `<PageHeader title description? actions? eyebrow? />` — server-friendly, sem client hooks. `eyebrow` é `@deprecated`: aceito para as páginas que ainda o passam, mas **não é mais exibido**; remover das chamadas ao tocar em cada página.
+- `<PageHeader title description? actions? eyebrow? />` — server-friendly, sem client hooks. `eyebrow` é `@deprecated`: aceito por compatibilidade e **não é exibido**; nenhuma página do painel (fora da agenda, em ajuste) o passa mais.
 
 **Depende de:** nada além de React.
 

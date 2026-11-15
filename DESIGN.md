@@ -214,12 +214,12 @@ do painel segue claro e calmo (degraus de tom em vez de bordas e sombras).
 
 Decisão do TL (nov/2026). **Exceção removida no redesign premium (14/11/2026):** o rótulo mono `// SEÇÃO`
 não vale mais no painel; títulos de seção usam `SectionHeader` (ver "Painel: redesign premium"). Os blocos
-de `components/dashboard/home/` ainda usam `SectionLabel` até a etapa 2 migrar a página; não copie o padrão.
+de `components/dashboard/home/` já usam `SectionHeader` (etapa 2).
 
 - ~~Rótulos de seção em JetBrains Mono, caixa alta, precedidos de `//`~~ (removido).
 - Números grandes em Sora 700 (contagem do dia, métricas da semana).
-- Cards brancos sobre a Névoa; separam por tom, sem linha nem sombra. Raio 16 (era 28 a 32; a etapa 2 ajusta).
-- Um único degradê (`95deg #A78BFF, #7FD8F0, #5EEAD4`): o trecho já vivido da régua do dia (e a barra de progresso do passo a passo da conta nova). O resto é violeta sólido.
+- Cards brancos sobre a Névoa; separam por tom, sem linha nem sombra. Raio 16.
+- Um único degradê (`95deg #A78BFF, #7FD8F0, #5EEAD4`): o trecho já vivido da régua do dia (a barra de progresso do passo a passo agora é violeta sólido).
 - O que precisa de ação (WhatsApp desligado, passo pendente de WhatsApp) usa Void sobre o claro.
 - ~~Revisão do designer (nov/2026): a exceção do mono fica~~ (superada pela decisão do TL de 14/11/2026: sai do painel; a landing escura segue com o rótulo).
 - Só dado real: a barra de progresso não tem largura mínima (0% = vazia); estados vazios não repetem a mesma mensagem em caixas empilhadas (dia sem rotina e agenda vazia viram uma caixa só).
@@ -268,3 +268,24 @@ da linha (a IA online), nunca na linha inteira.
 `StatusBadge`, `AppointmentCard`) e, em `components/ui/`, `dialog`, `tabs`, `dropdown-menu`, `tooltip`,
 `badge` (variante `plain`) e `table`. Tabs em pílula (ativa = card branco sobre `--muted`); tabela com
 cabeçalho `text-xs` cinza e linha separada por `border-border`.
+
+## Painel: etapa 2, shell e visão geral (15/11/2026)
+
+**Layout.** O `main` do layout só dá teto (`max-w-7xl`) e respiro (`px-4 sm:px-6 lg:px-8`); a largura de cada
+tela é do `PageContainer` (1024 padrão, 1280 `wide`). Sidebar fixa de `lg` (1024) para cima; abaixo disso
+(tablet e celular) vira barra superior + drawer, porque a 768 a sidebar de 256px comia um terço da tela.
+
+**Sidebar.** Itens do dia a dia no Void; **Configurações** num painel um degrau acima (`--ia-void-1`) com
+itens menores, para a hierarquia ler de relance. Item ativo = degrau mais claro + `aria-current`. Rodapé com
+o perfil e o sinal "Secretária IA online/pausada" (ponto Faísca pulsando só quando online, lido de
+`ai_enabled`). Drawer sempre montado e `inert` fechado; Escape fecha, foco entra e volta, scroll do corpo travado.
+
+**Visão geral.** Cabeçalho compacto com "Novo agendamento"; teste grátis vira faixa fina; 4 `MetricCard` de
+dado real (Hoje, Próximos, Clientes, Pela IA), com dica honesta quando zerados (nunca número inventado). O
+conteúdo é a lista de próximos (mesmo `AppointmentCard` da agenda); "Sua secretária" resume IA, WhatsApp e
+quem espera; o passo a passo é um card discreto com só o próximo CTA (e some quando completo). Atenção,
+Seu dia, Vagas e Conversas descem e ficam menores. No celular a origem do atendimento e o Confirmar saem da
+linha (a linha só cabe horário, nome e status).
+
+**Progresso do passo a passo** é violeta sólido (o único degradê do painel é o trecho vivido da régua).
+`loading.tsx` com `LoadingSkeleton` em todas as rotas do painel.

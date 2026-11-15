@@ -7,9 +7,10 @@ configurações, agenda, clientes, assistente). O `proxy.ts` (raiz) redireciona 
 ## layout.tsx
 
 **O que faz:** shell compartilhado por todas as páginas deste grupo — renderiza
-a [`<Sidebar>`](../../components/dashboard/README.md) (fixa à esquerda no desktop,
-drawer no mobile) e o conteúdo num container `max-w-5xl` deslocado com `md:pl-64`.
-Fundo `bg-muted/40` (contraste com a sidebar branca).
+a [`<Sidebar>`](../../components/dashboard/README.md) (fixa à esquerda de `lg` para cima,
+drawer abaixo disso) e o conteúdo com `lg:pl-64`. O `main` só dá o teto (`max-w-7xl`) e o
+respiro; quem decide a largura de cada tela é o `PageContainer` (padrão 1024, `wide` 1280).
+Fundo `bg-muted/40`.
 
 **Depende de:** `@/components/dashboard/Sidebar`,
 `@/components/notifications/NotificationsProvider`, `@/components/ui/sonner`.
@@ -32,24 +33,12 @@ sidebar lateral (antes era uma navbar no topo).
 - [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) dos agendamentos.
 - [conversas/](./conversas/) — caixa de conversas do WhatsApp + handoff (pausar a IA).
 
+## loading.tsx
+
+`dashboard/`, `clientes/`, `conversas/`, `assistente/` e `configuracoes/` têm `loading.tsx`
+com `PageContainer` + `LoadingSkeleton` (layout de página ou de lista), para o painel não
+piscar em branco na navegação. A agenda tem o seu (`AgendaSkeleton`).
+
 ## dashboard/page.tsx
 
-**O que faz:** Server Component que busca o `professional` vinculado ao usuário
-logado, conta agendamentos futuros, clientes e blocos semanais ativos. Exibe:
-
-- [`<PageHeader>`](../../components/dashboard/README.md) com saudação, plano e
-  badge de status (trial/ativo/atraso/cancelado)
-- [`<PlanStatusBanner>`](../../components/billing/README.md) — alerta quando o
-  plano exige atenção (past_due, cancelled, trial terminando)
-- Três `StatCard` com métricas (próximos atendimentos, clientes, blocos ativos)
-- Card CTA "Configure sua agenda" (quando `availability_weekly` ainda está vazio)
-- Grid 2×2 de `ActionCard` com atalhos para agenda, clientes, disponibilidade
-  e WhatsApp
-
-Redireciona para `/onboarding/step-1` se o perfil ainda não foi criado.
-
-**Depende de:** `@/auth`, `@/lib/supabase`, `@/components/ui/{card,button}`,
-`@/components/billing/PlanStatusBanner`, `@/components/dashboard/PageHeader`.
-
-**Notas:** helpers privados `StatCard` e `ActionCard` ficam no próprio arquivo —
-são só estilização do dashboard, sem uso em outras páginas.
+Detalhes em [dashboard/README.md](./dashboard/README.md).

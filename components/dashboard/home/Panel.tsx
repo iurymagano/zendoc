@@ -2,56 +2,49 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { SectionHeader } from '@/components/layout/SectionHeader';
 import { cn } from '@/lib/utils';
 
-/** Rótulo de seção: JetBrains Mono em caixa alta com tracking, precedido de "//". */
-export function SectionLabel({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <p
-      className={cn(
-        'font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground',
-        className,
-      )}
-    >
-      <span aria-hidden="true">{'// '}</span>
-      {children}
-    </p>
-  );
-}
-
 /**
- * Card do painel inicial: branco sobre a Névoa (o degrau de tom separa, sem
- * linha nem sombra), canto de 28px. Cabeçalho com rótulo mono, título opcional
- * em Sora e uma ação à direita.
+ * Card do painel inicial: branco sobre a Névoa (o degrau de tom separa, sem linha
+ * nem sombra), canto de 16px. Cabeçalho com `SectionHeader` (Inter 15px semibold),
+ * descrição opcional e uma ação à direita.
  */
 export function Panel({
-  label,
   title,
+  description,
   action,
+  id,
   className,
   children,
 }: {
-  label: string;
-  title?: string;
+  title: string;
+  description?: string;
   action?: ReactNode;
+  id?: string;
   className?: string;
   children: ReactNode;
 }) {
   return (
-    <Card className={cn('gap-5 rounded-[28px] py-6 ring-0', className)}>
-      <div className="flex items-start justify-between gap-3 px-5 sm:px-6">
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <SectionLabel>{label}</SectionLabel>
-          {title && (
-            <h2 className="font-display text-xl font-bold tracking-[-0.03em] sm:text-2xl">
-              {title}
-            </h2>
-          )}
-        </div>
-        {action && <div className="shrink-0">{action}</div>}
-      </div>
-      <div className="flex flex-col gap-4 px-5 sm:px-6">{children}</div>
+    <Card
+      id={id}
+      className={cn('scroll-mt-20 gap-4 rounded-[var(--radius-card)] py-5 ring-0', className)}
+    >
+      <SectionHeader title={title} description={description} action={action} className="px-5" />
+      <div className="flex flex-col gap-4 px-5">{children}</div>
     </Card>
+  );
+}
+
+/** Link de texto de canto de painel ("Abrir agenda", "Ver todas"). */
+export function PanelLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="rounded-sm text-sm font-medium text-[var(--ia-violet-ink)] underline underline-offset-4 outline-none transition-colors duration-150 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
+      {children}
+    </Link>
   );
 }
 
@@ -64,21 +57,28 @@ export function EmptyState({
   children,
   href,
   cta,
+  className,
 }: {
   title: string;
   children: ReactNode;
   href: string;
   cta: string;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-2xl bg-background p-5 text-sm leading-relaxed">
+    <div
+      className={cn(
+        'flex flex-col items-start gap-3 rounded-[var(--radius-field)] bg-background p-4 text-sm leading-relaxed',
+        className,
+      )}
+    >
       <div>
         <p className="font-semibold">{title}</p>
         <p className="mt-1 text-foreground/80">{children}</p>
       </div>
       <Link
         href={href}
-        className={buttonVariants({ variant: 'default', size: 'sm', className: 'min-h-11 rounded-full sm:min-h-9' })}
+        className={buttonVariants({ variant: 'default', size: 'sm', className: 'min-h-11 sm:min-h-9' })}
       >
         {cta}
       </Link>

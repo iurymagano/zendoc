@@ -270,7 +270,6 @@ export default function AvailabilityPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Configurações"
         title="Disponibilidade semanal"
         description="Defina os horários em que você atende em cada dia. A IA só oferece esses horários aos seus clientes."
       />
