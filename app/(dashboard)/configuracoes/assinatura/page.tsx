@@ -130,7 +130,6 @@ export default async function AssinaturaPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Configurações"
         title="Assinatura"
         description="Seu plano IAzen — R$297/mês. O teste grátis de 7 dias é liberado no cadastro."
       />

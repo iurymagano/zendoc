@@ -166,7 +166,6 @@ export default function PatientsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Clientes"
         title="Seu cadastro"
         description="Base central usada em agendamentos manuais e no fluxo da IA pelo WhatsApp."
         actions={

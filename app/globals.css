@@ -22,6 +22,24 @@
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-ink: var(--destructive-ink);
+  --color-surface-2: var(--surface-2);
+  --color-status-scheduled: var(--status-scheduled-fg);
+  --color-status-scheduled-soft: var(--status-scheduled-bg);
+  --color-status-confirmed: var(--status-confirmed-fg);
+  --color-status-confirmed-soft: var(--status-confirmed-bg);
+  --color-status-pending: var(--status-pending-fg);
+  --color-status-pending-soft: var(--status-pending-bg);
+  --color-status-cancelled: var(--status-cancelled-fg);
+  --color-status-cancelled-soft: var(--status-cancelled-bg);
+  --color-status-noshow: var(--status-noshow-fg);
+  --color-status-noshow-soft: var(--status-noshow-bg);
+  /* Raios do painel: card 16, campo 12, pílula (botão, badge, chip). */
+  --radius-card: 1rem;
+  --radius-field: 0.75rem;
+  /* Sombra só em elemento que flutua (menu, dialog, tooltip). */
+  --shadow-pop: 0 8px 24px rgb(5 6 10 / 0.12);
+  --ease-panel: cubic-bezier(0.2, 0, 0, 1);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -105,6 +123,26 @@
   --chart-4: #a3a7ba;
   --chart-5: #cfcce0;
   --radius: 0.75rem; /* 12px: campos e superfícies; botões são pílula */
+
+  /* Painel (redesign premium, ver DESIGN.md): status do atendimento.
+     Pares fundo/texto com contraste AA; o estilo (borda, riscado) e o ícone
+     ficam em components/appointments/status.ts. */
+  --status-scheduled-bg: #ede7ff;
+  --status-scheduled-fg: #3d2399;
+  --status-confirmed-bg: #d9f4ee;
+  --status-confirmed-fg: #0b5f58;
+  --status-pending-bg: #fdf0d0;
+  --status-pending-fg: #8a5a00;
+  --status-cancelled-bg: #f4f3f8;
+  --status-cancelled-fg: #5a5d72;
+  --status-noshow-bg: #fbe3e4;
+  --status-noshow-fg: #b02a34;
+  --destructive-ink: #b02a34; /* texto de erro/destrutivo sobre claro (AA) */
+  --surface-2: #faf9fd; /* degrau entre o card branco e a Névoa */
+
+  /* Movimento: 150ms para hover/foco, 200ms para abrir/fechar. */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
   --sidebar: #05060a;
   --sidebar-foreground: #f4f3f8;
   --sidebar-primary: #8b5cff;
@@ -260,5 +298,17 @@
   .ia-dot {
     animation: none;
     opacity: 0.4;
+  }
+}
+
+/* Painel: movimento curto e sem translação para quem prefere menos movimento. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+  }
+  [data-slot] {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }

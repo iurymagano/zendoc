@@ -1,48 +1,43 @@
 # components/dashboard/home/
 
-Blocos da página inicial `/dashboard`. Todos são Server Components, menos `ApproveButton`. Os dados chegam prontos de `lib/dashboard/load.ts`.
+Blocos da página inicial `/dashboard`. Todos são Server Components, menos `ApproveButton`. Os dados chegam prontos de `lib/dashboard/load.ts`. Cards com raio 16 (`--radius-card`), sem linha nem sombra; títulos de bloco em Inter semibold via `SectionHeader` (sem rótulo mono em caixa alta).
 
 ---
 
 ## Panel.tsx
 
-**O que faz:** card branco de 28px sem linha nem sombra, com cabeçalho (rótulo mono + título Sora + ação).
-**Exporta:** `Panel({ label, title?, action?, className?, children })`, `SectionLabel` (rótulo "// TEXTO" em JetBrains Mono, caixa alta).
+**O que faz:** card branco com cabeçalho (`SectionHeader`: título + descrição + ação), mais o link de ação e o estado vazio padrão.
+**Exporta:** `Panel({ title, description?, action?, id?, className?, children })`, `PanelLink({ href, children })` (link discreto "Ver todas" etc.), `EmptyState({ title, children, href, cta, className? })` (texto na tinta, botão primário para a rota que resolve).
 
-## chips.tsx
+## DashboardHeader.tsx
 
-**O que faz:** chips de status (sempre com texto) e de origem do atendimento (IA no WhatsApp, Manual, Pessoal).
-**Exporta:** `StatusChip({ status })`, `OriginChip({ via, personal })`.
+**O que faz:** cabeçalho compacto: saudação (Sora), data por extenso com o resumo do dia e o botão "Novo agendamento" (abre o formulário em `/agenda?novo=1`).
+**Exporta:** `DashboardHeader({ data, firstName })`.
 
-## ApproveButton.tsx
+## Metrics.tsx
 
-**O que faz:** (client) botão de ação rápida. `mode='approve'` aprova um pedido (`PATCH /api/appointments/[id]` com `scheduled`), `mode='confirm'` confirma (`confirmed`); depois `router.refresh()`.
-**Exporta:** `ApproveButton({ id, mode })`.
-
-## DayRuler.tsx
-
-**O que faz:** a régua do dia: janela de atendimento, blocos dos atendimentos, "agora" com a faísca e o trecho já vivido em degradê (o único degradê do painel).
-**Exporta:** `DayRulerView({ ruler, items, now, summary })`.
-
-## Hero.tsx
-
-**O que faz:** saudação, resumo do dia, número grande de atendimentos, "Agora/Próximo" e a régua.
-**Exporta:** `Hero({ data, firstName })`.
-
-## Alerts.tsx
-
-**O que faz:** alerta forte (Void) de WhatsApp desconectado e faixa do teste grátis com CTA de assinatura.
-**Exporta:** `WhatsAppAlert()`, `TrialStrip({ trial })`.
-
-## Attention.tsx
-
-**O que faz:** "Precisam de você": aprovações pendentes (com Aprovar), conversas em que a IA pediu ajuda e conversas pausadas. Some se não há nada.
-**Exporta:** `Attention({ pending, pendingCount, needsReply, paused, now })`.
+**O que faz:** 4 `MetricCard` com dado real: Hoje (atendimentos + agora/próximo), Próximos (total futuro + aprovações pendentes), Clientes (total + novos na semana) e Pela IA (total marcado pela IA + na semana). Sem número inventado; cada card tem dica honesta quando está zerado.
+**Exporta:** `Metrics({ data, whatsappConnected })`.
 
 ## Upcoming.tsx
 
-**O que faz:** próximos atendimentos por dia, com origem, status e Confirmar nos agendados.
+**O que faz:** próximos atendimentos por dia com `AppointmentCard`; a linha abre o dia na agenda (`/agenda?date=`). Origem e Confirmar só aparecem de `sm` para cima (no celular a linha mostra horário, nome e status).
 **Exporta:** `Upcoming({ groups, serviceNames })`.
+
+## StatusCard.tsx
+
+**O que faz:** "Sua secretária": IA ligada/pausada, WhatsApp conectado/desconectado (com "Conectar"), quantos aguardam o profissional e atalho para as configurações.
+**Exporta:** `StatusCard({ data, aiEnabled, whatsappConnected })`.
+
+## TodayPanel.tsx
+
+**O que faz:** "Seu dia": linha Agora/Próximo e a régua do dia.
+**Exporta:** `TodayPanel({ data })`.
+
+## Attention.tsx
+
+**O que faz:** "Precisam de você" (`id="atencao"`): aprovações pendentes (com Aprovar), conversas em que a IA pediu ajuda e conversas pausadas. Some se não há nada.
+**Exporta:** `Attention({ pending, pendingCount, needsReply, paused, now })`.
 
 ## WeekPanel.tsx
 
@@ -51,26 +46,37 @@ Blocos da página inicial `/dashboard`. Todos são Server Components, menos `App
 
 ## FreeSlots.tsx
 
-**O que faz:** próximos horários livres que a IA oferece, com estado vazio que leva a Disponibilidade.
+**O que faz:** "Vagas que a IA oferece": próximos horários livres, com estado vazio que leva a Disponibilidade.
 **Exporta:** `FreeSlots({ slots, availabilityConfigured, now })`.
 
 ## Conversations.tsx
 
 **O que faz:** últimas conversas do WhatsApp (nome ou telefone, trecho, quando).
-**Exporta:** `Conversations({ items, now })`.
+**Exporta:** `Conversations({ items, now, whatsappConnected })`.
+
+## DayRuler.tsx
+
+**O que faz:** a régua do dia: janela de atendimento, blocos dos atendimentos, "agora" com a faísca e o trecho já vivido em degradê (o único degradê do painel).
+**Exporta:** `DayRulerView({ ruler, items, now, summary })`.
+
+## Alerts.tsx
+
+**O que faz:** faixa fina de WhatsApp desconectado e faixa do teste grátis (dias restantes + CTA de assinatura).
+**Exporta:** `WhatsAppAlert()`, `TrialStrip({ trial })`.
 
 ## SetupChecklist.tsx
 
-**O que faz:** checklist de configuração (WhatsApp, horários, serviços, Google Agenda) com progresso.
-**Exporta:** `SetupHero({ setup, firstName })` (conta nova, topo da página, barra em degradê) e `SetupCard({ setup })` (conta em uso, barra sólida).
+**O que faz:** checklist de configuração (WhatsApp, horários, serviços, Google Agenda) com progresso real.
+**Exporta:** `SetupHero({ setup, firstName })` (conta nova, topo da página) e `SetupCard({ setup })` (conta em uso: lista compacta e só o CTA do próximo passo). Barra de progresso sólida nos dois.
 
-**Notas gerais:** o WhatsApp pendente é o único item em Void. Vocabulário "cliente"/"atendimento".
+## chips.tsx
 
-## Revisão visual (nov/2026)
+**O que faz:** chips de status (rótulo e cores vêm de `components/appointments/status.ts`) e de origem do atendimento (IA no WhatsApp, Manual, Pessoal).
+**Exporta:** `StatusChip({ status })`, `OriginChip({ via, personal })`.
 
-- `Hero.tsx`: dia sem rotina e agenda vazia viram uma caixa só (texto + "Ajustar horários" + "Marcar um atendimento"); o aviso separado só aparece se houver compromisso num dia sem rotina.
-- `SetupChecklist.tsx`: a barra de progresso usa a largura real (0% = vazia), sem mínimo.
-- `Panel.tsx`: novo `EmptyState({ title, children, href, cta })`, o estado vazio padrão dos cards (texto na cor da tinta, botão primário para a rota que resolve). Usado em `Upcoming` (/agenda), `Conversations` (/configuracoes/whatsapp ou /configuracoes/testar-ia, conforme `whatsappConnected`), `WeekPanel` e `FreeSlots` (/configuracoes/disponibilidade).
-- `Conversations({ items, now, whatsappConnected })`: nova prop.
-- `SetupChecklist.tsx`: o título da conta nova usa `text-wrap: balance` e `&nbsp;` antes de "secretária" (sem palavra sozinha na linha).
+## ApproveButton.tsx
 
+**O que faz:** (client) botão de ação rápida. `mode='approve'` aprova um pedido (`PATCH /api/appointments/[id]` com `scheduled`), `mode='confirm'` confirma (`confirmed`); depois `router.refresh()`.
+**Exporta:** `ApproveButton({ id, mode })`.
+
+**Notas gerais:** vocabulário "cliente"/"atendimento". O antigo `Hero.tsx` e o `SectionLabel` foram removidos (redesign premium).

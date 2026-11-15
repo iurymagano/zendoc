@@ -24,3 +24,7 @@ Tela do Assistente pessoal: chat do profissional com a IA para consultar a agend
 **Depende de:** `@/components/ui/*` (shadcn), `@/components/dashboard/{PageHeader,EmptyState}`, `@/lib/assistant/datetime` (`formatBrDateTime`), `app/api/assistant/*`.
 
 **Notas:** `'use client'` porque usa estado e `fetch`. A página não conhece a regra de plano — quem bloqueia é a API.
+
+## loading.tsx
+
+**O que faz:** esqueleto da rota enquanto a página carrega (`PageContainer` + `LoadingSkeleton`, layout list, largura padrão).

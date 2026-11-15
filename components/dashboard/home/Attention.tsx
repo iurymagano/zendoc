@@ -7,6 +7,8 @@ import { buttonVariants } from '@/components/ui/button';
 import { ApproveButton } from './ApproveButton';
 import { Panel } from './Panel';
 
+const SUB = 'text-[13px] font-semibold text-muted-foreground';
+
 const who = (c: ConversationItem) => c.name ?? formatPhoneBR(c.phone);
 
 /**
@@ -30,17 +32,17 @@ export function Attention({
   if (total === 0) return null;
 
   return (
-    <Panel label="Atenção" title={`${total} ${total === 1 ? 'coisa precisa' : 'coisas precisam'} de você`}>
+    <Panel id="atencao" title={`${total} ${total === 1 ? 'coisa precisa' : 'coisas precisam'} de você`}>
       {pending.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <h3 className={SUB}>
             Aguardam sua aprovação{pendingCount > pending.length ? ` · ${pendingCount}` : ''}
           </h3>
           <ul className="flex flex-col gap-2">
             {pending.map((a) => (
               <li
                 key={a.id}
-                className="flex flex-col gap-2 rounded-2xl bg-[var(--warning-soft)] p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
+                className="flex flex-col gap-2 rounded-[var(--radius-field)] bg-[var(--warning-soft)] p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium text-[var(--warning)]">{a.patient_name}</p>
@@ -62,14 +64,14 @@ export function Attention({
         .filter((g) => g.list.length > 0)
         .map((g) => (
           <div key={g.title} className="flex flex-col gap-2">
-            <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            <h3 className={SUB}>
               {g.title}
             </h3>
             <ul className="flex flex-col gap-2">
               {g.list.slice(0, 3).map((c) => (
                 <li
                   key={c.phone}
-                  className="flex flex-col gap-2 rounded-2xl bg-background p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
+                  className="flex flex-col gap-2 rounded-[var(--radius-field)] bg-background p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
                 >
                   <div className="min-w-0">
                     <p className="truncate font-medium">{who(c)}</p>

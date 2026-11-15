@@ -35,3 +35,7 @@ total também aparece no item "Conversas" do Navbar (poll 30s,
 **Notas:** mensagens `assistant` (IA ou profissional) alinhadas à direita; do
 cliente à esquerda. Enquanto a IA está ativa, o profissional ainda pode
 responder — pausar só impede a resposta automática.
+
+## loading.tsx
+
+**O que faz:** esqueleto da rota enquanto a página carrega (`PageContainer` + `LoadingSkeleton`, layout list, wide).

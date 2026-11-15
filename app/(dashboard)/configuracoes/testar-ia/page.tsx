@@ -245,7 +245,6 @@ export default function TestarIaPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Configurações"
         title="Testar IA"
         description="Simule conversas de cliente sem WhatsApp. Cada conversa fica salva — você pode ter várias e voltar nelas depois."
         actions={

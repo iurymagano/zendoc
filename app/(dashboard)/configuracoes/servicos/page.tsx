@@ -135,7 +135,6 @@ export default function ServicesPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Configurações"
         title="Serviços"
         description="Tipos de atendimento com duração e preço próprios. Ao agendar, o fim é calculado pela duração do serviço escolhido."
       />

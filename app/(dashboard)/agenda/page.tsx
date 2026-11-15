@@ -1,126 +1,52 @@
 'use client';
 
-import { FormEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  addDays,
-  addMonths,
-  endOfMonth,
-  format,
-  startOfMonth,
-  startOfWeek,
-} from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Lock } from 'lucide-react';
-import { toast } from 'sonner';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { addDays, addMonths, format, startOfWeek } from 'date-fns';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { FormField } from '@/components/ui/form-field';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { UrlParamEffect } from '@/components/dashboard/UrlParamEffect';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { AgendaToolbar } from '@/components/agenda/AgendaToolbar';
+import { AgendaLegend } from '@/components/agenda/AgendaLegend';
+import { AgendaSkeleton } from '@/components/agenda/AgendaSkeleton';
+import { AppointmentDetails } from '@/components/agenda/AppointmentDetails';
+import { AppointmentForm } from '@/components/agenda/AppointmentForm';
 import { CalendarMonth } from '@/components/agenda/CalendarMonth';
-import { CalendarWeek } from '@/components/agenda/CalendarWeek';
+import { CalendarTimeGrid } from '@/components/agenda/CalendarTimeGrid';
+import { DayStrip } from '@/components/agenda/DayStrip';
+import { ResponsiveOverlay } from '@/components/agenda/ResponsiveOverlay';
+import { useMediaQuery } from '@/components/agenda/useMediaQuery';
 import {
-  BusyEvent,
-  STATUS_DOT,
-  STATUS_LABEL,
-  TZ,
-  formatTime,
-} from '@/components/agenda/calendar-utils';
-import { formatCpf, isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
-import { maskPhone } from '@/lib/masks';
-import { MaskedInput } from '@/components/ui/masked-input';
+  buildAvailability,
+  routineBounds,
+  isoToLocal,
+  periodLabel,
+  rangeFor,
+  type View,
+} from '@/components/agenda/agenda-utils';
+import { BusyEvent, formatTime } from '@/components/agenda/calendar-utils';
 import { isPersonalCommitment } from '@/lib/appointments/personal';
-import { formatPhoneBR, isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
-import type { Appointment, AppointmentStatus, Patient, Service } from '@/types/database';
+import type {
+  Appointment,
+  AppointmentStatus,
+  AvailabilityException,
+  AvailabilityWeekly,
+  Patient,
+  Service,
+} from '@/types/database';
 
-const DEFAULT_DURATION_MIN = 50;
-type View = 'month' | 'week';
-
-type Repeat = 'none' | 'weekly' | 'biweekly';
-
-// base-ui Select usa `items` p/ mapear value → rótulo exibido no gatilho.
-const REPEAT_ITEMS: Record<Repeat, string> = {
-  none: 'Não repete',
-  weekly: 'Toda semana',
-  biweekly: 'A cada 2 semanas',
+const VIEW_PERIOD: Record<View, string> = {
+  day: 'neste dia',
+  week: 'nesta semana',
+  month: 'neste mês',
 };
-
-type FormState = {
-  patient_name: string;
-  patient_phone: string;
-  patient_cpf: string;
-  starts_local: string;
-  ends_local: string;
-  notes: string;
-  repeat: Repeat;
-  until: string;
-  service_id: string; // '' = nenhum
-};
-
-const EMPTY_FORM: FormState = {
-  patient_name: '',
-  patient_phone: '',
-  patient_cpf: '',
-  starts_local: '',
-  ends_local: '',
-  notes: '',
-  repeat: 'none',
-  until: '',
-  service_id: '',
-};
-
-function localToISO(local: string): string {
-  return `${local}:00-03:00`;
-}
-
-function isoToLocal(iso: string): string {
-  const formatted = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: TZ,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).format(new Date(iso));
-  return formatted.replace(' ', 'T');
-}
-
-function addMinutesToLocal(local: string, minutes: number): string {
-  if (!local) return '';
-  const d = new Date(localToISO(local));
-  d.setMinutes(d.getMinutes() + minutes);
-  return isoToLocal(d.toISOString());
-}
-
-function rangeFor(view: View, cursor: Date): { from: Date; to: Date } {
-  if (view === 'week') {
-    const from = startOfWeek(cursor, { weekStartsOn: 1 });
-    return { from, to: addDays(from, 7) };
-  }
-  const from = startOfWeek(startOfMonth(cursor), { weekStartsOn: 1 });
-  const gridEnd = startOfWeek(endOfMonth(cursor), { weekStartsOn: 1 });
-  return { from, to: addDays(gridEnd, 7) };
-}
 
 export default function AgendaPage() {
-  const [view, setView] = useState<View>('week');
+  // No celular o Dia é o padrão (a faixa de 7 dias troca o dia); a escolha manual vale depois.
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const [chosenView, setView] = useState<View | null>(null);
+  const view: View = chosenView ?? (isMobile ? 'day' : 'week');
   const [cursor, setCursor] = useState(() => new Date());
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -128,44 +54,63 @@ export default function AgendaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Detalhes e formulário: cada um é uma sobreposição (Dialog no desktop, Sheet no celular).
+  const [selected, setSelected] = useState<Appointment | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Appointment | null>(null);
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [initialStart, setInitialStart] = useState<string | undefined>(undefined);
 
   const [patientsList, setPatientsList] = useState<Patient[]>([]);
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
-  const [servicesList, setServicesList] = useState<Service[]>([]);
+  const [allServices, setAllServices] = useState<Service[]>([]);
+  const [weekly, setWeekly] = useState<AvailabilityWeekly[]>([]);
+  const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
 
   const { from, to } = useMemo(() => rangeFor(view, cursor), [view, cursor]);
+  const fromStr = format(from, 'yyyy-MM-dd');
+  const toStr = format(to, 'yyyy-MM-dd');
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const fromStr = format(from, 'yyyy-MM-dd');
-    const toStr = format(to, 'yyyy-MM-dd');
-    const res = await fetch(`/api/appointments?from=${fromStr}&to=${toStr}`);
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      setError(body.error ?? 'Erro ao carregar agenda.');
-      setAppointments([]);
-      setBusy([]);
-    } else {
-      const body = await res.json();
-      setAppointments(body.appointments ?? []);
-      setBusy(body.googleBusy ?? []);
-    }
-    setLoading(false);
-  }, [from, to]);
+  // Só a resposta da última busca vale (navegar rápido não mistura períodos).
+  const requestRef = useRef(0);
+  const loadData = useCallback(
+    async (silent = false) => {
+      const id = ++requestRef.current;
+      if (!silent) setLoading(true);
+      setError(null);
+      const [res, exRes] = await Promise.all([
+        fetch(`/api/appointments?from=${fromStr}&to=${toStr}`),
+        // Só leitura: serve para hachurar o que está fora da rotina.
+        fetch(`/api/availability/exceptions?from=${fromStr}&to=${toStr}`).catch(() => null),
+      ]);
+      if (id !== requestRef.current) return;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        if (id !== requestRef.current) return;
+        setError(body.error ?? 'Erro ao carregar agenda.');
+        setAppointments([]);
+        setBusy([]);
+      } else {
+        const body = await res.json();
+        if (id !== requestRef.current) return;
+        setAppointments(body.appointments ?? []);
+        setBusy(body.googleBusy ?? []);
+      }
+      if (exRes?.ok) {
+        const exBody = await exRes.json().catch(() => ({}));
+        if (id === requestRef.current) setExceptions(exBody.exceptions ?? []);
+      }
+      setLoading(false);
+    },
+    [fromStr, toStr],
+  );
 
-  async function loadPatients() {
+  const loadPatients = useCallback(async () => {
     const res = await fetch('/api/patients');
     if (res.ok) {
       const body = await res.json();
       setPatientsList(body.patients ?? []);
     }
-  }
+  }, []);
 
   useEffect(() => {
     void (async () => {
@@ -173,12 +118,15 @@ export default function AgendaPage() {
       const res = await fetch('/api/services');
       if (res.ok) {
         const body = await res.json();
-        setServicesList(
-          ((body.services ?? []) as Service[]).filter((s) => s.active),
-        );
+        setAllServices((body.services ?? []) as Service[]);
+      }
+      const wk = await fetch('/api/availability/weekly').catch(() => null);
+      if (wk?.ok) {
+        const body = await wk.json().catch(() => ({}));
+        setWeekly(body.blocks ?? []);
       }
     })();
-  }, []);
+  }, [loadPatients]);
 
   useEffect(() => {
     void (async () => {
@@ -205,7 +153,7 @@ export default function AgendaPage() {
       const body = await res.json().catch(() => ({}));
       if (body.connected === false) return; // Google não conectado — ignora
       if ((body.upserted ?? 0) > 0 || (body.removed ?? 0) > 0) {
-        await loadDataRef.current();
+        await loadDataRef.current(true);
       }
     } catch {
       /* silencioso — auto-sync é best-effort */
@@ -227,185 +175,60 @@ export default function AgendaPage() {
     };
   }, [autoSync]);
 
-  const suggestions = useMemo(() => {
-    const rawQuery = form.patient_name.trim().toLowerCase();
-    const digits = form.patient_name.replace(/\D/g, '');
-    if (!rawQuery && !digits) return patientsList.slice(0, 8);
-    return patientsList
-      .filter((p) => {
-        const matchName = rawQuery && p.name.toLowerCase().includes(rawQuery);
-        const matchPhone = digits && p.phone.includes(digits);
-        return matchName || matchPhone;
-      })
-      .slice(0, 8);
-  }, [patientsList, form.patient_name]);
+  const activeServices = useMemo(() => allServices.filter((s) => s.active), [allServices]);
+  const serviceNames = useMemo(
+    () => Object.fromEntries(allServices.map((s) => [s.id, s.name])),
+    [allServices],
+  );
+  const routine = useMemo(() => routineBounds(weekly), [weekly]);
+  const availability = useMemo(
+    () => buildAvailability(weekly, exceptions),
+    [weekly, exceptions],
+  );
 
-  function pickPatient(p: Patient) {
-    setForm((prev) => ({
-      ...prev,
-      patient_name: p.name,
-      patient_phone: maskPhone(p.phone),
-      patient_cpf: p.cpf ? formatCpf(p.cpf) : '',
-    }));
-    setSuggestionsOpen(false);
-  }
+  // --- abrir/fechar sobreposições -------------------------------------------
 
   function openCreate(startsLocal?: string) {
     const base = new Date();
     base.setMinutes(Math.ceil(base.getMinutes() / 15) * 15, 0, 0);
-    const starts = startsLocal ?? isoToLocal(base.toISOString());
     setEditing(null);
-    setForm({
-      ...EMPTY_FORM,
-      starts_local: starts,
-      ends_local: addMinutesToLocal(starts, DEFAULT_DURATION_MIN),
-    });
-    setFormError(null);
-    setSuggestionsOpen(false);
+    setInitialStart(startsLocal ?? isoToLocal(base.toISOString()));
+    setDetailsOpen(false);
     setFormOpen(true);
+  }
+
+  // Atalho ?novo=1: abre o formulário e limpa o parâmetro (recarregar não reabre).
+  function openNew(value: string) {
+    if (value !== '1') return;
+    openCreate();
+    const url = new URL(window.location.href);
+    url.searchParams.delete('novo');
+    url.searchParams.delete('n');
+    window.history.replaceState(null, '', url.pathname + url.search);
   }
 
   function openCreateAt(dateKey: string, hour = 9) {
     openCreate(`${dateKey}T${String(hour).padStart(2, '0')}:00`);
   }
 
+  function openDetails(a: Appointment) {
+    setSelected(a);
+    setDetailsOpen(true);
+  }
+
   function openEdit(a: Appointment) {
     setEditing(a);
-    setForm({
-      patient_name: a.patient_name,
-      patient_phone: isPersonalCommitment(a.patient_phone)
-        ? a.patient_phone
-        : maskPhone(a.patient_phone),
-      patient_cpf: '',
-      starts_local: isoToLocal(a.starts_at),
-      ends_local: isoToLocal(a.ends_at),
-      notes: a.notes ?? '',
-      repeat: 'none',
-      until: '',
-      service_id: a.service_id ?? '',
-    });
-    setFormError(null);
-    setSuggestionsOpen(false);
+    setInitialStart(undefined);
+    setDetailsOpen(false);
     setFormOpen(true);
   }
 
-  function closeForm() {
+  async function refreshAfterSave() {
+    await Promise.all([loadData(true), loadPatients()]);
     setFormOpen(false);
-    setEditing(null);
-    setForm(EMPTY_FORM);
-    setFormError(null);
-    setSuggestionsOpen(false);
   }
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    setFormError(null);
-
-    // Compromisso pessoal (criado pelo Assistente) não tem cliente: sem telefone.
-    const editingPersonal = !!editing && isPersonalCommitment(editing.patient_phone);
-    const phone = editingPersonal ? '' : normalizePhoneBR(form.patient_phone);
-    if (!editingPersonal && !isValidPhoneBR(phone)) {
-      setFormError('Informe um telefone válido com DDD (ex.: (11) 91111-2222).');
-      return;
-    }
-    if (!form.patient_name.trim()) {
-      setFormError('Nome é obrigatório.');
-      return;
-    }
-    if (!form.starts_local || !form.ends_local) {
-      setFormError('Defina início e fim do atendimento.');
-      return;
-    }
-    if (form.starts_local >= form.ends_local) {
-      setFormError('O horário final precisa ser maior que o inicial.');
-      return;
-    }
-    if (
-      !editing &&
-      form.repeat !== 'none' &&
-      form.starts_local.slice(0, 10) !== form.ends_local.slice(0, 10)
-    ) {
-      setFormError(
-        'Para repetir, início e fim devem ser no mesmo dia — eles definem o horário de UM atendimento. Use "Repetir até" para a data em que a série termina.',
-      );
-      return;
-    }
-    const cpf = normalizeCpf(form.patient_cpf);
-    if (cpf && !isValidCpf(cpf)) {
-      setFormError('CPF inválido.');
-      return;
-    }
-
-    setSaving(true);
-
-    // Atendimento recorrente (só na criação): cria a série e materializa as
-    // ocorrências; senão, fluxo normal de appointment único.
-    if (!editing && form.repeat !== 'none') {
-      const res = await fetch('/api/recurrences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          patient_name: form.patient_name.trim(),
-          patient_phone: phone,
-          cpf: cpf || null,
-          starts_at: localToISO(form.starts_local),
-          ends_at: localToISO(form.ends_local),
-          frequency: form.repeat,
-          until: form.until || null,
-          notes: form.notes.trim() || null,
-        }),
-      });
-      const body = await res.json().catch(() => ({}));
-      setSaving(false);
-      if (!res.ok) {
-        setFormError(body.error ?? 'Erro ao criar a recorrência.');
-        return;
-      }
-      await Promise.all([loadData(), loadPatients()]);
-      closeForm();
-      const created = Number(body.created ?? 0);
-      const skipped = Number(body.skipped ?? 0);
-      const clash =
-        skipped > 0
-          ? ` ${skipped} ${skipped === 1 ? 'data ficou' : 'datas ficaram'} de fora por conflito de horário.`
-          : '';
-      if (created > 0) {
-        toast.success(
-          `Série criada: ${created} ${created === 1 ? 'atendimento marcado' : 'atendimentos marcados'}.${clash}`,
-        );
-      } else {
-        toast.warning(`Série criada, mas nenhum atendimento foi marcado.${clash}`);
-      }
-      return;
-    }
-
-    const payload = {
-      patient_name: form.patient_name.trim(),
-      patient_phone: phone,
-      cpf: cpf || null,
-      starts_at: localToISO(form.starts_local),
-      ends_at: localToISO(form.ends_local),
-      notes: form.notes.trim() || null,
-      service_id: form.service_id || null,
-    };
-    const url = editing ? `/api/appointments/${editing.id}` : '/api/appointments';
-    const method = editing ? 'PATCH' : 'POST';
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const body = await res.json().catch(() => ({}));
-    setSaving(false);
-
-    if (!res.ok) {
-      setFormError(body.error ?? 'Erro ao salvar agendamento.');
-      return;
-    }
-
-    await Promise.all([loadData(), loadPatients()]);
-    closeForm();
-  }
+  // --- ações de status (mesmos endpoints de sempre) --------------------------
 
   async function stopSeries(a: Appointment) {
     if (!a.recurrence_id) return;
@@ -420,8 +243,8 @@ export default function AgendaPage() {
       method: 'POST',
     });
     if (res.ok) {
-      await loadData();
-      closeForm();
+      await loadData(true);
+      setDetailsOpen(false);
     }
   }
 
@@ -432,8 +255,8 @@ export default function AgendaPage() {
       body: JSON.stringify({ status }),
     });
     if (res.ok) {
-      await loadData();
-      closeForm();
+      await loadData(true);
+      setDetailsOpen(false);
     }
   }
 
@@ -449,79 +272,18 @@ export default function AgendaPage() {
       body: JSON.stringify({ cancellation_note: reason.trim() || undefined }),
     });
     if (res.ok) {
-      await loadData();
-      closeForm();
+      await loadData(true);
+      setDetailsOpen(false);
     }
   }
 
-  function statusActions(a: Appointment) {
-    // Compromisso pessoal (sem telefone): não tem cliente para confirmar,
-    // aprovar ou dar falta; só cancelar.
-    if (isPersonalCommitment(a.patient_phone)) {
-      if (a.status === 'cancelled' || a.status === 'no_show') return null;
-      return (
-        <Button type="button" size="sm" variant="outline" onClick={() => cancel(a)}>
-          Cancelar compromisso
-        </Button>
-      );
-    }
-    if (a.status === 'pending_approval') {
-      return (
-        <>
-          <Button type="button" size="sm" onClick={() => patchStatus(a.id, 'scheduled')}>
-            Aprovar
-          </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => cancel(a)}>
-            Rejeitar
-          </Button>
-        </>
-      );
-    }
-    if (a.status === 'scheduled') {
-      return (
-        <>
-          <Button type="button" size="sm" variant="outline" onClick={() => patchStatus(a.id, 'confirmed')}>
-            Confirmar
-          </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => cancel(a)}>
-            Cancelar
-          </Button>
-        </>
-      );
-    }
-    if (a.status === 'confirmed') {
-      return (
-        <>
-          <Button type="button" size="sm" variant="outline" onClick={() => patchStatus(a.id, 'no_show')}>
-            Não compareceu
-          </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => cancel(a)}>
-            Cancelar
-          </Button>
-        </>
-      );
-    }
-    return null;
-  }
+  // --- navegação -------------------------------------------------------------
 
   function navigate(dir: -1 | 1) {
-    setCursor((c) => (view === 'week' ? addDays(c, dir * 7) : addMonths(c, dir)));
+    setCursor((c) =>
+      view === 'month' ? addMonths(c, dir) : addDays(c, dir * (view === 'week' ? 7 : 1)),
+    );
   }
-
-  const headerLabel =
-    view === 'week'
-      ? (() => {
-          const start = startOfWeek(cursor, { weekStartsOn: 1 });
-          const end = addDays(start, 6);
-          const sameMonth = start.getMonth() === end.getMonth();
-          return sameMonth
-            ? `${format(start, 'dd')} – ${format(end, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}`
-            : `${format(start, "dd 'de' MMM", { locale: ptBR })} – ${format(end, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}`;
-        })()
-      : (() => {
-          const label = format(cursor, "MMMM 'de' yyyy", { locale: ptBR });
-          return label.charAt(0).toUpperCase() + label.slice(1);
-        })();
 
   // Vai para o dia (yyyy-MM-dd) pedido pela URL, ignorando valor malformado.
   function openDay(dateKey: string) {
@@ -530,406 +292,153 @@ export default function AgendaPage() {
     setCursor(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12));
   }
 
+  // Do mês para a visão Dia (número do dia ou "+N").
+  function goToDay(dateKey: string) {
+    openDay(dateKey);
+    setView('day');
+  }
+
+  const days = useMemo(() => {
+    if (view === 'day') return [cursor];
+    const start = startOfWeek(cursor, { weekStartsOn: 1 });
+    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  }, [view, cursor]);
+
+  const handlers = {
+    onEdit: openEdit,
+    onSetStatus: patchStatus,
+    onCancel: cancel,
+    onStopSeries: stopSeries,
+  };
+
+  const editingPersonal = !!editing && isPersonalCommitment(editing.patient_phone);
+  const empty = !loading && !error && appointments.length === 0;
+
   return (
-    <div className="flex flex-col gap-6">
+    <PageContainer variant="wide" className="gap-4 sm:gap-5">
       {/* Link de notificação: /agenda?date=AAAA-MM-DD abre a agenda nesse dia. */}
       <Suspense fallback={null}>
         <UrlParamEffect name="date" onChange={openDay} />
+        {/* /agenda?novo=1 abre o formulário direto (atalho do painel). */}
+        <UrlParamEffect name="novo" onChange={openNew} />
       </Suspense>
+
       <PageHeader
-        eyebrow="Agenda"
-        title="Calendário"
-        description={headerLabel}
+        title="Agenda"
         actions={
-          <>
-            <div className="inline-flex items-center rounded-lg border border-border bg-card p-1">
-              <Button
-                type="button"
-                variant={view === 'month' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setView('month')}
-              >
-                Mês
-              </Button>
-              <Button
-                type="button"
-                variant={view === 'week' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setView('week')}
-              >
-                Semana
-              </Button>
-            </div>
-            <div className="inline-flex items-center rounded-lg border border-border bg-card p-1">
-              <Button type="button" variant="ghost" size="sm" onClick={() => navigate(-1)}>
-                ←
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setCursor(new Date())}>
-                Hoje
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => navigate(1)}>
-                →
-              </Button>
-            </div>
-            {!formOpen && <Button onClick={() => openCreate()}>Novo agendamento</Button>}
-          </>
+          <Button onClick={() => openCreate()}>
+            <Plus data-icon="inline-start" aria-hidden="true" />
+            Novo agendamento
+          </Button>
         }
       />
 
-      {formOpen && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editing
-                ? isPersonalCommitment(editing.patient_phone)
-                  ? 'Editar compromisso'
-                  : 'Editar agendamento'
-                : 'Novo agendamento'}
-            </CardTitle>
-            <CardDescription>
-              {editing && isPersonalCommitment(editing.patient_phone)
-                ? 'Horários interpretados em America/Sao_Paulo.'
-                : 'Horários interpretados em America/Sao_Paulo. Se o cliente já existir (mesmo telefone), seu cadastro é reutilizado.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {editing && (
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {STATUS_LABEL[editing.status]}
-                </span>
-                {statusActions(editing)}
-                {editing.status !== 'cancelled' && !isPersonalCommitment(editing.patient_phone) && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      window.open(
-                        `/documentos/declaracao/${editing.id}`,
-                        '_blank',
-                      )
-                    }
-                  >
-                    Declaração
-                  </Button>
-                )}
-                {editing.recurrence_id && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => stopSeries(editing)}
-                  >
-                    Encerrar série
-                  </Button>
-                )}
-              </div>
-            )}
-            {editing?.recurrence_id && (
-              <p className="mb-4 -mt-2 text-xs text-muted-foreground">
-                Este atendimento faz parte de uma série recorrente. Editar ou
-                cancelar aqui afeta só esta ocorrência; use “Encerrar série” para
-                cancelar as futuras.
-              </p>
-            )}
-            <form onSubmit={onSubmit} className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  label={
-                    editing && isPersonalCommitment(editing.patient_phone)
-                      ? 'Título do compromisso'
-                      : 'Nome do cliente'
-                  }
-                  htmlFor="ap_name"
-                >
-                  <div className="relative">
-                    <Input
-                      id="ap_name"
-                      value={form.patient_name}
-                      onChange={(e) => {
-                        setForm((p) => ({ ...p, patient_name: e.target.value }));
-                        setSuggestionsOpen(true);
-                      }}
-                      onFocus={() => setSuggestionsOpen(true)}
-                      onBlur={() => setTimeout(() => setSuggestionsOpen(false), 150)}
-                      autoComplete="off"
-                      required
-                      maxLength={120}
-                    />
-                    {suggestionsOpen &&
-                      suggestions.length > 0 &&
-                      !(editing && isPersonalCommitment(editing.patient_phone)) && (
-                      <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto rounded-xl bg-popover ring-1 ring-border">
-                        {suggestions.map((p) => (
-                          <li key={p.id}>
-                            <button
-                              type="button"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => pickPatient(p)}
-                              className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent"
-                            >
-                              <span className="font-medium truncate w-full">{p.name}</span>
-                              <span className="text-xs text-muted-foreground truncate w-full">
-                                {formatPhoneBR(p.phone)}
-                                {p.cpf ? ` · ${formatCpf(p.cpf)}` : ''}
-                              </span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </FormField>
-                {!(editing && isPersonalCommitment(editing.patient_phone)) && (
-                  <>
-                    <FormField label="Telefone" htmlFor="ap_phone">
-                      <MaskedInput
-                        mask="phone"
-                        id="ap_phone"
-                        value={form.patient_phone}
-                        onChangeValue={(v) => setForm((p) => ({ ...p, patient_phone: v }))}
-                        required
-                      />
-                    </FormField>
-                    <FormField label="CPF (opcional)" htmlFor="ap_cpf">
-                      <MaskedInput
-                        mask="cpf"
-                        id="ap_cpf"
-                        value={form.patient_cpf}
-                        onChangeValue={(v) => setForm((p) => ({ ...p, patient_cpf: v }))}
-                      />
-                    </FormField>
-                  </>
-                )}
-              </div>
+      <AgendaToolbar
+        view={view}
+        onViewChange={setView}
+        label={periodLabel(view, cursor)}
+        onPrev={() => navigate(-1)}
+        onNext={() => navigate(1)}
+        onToday={() => setCursor(new Date())}
+      />
 
-              {servicesList.length > 0 && (
-                <FormField label="Serviço (opcional)" htmlFor="ap_service">
-                  <Select
-                    items={{
-                      none: 'Nenhum',
-                      ...Object.fromEntries(
-                        servicesList.map((s) => [
-                          s.id,
-                          `${s.name} · ${s.duration_min}min`,
-                        ]),
-                      ),
-                    }}
-                    value={form.service_id || 'none'}
-                    onValueChange={(v) =>
-                      setForm((p) => {
-                        const id = v === 'none' ? '' : ((v as string) ?? '');
-                        const dur =
-                          servicesList.find((s) => s.id === id)?.duration_min ??
-                          DEFAULT_DURATION_MIN;
-                        const ends_local = p.starts_local
-                          ? addMinutesToLocal(p.starts_local, dur)
-                          : p.ends_local;
-                        return { ...p, service_id: id, ends_local };
-                      })
-                    }
-                  >
-                    <SelectTrigger id="ap_service" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhum</SelectItem>
-                      {servicesList.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name} · {s.duration_min}min
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ao escolher, o fim é calculado pela duração do serviço.
-                  </p>
-                </FormField>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Início" htmlFor="ap_start">
-                  <Input
-                    id="ap_start"
-                    type="datetime-local"
-                    value={form.starts_local}
-                    onChange={(e) => {
-                      const starts = e.target.value;
-                      setForm((p) => {
-                        const dur =
-                          servicesList.find((s) => s.id === p.service_id)
-                            ?.duration_min ?? DEFAULT_DURATION_MIN;
-                        return {
-                          ...p,
-                          starts_local: starts,
-                          ends_local:
-                            !p.ends_local || p.ends_local <= starts
-                              ? addMinutesToLocal(starts, dur)
-                              : p.ends_local,
-                        };
-                      });
-                    }}
-                    required
-                  />
-                </FormField>
-                <FormField label="Fim" htmlFor="ap_end">
-                  <Input
-                    id="ap_end"
-                    type="datetime-local"
-                    value={form.ends_local}
-                    onChange={(e) => setForm((p) => ({ ...p, ends_local: e.target.value }))}
-                    required
-                  />
-                </FormField>
-              </div>
-
-              {!editing && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField label="Repetir" htmlFor="ap_repeat">
-                      <Select
-                        items={REPEAT_ITEMS}
-                        value={form.repeat}
-                        onValueChange={(v) =>
-                          setForm((p) => {
-                            const repeat = (v ?? 'none') as Repeat;
-                            // Ao ativar a repetição, garante que o fim fique no
-                            // mesmo dia do início (é o horário de UM atendimento).
-                            const sameDay =
-                              p.starts_local.slice(0, 10) ===
-                              p.ends_local.slice(0, 10);
-                            const ends_local =
-                              repeat !== 'none' && p.starts_local && !sameDay
-                                ? addMinutesToLocal(
-                                    p.starts_local,
-                                    DEFAULT_DURATION_MIN,
-                                  )
-                                : p.ends_local;
-                            return { ...p, repeat, ends_local };
-                          })
-                        }
-                      >
-                        <SelectTrigger id="ap_repeat" className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Não repete</SelectItem>
-                          <SelectItem value="weekly">Toda semana</SelectItem>
-                          <SelectItem value="biweekly">
-                            A cada 2 semanas
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormField>
-                    {form.repeat !== 'none' && (
-                      <FormField label="Repetir até (opcional)" htmlFor="ap_until">
-                        <Input
-                          id="ap_until"
-                          type="date"
-                          value={form.until}
-                          onChange={(e) =>
-                            setForm((p) => ({ ...p, until: e.target.value }))
-                          }
-                        />
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Data em que a repetição para. Deixe vazio para repetir
-                          sem fim.
-                        </p>
-                      </FormField>
-                    )}
-                  </div>
-                  {form.repeat !== 'none' && (
-                    <p className="-mt-1 text-xs text-muted-foreground">
-                      <strong>Início</strong> e <strong>Fim</strong> acima são o
-                      horário de <strong>um</strong> atendimento (mesmo dia). Ela vai
-                      se repetir {form.repeat === 'weekly' ? 'toda semana' : 'a cada 2 semanas'} no
-                      mesmo dia e horário, até a data de “Repetir até”.
-                    </p>
-                  )}
-                </>
-              )}
-
-              <FormField label="Anotações (opcional)" htmlFor="ap_notes">
-                <Textarea
-                  id="ap_notes"
-                  value={form.notes}
-                  onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-                  rows={2}
-                  placeholder="Ex.: primeiro atendimento, indicação, observações, etc."
-                />
-              </FormField>
-
-              {formError && <div className="text-sm text-destructive">{formError}</div>}
-
-              <div className="flex items-center justify-end gap-3">
-                <Button type="button" variant="outline" onClick={closeForm} disabled={saving}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={saving}>
-                  {saving ? 'Salvando…' : editing ? 'Salvar alterações' : 'Criar agendamento'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+      {view === 'day' && (
+        <div className="md:hidden">
+          <DayStrip cursor={cursor} appointments={appointments} onSelect={setCursor} />
+        </div>
       )}
 
       {error && (
-        <Card className="border-destructive/40">
-          <CardContent className="text-sm text-destructive py-4">{error}</CardContent>
-        </Card>
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] bg-destructive-soft px-4 py-3 text-sm text-destructive-ink"
+        >
+          <span>{error}</span>
+          <Button type="button" size="sm" variant="outline" onClick={() => void loadData()}>
+            Tentar de novo
+          </Button>
+        </div>
       )}
 
       {loading ? (
-        <div className="overflow-hidden rounded-xl border border-border bg-card p-4">
-          <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 28 }).map((_, i) => (
-              <Skeleton key={i} className="h-16" />
-            ))}
-          </div>
-        </div>
-      ) : view === 'month' ? (
-        <CalendarMonth
-          monthCursor={cursor}
-          appointments={appointments}
-          busy={busy}
-          onSelectAppointment={openEdit}
-          onSelectDay={(key) => openCreateAt(key)}
-        />
+        <AgendaSkeleton view={view} />
       ) : (
-        <CalendarWeek
-          weekStart={startOfWeek(cursor, { weekStartsOn: 1 })}
-          appointments={appointments}
-          busy={busy}
-          onSelectAppointment={openEdit}
-          onSelectSlot={(key, hour) => openCreateAt(key, hour)}
-        />
+        <>
+          {empty && (
+            <p className="text-sm text-muted-foreground">
+              Nenhum atendimento {VIEW_PERIOD[view]}. Clique em um horário da grade ou
+              use “Novo agendamento”.
+            </p>
+          )}
+          {view === 'month' ? (
+            <CalendarMonth
+              monthCursor={cursor}
+              appointments={appointments}
+              busy={busy}
+              onSelectAppointment={openDetails}
+              onSelectDay={(key) => openCreateAt(key)}
+              onOpenDay={goToDay}
+            />
+          ) : (
+            <CalendarTimeGrid
+              days={days}
+              appointments={appointments}
+              busy={busy}
+              availability={availability}
+              routine={routine}
+              serviceNames={serviceNames}
+              onSelectAppointment={openDetails}
+              onSelectSlot={(key, hour) => openCreateAt(key, hour)}
+            />
+          )}
+          <AgendaLegend showRoutine={view !== 'month' && weekly.length > 0} />
+        </>
       )}
 
-      {!loading && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-          {(
-            [
-              'scheduled',
-              'confirmed',
-              'pending_approval',
-              'no_show',
-              'cancelled',
-            ] as AppointmentStatus[]
-          ).map((s) => (
-            <span key={s} className="inline-flex items-center gap-1.5">
-              <span className={`h-2.5 w-2.5 rounded-sm ${STATUS_DOT[s]}`} />
-              {STATUS_LABEL[s]}
-            </span>
-          ))}
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm border border-dashed border-border bg-muted" />
-            <Lock className="size-3" aria-hidden />
-            Google (pessoal)
-          </span>
-        </div>
-      )}
-    </div>
+      <ResponsiveOverlay
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        title={selected?.patient_name ?? 'Atendimento'}
+        description={
+          selected && isPersonalCommitment(selected.patient_phone)
+            ? 'Compromisso pessoal'
+            : undefined
+        }
+      >
+        {selected && (
+          <AppointmentDetails
+            appointment={selected}
+            serviceName={selected.service_id ? serviceNames[selected.service_id] : undefined}
+            handlers={handlers}
+          />
+        )}
+      </ResponsiveOverlay>
+
+      <ResponsiveOverlay
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        title={
+          editing
+            ? editingPersonal
+              ? 'Editar compromisso'
+              : 'Editar agendamento'
+            : 'Novo agendamento'
+        }
+        description={
+          editingPersonal
+            ? 'Horários interpretados em America/Sao_Paulo.'
+            : 'Horários interpretados em America/Sao_Paulo. Se o cliente já existir (mesmo telefone), seu cadastro é reutilizado.'
+        }
+      >
+        <AppointmentForm
+          editing={editing}
+          initialStart={initialStart}
+          patients={patientsList}
+          services={activeServices}
+          onCancel={() => setFormOpen(false)}
+          onSaved={refreshAfterSave}
+        />
+      </ResponsiveOverlay>
+    </PageContainer>
   );
 }

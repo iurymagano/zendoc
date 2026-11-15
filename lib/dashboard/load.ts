@@ -42,6 +42,10 @@ export type DashboardData = {
   today: TodaySummary;
   ruler: DayRuler | null;
   upcoming: UpcomingGroup[];
+  /** Total de atendimentos ativos por vir (não só os que a lista mostra). */
+  upcomingCount: number;
+  /** Total de atendimentos que a IA marcou pelo WhatsApp (desde o início, sem os cancelados). */
+  aiTotal: number;
   /** Atendimentos esperando a aprovação do profissional (o mais próximo primeiro). */
   pending: DashAppointment[];
   pendingCount: number;
@@ -98,6 +102,7 @@ export async function loadDashboard(
     newClientsRes,
     totalClientsRes,
     totalApptsRes,
+    aiTotalRes,
     stateRes,
     historyRes,
     slots,
@@ -125,7 +130,7 @@ export async function loadDashboard(
       .limit(1500),
     supabase
       .from('appointments')
-      .select(SELECT_APPT)
+      .select(SELECT_APPT, { count: 'exact' })
       .eq('professional_id', pid)
       .in('status', ACTIVE)
       .gte('ends_at', nowIso)
@@ -163,6 +168,12 @@ export async function loadDashboard(
       .from('appointments')
       .select('id', { count: 'exact', head: true })
       .eq('professional_id', pid),
+    supabase
+      .from('appointments')
+      .select('id', { count: 'exact', head: true })
+      .eq('professional_id', pid)
+      .eq('booked_via', 'whatsapp_ai')
+      .neq('status', 'cancelled'),
     supabase
       .from('conversation_state')
       .select('patient_phone, ai_paused, needs_attention, updated_at')
@@ -266,6 +277,8 @@ export async function loadDashboard(
     today,
     ruler,
     upcoming: upcomingGroups(upcomingRows, now, 6),
+    upcomingCount: upcomingRes.count ?? upcomingRows.length,
+    aiTotal: aiTotalRes.count ?? 0,
     pending,
     pendingCount: pendingRes.count ?? pending.length,
     serviceNames: Object.fromEntries(services.map((s) => [s.id as string, s.name as string])),

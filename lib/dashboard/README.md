@@ -42,3 +42,7 @@ Contas e carregamento de dados da página inicial `/dashboard`. As contas são p
 ## schedule.test.ts, summary.test.ts, setup.test.ts
 
 Testes `node:test` das contas acima, com relógio fixo (sábado 14/11/2026 16:57 -03:00); rodam com `npm test` e foram conferidos com `TZ=UTC`, `America/Sao_Paulo` e `Asia/Tokyo`.
+
+## load.ts
+
+**Notas (redesign premium):** `DashboardData` ganhou `upcomingCount` (total de atendimentos ativos a partir de agora, contagem exata da mesma consulta de próximos) e `aiTotal` (agendamentos `booked_via='whatsapp_ai'` não cancelados, consulta `head` só de contagem). Ambas só leem; alimentam os MetricCards "Próximos" e "Pela IA".

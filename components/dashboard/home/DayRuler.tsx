@@ -29,7 +29,7 @@ export function DayRulerView({
 
   return (
     <div role="img" aria-label={summary} className="flex flex-col gap-2">
-      <div className="relative h-14 overflow-hidden rounded-2xl bg-secondary">
+      <div className="relative h-11 overflow-hidden rounded-[var(--radius-field)] bg-secondary">
         {ruler.windows.map((w, i) => (
           <div
             key={i}
@@ -50,7 +50,7 @@ export function DayRulerView({
             <div
               key={s.id}
               title={a ? `${a.patient_name}` : undefined}
-              className={`absolute inset-y-2 rounded-lg ${tone} ${past ? 'opacity-40' : ''}`}
+              className={`absolute inset-y-1.5 rounded-md ${tone} ${past ? 'opacity-40' : ''}`}
               style={{ left: `${s.left}%`, width: `${s.width}%` }}
             />
           );

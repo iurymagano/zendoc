@@ -6,7 +6,7 @@ import { EmptyState, Panel } from './Panel';
 function Stat({ value, label, hint }: { value: string | number; label: string; hint?: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="font-display text-4xl font-bold leading-none tracking-[-0.04em] tabular-nums">
+      <span className="font-display text-2xl font-bold leading-none tracking-[-0.04em] tabular-nums">
         {value}
       </span>
       <span className="text-sm font-medium">{label}</span>
@@ -31,7 +31,7 @@ export function WeekPanel({ data }: { data: DashboardData }) {
 
   if (metrics.total === 0 && !hasCapacity && newClients.week === 0) {
     return (
-      <Panel label="Semana" title="Sua semana">
+      <Panel title="Sua semana">
         <EmptyState title="Ainda sem números." href="/configuracoes/disponibilidade" cta="Definir horários">
           Depois que você definir seus horários e os primeiros atendimentos entrarem, aqui
             aparecem a ocupação, quantos a IA marcou e o tempo que ela poupou.
@@ -41,7 +41,7 @@ export function WeekPanel({ data }: { data: DashboardData }) {
   }
 
   return (
-    <Panel label="Semana" title="Sua semana">
+    <Panel title="Sua semana">
       <div className="grid grid-cols-2 gap-x-4 gap-y-5">
         <Stat
           value={metrics.total}
@@ -69,18 +69,18 @@ export function WeekPanel({ data }: { data: DashboardData }) {
 
       {hasCapacity && (
         <div role="img" aria-label={chartSummary} className="flex flex-col gap-2">
-          <div className="grid h-24 grid-cols-7 items-end gap-2">
+          <div className="grid h-20 grid-cols-7 items-end gap-2">
             {occupancy.days.map((d) => {
               const pct = d.capacityMin > 0 ? Math.min(100, (d.bookedMin / d.capacityMin) * 100) : 0;
               return (
-                <div key={d.date} className="relative flex h-full flex-col justify-end rounded-xl bg-secondary">
+                <div key={d.date} className="relative flex h-full flex-col justify-end rounded-lg bg-secondary">
                   {d.capacityMin === 0 ? (
                     <span className="absolute inset-x-0 bottom-1.5 text-center font-mono text-[10px] text-muted-foreground">
                       –
                     </span>
                   ) : (
                     <div
-                      className={`rounded-xl ${d.isToday ? 'bg-primary' : d.isPast ? 'bg-[var(--ia-violet)]/35' : 'bg-[var(--ia-violet)]/70'}`}
+                      className={`rounded-lg ${d.isToday ? 'bg-primary' : d.isPast ? 'bg-[var(--ia-violet)]/35' : 'bg-[var(--ia-violet)]/70'}`}
                       style={{ height: `${Math.max(pct, d.count > 0 ? 8 : 0)}%` }}
                     />
                   )}

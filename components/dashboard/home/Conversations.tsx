@@ -1,8 +1,7 @@
-import Link from 'next/link';
 import { formatPhoneBR } from '@/lib/phone';
 import type { ConversationItem } from '@/lib/dashboard/load';
 import { relativeTime, snippet } from '@/lib/dashboard/summary';
-import { EmptyState, Panel } from './Panel';
+import { EmptyState, Panel, PanelLink } from './Panel';
 
 /** Últimas conversas do WhatsApp, uma linha por cliente. */
 export function Conversations({
@@ -15,15 +14,7 @@ export function Conversations({
   whatsappConnected: boolean;
 }) {
   return (
-    <Panel
-      label="WhatsApp"
-      title="Conversas recentes"
-      action={
-        <Link href="/conversas" className="text-sm font-medium text-[var(--ia-violet-ink)] underline underline-offset-4">
-          Ver todas
-        </Link>
-      }
-    >
+    <Panel title="Conversas recentes" action={<PanelLink href="/conversas">Ver todas</PanelLink>}>
       {items.length === 0 ? (
         whatsappConnected ? (
           <EmptyState title="Nenhuma conversa ainda." href="/configuracoes/testar-ia" cta="Testar a IA">
@@ -37,7 +28,7 @@ export function Conversations({
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((c) => (
-            <li key={c.phone} className="flex flex-col gap-0.5 rounded-2xl bg-background px-4 py-3">
+            <li key={c.phone} className="flex flex-col gap-0.5 rounded-[var(--radius-field)] bg-background px-4 py-3">
               <div className="flex items-baseline justify-between gap-3">
                 <p className="truncate font-medium">{c.name ?? formatPhoneBR(c.phone)}</p>
                 {c.last_at && (

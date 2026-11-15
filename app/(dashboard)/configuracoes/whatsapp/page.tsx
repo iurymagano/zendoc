@@ -174,7 +174,6 @@ export default function WhatsAppConfigPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Configurações"
         title="WhatsApp"
         description="Conecte seu WhatsApp para que a IA responda seus clientes automaticamente, 24h por dia."
         actions={

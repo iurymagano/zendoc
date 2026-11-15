@@ -33,7 +33,7 @@ appointments, separando em "Próximos atendimentos" e "Histórico".
 **Depende de:**
 
 - `@/auth`, `@/lib/supabase`
-- `@/components/ui/{card,button}`
+- `@/components/ui/{card,button}`, `@/components/appointments/StatusBadge`
 - `@/types/database`
 
 **Notas:**
@@ -41,5 +41,6 @@ appointments, separando em "Próximos atendimentos" e "Histórico".
 - Appointments criados antes da deleção do cliente perdem o vínculo
   (`ON DELETE SET NULL` no FK) e **não aparecem aqui** — ainda ficam em
   `/agenda` com `patient_name`/`patient_phone` desnormalizados.
+- O status de cada atendimento usa `StatusBadge` (`components/appointments/status.ts`, ícone + rótulo), a mesma fonte da agenda e do dashboard.
 - Edição de cliente e de appointment continua sendo feita em `/clientes`
   e `/agenda` respectivamente — esta página é read-only (view).

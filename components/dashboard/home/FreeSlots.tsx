@@ -12,7 +12,7 @@ export function FreeSlots({
   now: Date;
 }) {
   return (
-    <Panel label="Vagas" title="A IA oferece estes horários">
+    <Panel title="Vagas que a IA oferece" description="Os próximos horários livres, a partir de amanhã.">
       {slots.length > 0 ? (
         <ul className="flex flex-wrap gap-2">
           {slots.map((s) => (

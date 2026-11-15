@@ -50,3 +50,7 @@ criar/editar clientes.
 ## Subpastas
 
 - [\[id\]/](./[id]/) — página de detalhe + histórico do cliente.
+
+## loading.tsx
+
+**O que faz:** esqueleto da rota enquanto a página carrega (`PageContainer` + `LoadingSkeleton`, layout page, wide).
