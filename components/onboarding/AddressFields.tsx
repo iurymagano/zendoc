@@ -117,7 +117,7 @@ export function AddressFields({ initialValue, onChange }: AddressFieldsProps) {
 
   return (
     <fieldset className="flex flex-col gap-4">
-      <legend className="mb-1.5 text-sm font-medium leading-none">
+      <legend className="mb-3 text-sm font-medium leading-none">
         Endereço de atendimento (opcional)
       </legend>
 
