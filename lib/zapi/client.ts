@@ -127,7 +127,7 @@ export async function getQRCode(
 export async function getConnectionStatus(
   instanceName: string,
   token: string,
-): Promise<{ connected: boolean }> {
+): Promise<{ connected: boolean; state?: string }> {
   const res = await fetch(
     `${base()}/instance/connectionState/${instanceName}`,
     { headers: { apikey: instanceKey(token) } },
@@ -138,7 +138,7 @@ export async function getConnectionStatus(
     state?: string;
   };
   const state = data.instance?.state ?? data.state;
-  return { connected: state === 'open' };
+  return { connected: state === 'open', state };
 }
 
 export async function sendWhatsAppMessage(

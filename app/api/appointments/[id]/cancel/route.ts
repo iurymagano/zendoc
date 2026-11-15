@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createServerClient } from '@/lib/supabase';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
+import { notifyAppointmentCancelled } from '@/lib/notifications/events';
 
 const bodySchema = z.object({
   cancellation_note: z.string().trim().max(500).optional(),
@@ -66,6 +67,14 @@ export async function POST(
 
   // Remove o evento espelhado no Google (cancelamento).
   await syncAppointmentToGoogle(data);
+
+  // Aviso no sino (já nasce lido: foi o próprio profissional que cancelou).
+  await notifyAppointmentCancelled(
+    professionalId,
+    data,
+    'professional',
+    parsed.data.cancellation_note,
+  );
 
   return NextResponse.json({ ok: true, appointment: data });
 }

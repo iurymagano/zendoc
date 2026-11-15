@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase';
 import { hasAppointmentConflict } from '@/lib/appointments/conflicts';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
+import { notifyRecurrenceStopped } from '@/lib/notifications/events';
 import type { Appointment, Recurrence } from '@/types/database';
 
 const TZ = 'America/Sao_Paulo';
@@ -128,9 +129,20 @@ export async function stopRecurrence(
     .in('status', ['scheduled', 'confirmed', 'pending_approval'])
     .select();
 
-  for (const appt of (future ?? []) as Appointment[]) {
+  const cancelledList = (future ?? []) as Appointment[];
+  for (const appt of cancelledList) {
     await syncAppointmentToGoogle(appt);
   }
 
-  return { cancelled: (future ?? []).length };
+  // Um aviso só para a série (não um por ocorrência); nasce lido (foi o dono).
+  if (cancelledList.length > 0) {
+    await notifyRecurrenceStopped(professionalId, {
+      recurrenceId,
+      patientName: cancelledList[0].patient_name,
+      patientPhone: cancelledList[0].patient_phone,
+      cancelledCount: cancelledList.length,
+    });
+  }
+
+  return { cancelled: cancelledList.length };
 }

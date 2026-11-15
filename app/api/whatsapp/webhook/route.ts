@@ -3,6 +3,12 @@ import { createServerClient } from '@/lib/supabase';
 import { processWhatsAppMessage } from '@/lib/ai/processor';
 import { isConversationPaused } from '@/lib/conversations/state';
 import { sendWhatsAppMessage } from '@/lib/zapi/client';
+import { isConnectionUpdateEvent } from '@/lib/zapi/connection-event';
+import { handleConnectionUpdate } from '@/lib/zapi/connection-update';
+import {
+  notifyConversationAttention,
+  notifyReplyFailed,
+} from '@/lib/notifications/events';
 import type { Professional } from '@/types/database';
 
 function ok() {
@@ -46,8 +52,17 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return ok();
 
-  // Só tratamos mensagens recebidas. Evolution manda event "messages.upsert".
+  // Tratamos mensagens recebidas ("messages.upsert") e a queda/volta da
+  // conexão ("connection.update"); qualquer outro evento é ignorado.
   const event: string | undefined = body.event;
+  if (isConnectionUpdateEvent(event)) {
+    try {
+      await handleConnectionUpdate(body);
+    } catch (err) {
+      console.error('Erro ao tratar connection.update:', err);
+    }
+    return ok();
+  }
   if (event && event !== 'messages.upsert') return ok();
 
   // `data` pode vir como objeto único ou array.
@@ -86,6 +101,13 @@ export async function POST(req: NextRequest) {
       role: 'user',
       content: message,
     });
+    // O cliente falou numa conversa em que a secretária está pausada: o dono
+    // precisa responder (no máximo um aviso por hora e por cliente).
+    await notifyConversationAttention(professional.id, {
+      reason: 'paused',
+      patientPhone,
+      lastMessage: message,
+    });
     return ok();
   }
 
@@ -95,12 +117,24 @@ export async function POST(req: NextRequest) {
       patientPhone,
       message,
     );
-    await sendWhatsAppMessage(
-      professional.zapi_instance_id,
-      professional.zapi_token ?? '',
-      patientPhone,
-      aiResponse.message_to_patient,
-    );
+    try {
+      await sendWhatsAppMessage(
+        professional.zapi_instance_id,
+        professional.zapi_token ?? '',
+        patientPhone,
+        aiResponse.message_to_patient,
+      );
+    } catch (sendErr) {
+      console.error('Erro ao enviar resposta no WhatsApp:', sendErr);
+      // A resposta ficou no histórico mas não chegou ao cliente: avisa o dono.
+      await notifyReplyFailed(professional.id, {
+        patientPhone,
+        reason: professional.whatsapp_connected
+          ? 'o envio pelo WhatsApp falhou'
+          : 'o WhatsApp está desconectado',
+      });
+      throw sendErr;
+    }
   } catch (err) {
     console.error('Erro ao processar mensagem WhatsApp:', err);
   }

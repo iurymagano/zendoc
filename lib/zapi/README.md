@@ -29,8 +29,9 @@ há, senão a global).
 - `getQRCode(instanceName, token): Promise<string | null>` —
   `GET /instance/connect/{name}`. Lê o base64 tolerando vários formatos de
   resposta. `null` em não-2xx.
-- `getConnectionStatus(instanceName, token): Promise<{ connected: boolean }>` —
-  `GET /instance/connectionState/{name}`. `connected = state === 'open'`.
+- `getConnectionStatus(instanceName, token): Promise<{ connected: boolean; state?: string }>` —
+  `GET /instance/connectionState/{name}`. `connected = state === 'open'`; `state`
+  é o valor cru da Evolution (`open`, `close`, `connecting`).
 - `sendWhatsAppMessage(instanceName, token, phone, message): Promise<void>` —
   `POST /message/sendText/{name}` com `{ number, text }`. Lança em não-2xx
   (com o corpo de erro cru do Evolution — facilita debug).
@@ -49,3 +50,29 @@ há, senão a global).
 - Telefones no formato `5511999999999` (sem `+`, sem traços).
 - Risco aceito: provider não-oficial (ban de número). Migração futura para
   Cloud API oficial fica encapsulada neste módulo.
+
+---
+
+## connection-event.ts
+
+**O que faz:** interpretação PURA do evento `connection.update` da Evolution (sem I/O; testada em `connection-event.test.ts`).
+
+**Exporta:**
+
+- `isConnectionUpdateEvent(event): boolean` — aceita `connection.update` e `CONNECTION_UPDATE`.
+- `parseConnectionUpdate(body): ConnectionUpdate | null` — `{ instance, state, statusReason }`; sem instância → `null`.
+- `decideConnectionAction(update, currentlyConnected): 'reconnected' | 'disconnected' | 'confirm' | 'ignore'` — `open` com o banco desconectado = `reconnected`; `close` com motivo definitivo (401 deslogado, 403, 440 sessão substituída) = `disconnected`; `close` com motivo incerto = `confirm`; já desconectado no banco ou `connecting` = `ignore`.
+
+---
+
+## connection-update.ts
+
+**O que faz:** trata o `connection.update` (SERVER-ONLY): mantém `professionals.whatsapp_connected` em dia e avisa o dono no sino quando o WhatsApp cai.
+
+**Exporta:**
+
+- `handleConnectionUpdate(body): Promise<void>` — chamado pelo webhook (`app/api/whatsapp/webhook`).
+
+**Depende de:** `connection-event.ts`, `client.ts` (`getConnectionStatus`), `lib/notifications/events.ts`, `lib/supabase.ts`.
+
+**Notas:** `reconnected` volta `whatsapp_connected=true` em silêncio. `disconnected` marca e avisa na hora. `confirm` espera 5 s (o Baileys costuma reconectar sozinho) e só marca/avisa se `getConnectionStatus` ainda diz que caiu. O `update ... where whatsapp_connected = true` é o dedupe: só quem de fato virou a chave avisa, então eventos repetidos não geram avisos duplicados.

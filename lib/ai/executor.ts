@@ -1,5 +1,12 @@
 import { createServerClient } from '@/lib/supabase';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
+import {
+  notifyAppointmentBookedByAi,
+  notifyAppointmentCancelled,
+  notifyAppointmentConfirmed,
+  notifyAppointmentPendingApproval,
+  notifyAppointmentRescheduled,
+} from '@/lib/notifications/events';
 import type { Appointment, AIResponse, Professional } from '@/types/database';
 
 type Supabase = ReturnType<typeof createServerClient>;
@@ -35,6 +42,80 @@ async function findUpcomingAppointment(
   return (data as Appointment) ?? null;
 }
 
+/**
+ * Cria o atendimento pedido pela IA (cliente + appointment + espelho no Google).
+ * Não avisa o profissional: quem chama decide se é "agendou" ou "remarcou".
+ */
+async function bookAppointment(
+  supabase: Supabase,
+  professional: Professional,
+  patientPhone: string,
+  booking: NonNullable<AIResponse['booking']>,
+): Promise<Appointment | null> {
+  // Nome: usa o que a IA capturou; se não veio, preserva o nome já cadastrado
+  // (não reescreve com o placeholder); só cai em "Cliente" se não houver nada.
+  const providedName = booking.patient_name?.trim();
+  const { data: existingPatient } = await supabase
+    .from('patients')
+    .select('name')
+    .eq('professional_id', professional.id)
+    .eq('phone', patientPhone)
+    .maybeSingle();
+  const patientName = providedName || existingPatient?.name || 'Cliente';
+
+  const { data: patient } = await supabase
+    .from('patients')
+    .upsert(
+      {
+        professional_id: professional.id,
+        phone: patientPhone,
+        name: patientName,
+      },
+      { onConflict: 'professional_id,phone' },
+    )
+    .select()
+    .single();
+
+  const status = professional.requires_approval
+    ? 'pending_approval'
+    : 'scheduled';
+
+  const { data: created } = await supabase
+    .from('appointments')
+    .insert({
+      professional_id: professional.id,
+      patient_id: patient?.id ?? null,
+      patient_name: patient?.name ?? 'Cliente',
+      patient_phone: patientPhone,
+      starts_at: booking.starts_at,
+      ends_at: booking.ends_at,
+      status,
+      booked_via: 'whatsapp_ai',
+    })
+    .select()
+    .single();
+
+  if (created) await syncAppointmentToGoogle(created);
+  return (created as Appointment) ?? null;
+}
+
+/** Cancela um atendimento a pedido do cliente. Devolve o registro cancelado (ou null). */
+async function cancelForPatient(
+  supabase: Supabase,
+  professionalId: string,
+  target: Appointment,
+): Promise<Appointment | null> {
+  const { data: cancelled } = await supabase
+    .from('appointments')
+    .update({ status: 'cancelled', cancelled_by: 'patient' })
+    .eq('id', target.id)
+    .eq('professional_id', professionalId)
+    .select()
+    .maybeSingle();
+  if (cancelled) await syncAppointmentToGoogle(cancelled);
+  return (cancelled as Appointment) ?? null;
+}
+
 export async function executeAction(
   professional: Professional,
   patientPhone: string,
@@ -43,50 +124,13 @@ export async function executeAction(
   const supabase = createServerClient();
 
   if (response.action === 'book' && response.booking) {
-    // Nome: usa o que a IA capturou; se não veio, preserva o nome já cadastrado
-    // (não reescreve com o placeholder); só cai em "Cliente" se não houver nada.
-    const providedName = response.booking.patient_name?.trim();
-    const { data: existingPatient } = await supabase
-      .from('patients')
-      .select('name')
-      .eq('professional_id', professional.id)
-      .eq('phone', patientPhone)
-      .maybeSingle();
-    const patientName = providedName || existingPatient?.name || 'Cliente';
-
-    const { data: patient } = await supabase
-      .from('patients')
-      .upsert(
-        {
-          professional_id: professional.id,
-          phone: patientPhone,
-          name: patientName,
-        },
-        { onConflict: 'professional_id,phone' },
-      )
-      .select()
-      .single();
-
-    const status = professional.requires_approval
-      ? 'pending_approval'
-      : 'scheduled';
-
-    const { data: created } = await supabase
-      .from('appointments')
-      .insert({
-        professional_id: professional.id,
-        patient_id: patient?.id ?? null,
-        patient_name: patient?.name ?? 'Cliente',
-        patient_phone: patientPhone,
-        starts_at: response.booking.starts_at,
-        ends_at: response.booking.ends_at,
-        status,
-        booked_via: 'whatsapp_ai',
-      })
-      .select()
-      .single();
-
-    if (created) await syncAppointmentToGoogle(created);
+    const created = await bookAppointment(
+      supabase,
+      professional,
+      patientPhone,
+      response.booking,
+    );
+    if (created) await notifyAppointmentBookedByAi(professional.id, created);
     return;
   }
 
@@ -107,7 +151,10 @@ export async function executeAction(
         .eq('professional_id', professional.id)
         .select()
         .maybeSingle();
-      if (confirmed) await syncAppointmentToGoogle(confirmed);
+      if (confirmed) {
+        await syncAppointmentToGoogle(confirmed);
+        await notifyAppointmentConfirmed(professional.id, confirmed as Appointment);
+      }
     }
     return;
   }
@@ -120,14 +167,10 @@ export async function executeAction(
       response.cancel?.appointment_id,
     );
     if (target) {
-      const { data: cancelled } = await supabase
-        .from('appointments')
-        .update({ status: 'cancelled', cancelled_by: 'patient' })
-        .eq('id', target.id)
-        .eq('professional_id', professional.id)
-        .select()
-        .maybeSingle();
-      if (cancelled) await syncAppointmentToGoogle(cancelled);
+      const cancelled = await cancelForPatient(supabase, professional.id, target);
+      if (cancelled) {
+        await notifyAppointmentCancelled(professional.id, cancelled, 'patient');
+      }
     }
     return;
   }
@@ -139,20 +182,33 @@ export async function executeAction(
       patientPhone,
       response.cancel?.appointment_id,
     );
-    if (target) {
-      const { data: cancelled } = await supabase
-        .from('appointments')
-        .update({ status: 'cancelled', cancelled_by: 'patient' })
-        .eq('id', target.id)
-        .eq('professional_id', professional.id)
-        .select()
-        .maybeSingle();
-      if (cancelled) await syncAppointmentToGoogle(cancelled);
-    }
+    const cancelled = target
+      ? await cancelForPatient(supabase, professional.id, target)
+      : null;
 
-    await executeAction(professional, patientPhone, {
-      ...response,
-      action: 'book',
-    });
+    const created = await bookAppointment(
+      supabase,
+      professional,
+      patientPhone,
+      response.booking,
+    );
+
+    // Um único aviso para a troca: "remarcou" (cancelou o antigo e criou o novo).
+    // Se o novo não foi criado, o cliente ficou sem horário: avisa o cancelamento.
+    if (created && cancelled) {
+      await notifyAppointmentRescheduled(
+        professional.id,
+        created,
+        cancelled.starts_at,
+        'patient',
+      );
+      if (created.status === 'pending_approval') {
+        await notifyAppointmentPendingApproval(professional.id, created);
+      }
+    } else if (created) {
+      await notifyAppointmentBookedByAi(professional.id, created);
+    } else if (cancelled) {
+      await notifyAppointmentCancelled(professional.id, cancelled, 'patient');
+    }
   }
 }

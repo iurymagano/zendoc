@@ -169,3 +169,5 @@ mapeamento de status.
   ocorrências como appointments reais + encerrar série).
 - [conversations/](./conversations/) — estado das conversas (handoff: pausar a
   IA por contato).
+- [notifications/](./notifications/) — notificações dentro do app (sino do painel):
+  builders puros dos textos, gravação com dedupe e um `notify*` por evento.
