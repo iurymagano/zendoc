@@ -62,3 +62,21 @@ Faz só as consultas ao banco e delega o cálculo a `compute.ts`.
 - A janela de 14 dias é configurável pelo parâmetro, mas a query SQL das
   exceções e agendamentos também é limitada por esse range — expandir `days`
   custa uma query do mesmo tamanho.
+
+## replicate.ts
+
+**O que faz:** funções puras da cópia de um dia da rotina semanal para outros dias
+(botão "Replicar" em `/configuracoes/disponibilidade`). Testes em `replicate.test.ts`.
+
+**Exporta:**
+
+- `BlockState`, `DayState` — tipos do estado da tela
+- `WEEKDAY_NAMES`, `WEEKDAY_PRESETS` — nomes dos dias e atalhos (úteis, fim de semana, todos)
+- `presetTargets(preset, sourceWeekday): number[]` — atalho sem o dia de origem
+- `replicateDay(days, sourceWeekday, targets): DayState[]` — copia ligado/desligado e os três
+  blocos (manhã, almoço, tarde) da origem para os alvos; não muta a entrada
+- `describeWeekdays(weekdays): string` — `[1,2]` → `seg, ter` (segunda a domingo)
+
+**Notas:** alvos repetidos, iguais à origem ou inexistentes são ignorados. A duração do
+atendimento é global da semana, por isso não é copiada. Nada é salvo aqui: a tela só
+persiste no "Salvar".

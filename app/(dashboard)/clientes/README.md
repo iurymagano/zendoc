@@ -21,18 +21,20 @@ criar/editar clientes.
 **Formatação:**
 
 - Telefone armazenado como dígitos puros com DDI no banco (`5511999998888`),
-  renderizado na lista com `formatPhoneBR` (`+55 (11) 99999-8888`). O form
-  aceita com/sem DDI: normaliza com `normalizePhoneBR` (`lib/phone.ts`) antes
+  renderizado na lista com `formatPhoneBR` (`+55 (11) 99999-8888`). No form, o campo
+  usa `MaskedInput` (`(11) 99999-8888`; ao editar, o valor do banco já aparece
+  formatado via `maskPhone`). O form aceita com/sem DDI: normaliza com `normalizePhoneBR` (`lib/phone.ts`) antes
   de enviar, e a API normaliza de novo (fonte da verdade é o servidor).
-- CPF é opcional. O input usa `maskCpfInput` (máscara `000.000.000-00` ao
+- CPF é opcional. O input usa `MaskedInput mask="cpf"` (máscara `000.000.000-00` ao
   digitar) e é validado por checksum no submit; persiste só com dígitos. Na
   lista aparece como `CPF 000.000.000-00` quando preenchido.
 - No submit, o telefone é normalizado (só dígitos + `55` se faltar o DDI) antes de enviar à API.
 
 **Depende de:**
 
-- `@/components/ui/{button,input,textarea,card,form-field}`
-- `@/lib/patients/cpf` (`formatCpf`, `isValidCpf`, `maskCpfInput`, `normalizeCpf`)
+- `@/components/ui/{button,input,masked-input,textarea,card,form-field}`
+- `@/lib/masks` (`maskPhone`)
+- `@/lib/patients/cpf` (`formatCpf`, `isValidCpf`, `normalizeCpf`)
 - `GET|POST /api/patients`, `PATCH|DELETE /api/patients/[id]`
 
 **Notas:**

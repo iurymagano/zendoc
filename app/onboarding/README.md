@@ -23,13 +23,17 @@ minutos" em fonte mono.
 **O que faz:** coleta nome completo e WhatsApp, valida, normaliza o telefone
 (`5511999999999`, sempre com DDI 55) e salva em `sessionStorage`.
 
-**Notas:** validação: nome ≥ 2 chars, telefone 10-13 dígitos. Não envia ao
-backend — só armazena local.
+**Notas:** WhatsApp com máscara `(11) 99999-9999` (`MaskedInput`); validação: nome
+≥ 2 chars e telefone válido por `normalizePhoneBR`/`isValidPhoneBR` (o DDD 55 não é
+confundido com o DDI). Não envia ao backend — só armazena local (telefone já
+normalizado; ao voltar, é reformatado no campo).
 
 ## step-2/page.tsx
 
-**O que faz:** coleta a área de atuação (lista ampla de exemplos + "Outra" com campo livre), endereço (opcional), tom (`amigável|formal`)
+**O que faz:** coleta a área de atuação (lista ampla de exemplos + "Outra" com campo livre), endereço (opcional, por CEP via `AddressFields`), tom (`amigável|formal`)
 e instruções especiais. Lê o step 1 do `sessionStorage`, envia tudo para
 `POST /api/onboarding/profile` e redireciona para `/dashboard`.
 
-**Notas:** se o step 1 não estiver no storage, redireciona de volta.
+**Notas:** se o step 1 não estiver no storage, redireciona de volta. O endereço
+vai como texto único (`Rua X, 123, compl. - Bairro, Cidade/UF, CEP 00000-000`) em
+`address`, sem mudar o contrato da API.

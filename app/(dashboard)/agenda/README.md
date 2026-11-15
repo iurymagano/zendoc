@@ -34,7 +34,7 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
   **faixa de hora** (semana) abre o form já com a data/hora pré-preenchida.
 - Clicar num **bloco de agendamento** abre o form em modo edição, com as ações
   de status no topo (Aprovar/Confirmar/Não compareceu/Cancelar conforme o status).
-- Autocomplete de clientes (nome OU telefone), campo CPF com máscara, fim
+- Autocomplete de clientes (nome OU telefone), telefone e CPF com máscara (`MaskedInput`; ao escolher um cliente ou editar, o telefone vem formatado; a sugestão mostra `formatPhoneBR`), fim
   auto-preenchido em `+50min`. Salva via `POST`/`PATCH /api/appointments`.
   O telefone é normalizado (`normalizePhoneBR`: `55` + DDD + número) antes do
   envio — o mesmo número digitado com/sem DDI cai no mesmo cliente.
@@ -70,7 +70,7 @@ de uma delas há o aviso da série e o botão "Encerrar série"
 **Depende de:**
 
 - `@/components/agenda/{CalendarMonth,CalendarWeek,calendar-utils}`
-- `@/components/ui/{button,input,textarea,card,form-field}`
+- `@/components/ui/{button,input,masked-input,textarea,card,form-field}`, `@/lib/masks`
 - `GET /api/appointments`, `POST/PATCH /api/appointments`, `POST /api/appointments/:id/cancel`
 - `@/lib/patients/cpf`, `@/lib/appointments/personal`, `date-fns`
 

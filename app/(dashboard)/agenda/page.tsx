@@ -40,9 +40,11 @@ import {
   TZ,
   formatTime,
 } from '@/components/agenda/calendar-utils';
-import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
+import { formatCpf, isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
+import { maskPhone } from '@/lib/masks';
+import { MaskedInput } from '@/components/ui/masked-input';
 import { isPersonalCommitment } from '@/lib/appointments/personal';
-import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
+import { formatPhoneBR, isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import type { Appointment, AppointmentStatus, Patient, Service } from '@/types/database';
 
 const DEFAULT_DURATION_MIN = 50;
@@ -240,7 +242,7 @@ export default function AgendaPage() {
     setForm((prev) => ({
       ...prev,
       patient_name: p.name,
-      patient_phone: p.phone,
+      patient_phone: maskPhone(p.phone),
       patient_cpf: p.cpf ? formatCpf(p.cpf) : '',
     }));
     setSuggestionsOpen(false);
@@ -269,7 +271,9 @@ export default function AgendaPage() {
     setEditing(a);
     setForm({
       patient_name: a.patient_name,
-      patient_phone: a.patient_phone,
+      patient_phone: isPersonalCommitment(a.patient_phone)
+        ? a.patient_phone
+        : maskPhone(a.patient_phone),
       patient_cpf: '',
       starts_local: isoToLocal(a.starts_at),
       ends_local: isoToLocal(a.ends_at),
@@ -641,7 +645,7 @@ export default function AgendaPage() {
                             >
                               <span className="font-medium truncate w-full">{p.name}</span>
                               <span className="text-xs text-muted-foreground truncate w-full">
-                                {p.phone}
+                                {formatPhoneBR(p.phone)}
                                 {p.cpf ? ` · ${formatCpf(p.cpf)}` : ''}
                               </span>
                             </button>
@@ -654,23 +658,20 @@ export default function AgendaPage() {
                 {!(editing && isPersonalCommitment(editing.patient_phone)) && (
                   <>
                     <FormField label="Telefone" htmlFor="ap_phone">
-                      <Input
+                      <MaskedInput
+                        mask="phone"
                         id="ap_phone"
                         value={form.patient_phone}
-                        onChange={(e) => setForm((p) => ({ ...p, patient_phone: e.target.value }))}
-                        placeholder="5511999998888"
+                        onChangeValue={(v) => setForm((p) => ({ ...p, patient_phone: v }))}
                         required
                       />
                     </FormField>
                     <FormField label="CPF (opcional)" htmlFor="ap_cpf">
-                      <Input
+                      <MaskedInput
+                        mask="cpf"
                         id="ap_cpf"
                         value={form.patient_cpf}
-                        onChange={(e) =>
-                          setForm((p) => ({ ...p, patient_cpf: maskCpfInput(e.target.value) }))
-                        }
-                        placeholder="000.000.000-00"
-                        inputMode="numeric"
+                        onChangeValue={(v) => setForm((p) => ({ ...p, patient_cpf: v }))}
                       />
                     </FormField>
                   </>

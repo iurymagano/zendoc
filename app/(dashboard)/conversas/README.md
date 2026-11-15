@@ -15,7 +15,9 @@ pausar a IA num contato para o profissional assumir.
 - Caixa de envio → `POST /api/conversations/[phone]/send` (manda pelo WhatsApp e
   grava como `assistant`).
 
-**Depende de:** `@/components/ui/{button,textarea,card}`,
+**Notas:** o telefone do contato aparece formatado (`formatPhoneBR`) quando não há nome.
+
+**Depende de:** `@/components/ui/{button,textarea,card}`, `@/lib/phone`,
 `@/components/dashboard/PageHeader`, `/api/conversations/*`.
 
 **Layout:** altura fixa (`h-[72vh]`) com as duas colunas rolando internamente

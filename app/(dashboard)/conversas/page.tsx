@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { EmptyState } from '@/components/dashboard/EmptyState';
+import { formatPhoneBR } from '@/lib/phone';
 
 type Conversation = {
   phone: string;
@@ -184,7 +185,7 @@ export default function ConversasPage() {
                           {c.needs_attention && (
                             <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-destructive" />
                           )}
-                          <span className="truncate">{c.name ?? c.phone}</span>
+                          <span className="truncate">{c.name ?? formatPhoneBR(c.phone)}</span>
                         </span>
                         {c.needs_attention ? (
                           <span className="shrink-0 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive ring-1 ring-destructive/20">
@@ -219,9 +220,9 @@ export default function ConversasPage() {
               <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium">
-                    {thread.name ?? thread.phone}
+                    {thread.name ?? formatPhoneBR(thread.phone)}
                   </div>
-                  <div className="text-xs text-muted-foreground">{thread.phone}</div>
+                  <div className="text-xs text-muted-foreground">{formatPhoneBR(thread.phone)}</div>
                 </div>
                 <Button
                   size="sm"

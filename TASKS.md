@@ -354,6 +354,18 @@ Legenda:
   - [ ] Nenhuma tela consome `ai_enabled` ainda (Sidebar/serviços): decidir onde
     mostrar o indicador "secretária pausada"
 
+### Máscaras e endereço por CEP
+
+- [x] Máscaras nos campos (`lib/masks.ts` + `components/ui/masked-input.tsx`):
+  telefone `(11) 99999-9999` (onboarding, `/clientes`, `/agenda`), CPF, valor em
+  R$ (preço do serviço); valores do banco já aparecem formatados
+- [x] Telefone formatado também nas listas (conversas, sugestões de cliente da agenda)
+- [x] Endereço de atendimento por CEP (ViaCEP): CEP com máscara, preenche rua,
+  bairro, cidade/UF; número e complemento manuais; salvo como texto único em
+  `professionals.address` (`lib/address.ts`, `components/onboarding/AddressFields.tsx`)
+- [x] Botão "Replicar" por dia em `/configuracoes/disponibilidade` (copiar a rotina de um dia
+  para outros; atalhos úteis/fim de semana/todos; só persiste no Salvar)
+
 ---
 
 ## Sprint 4 — Pagamentos (em andamento)

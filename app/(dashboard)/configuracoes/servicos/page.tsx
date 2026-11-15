@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MaskedInput } from '@/components/ui/masked-input';
+import { formatCentsBRL, parseCurrencyToCents } from '@/lib/masks';
 import { FormField } from '@/components/ui/form-field';
 import {
   Card,
@@ -22,15 +24,6 @@ function formatPrice(cents: number | null): string {
     style: 'currency',
     currency: 'BRL',
   }).format(cents / 100);
-}
-
-/** "150", "150,50", "R$ 150,50" → centavos. Vazio → null. */
-function priceToCents(raw: string): number | null {
-  const cleaned = raw.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
-  if (!cleaned) return null;
-  const value = Number(cleaned);
-  if (!Number.isFinite(value) || value < 0) return null;
-  return Math.round(value * 100);
 }
 
 type FormState = { name: string; duration_min: string; price: string };
@@ -78,7 +71,7 @@ export default function ServicesPage() {
     setForm({
       name: s.name,
       duration_min: String(s.duration_min),
-      price: s.price_cents != null ? String(s.price_cents / 100).replace('.', ',') : '',
+      price: formatCentsBRL(s.price_cents),
     });
     setError(null);
   }
@@ -95,7 +88,7 @@ export default function ServicesPage() {
     const payload = {
       name: form.name.trim(),
       duration_min: duration,
-      price_cents: priceToCents(form.price),
+      price_cents: parseCurrencyToCents(form.price),
     };
     const res = await fetch(
       editingId ? `/api/services/${editingId}` : '/api/services',
@@ -206,12 +199,12 @@ export default function ServicesPage() {
                 />
               </FormField>
               <FormField label="Preço (R$, opcional)" htmlFor="svc_price">
-                <Input
+                <MaskedInput
+                  mask="currency"
                   id="svc_price"
                   value={form.price}
-                  onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
-                  placeholder="150,00"
-                  inputMode="decimal"
+                  onChangeValue={(v) => setForm((p) => ({ ...p, price: v }))}
+                  placeholder="R$ 150,00"
                 />
               </FormField>
             </div>

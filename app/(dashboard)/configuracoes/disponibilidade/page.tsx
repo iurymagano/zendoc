@@ -13,12 +13,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { toast } from 'sonner';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import {
   WeekdayRow,
   type DayState,
   type BlockState,
 } from '@/components/availability/WeekdayRow';
+import { describeWeekdays, replicateDay } from '@/lib/availability/replicate';
+import { cn } from '@/lib/utils';
 import type { AvailabilityWeekly } from '@/types/database';
 
 const EMPTY_BLOCK: BlockState = { enabled: false, start: '', end: '' };
@@ -101,6 +104,8 @@ function AvailabilityForm() {
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  // Há mudança na tela que ainda não foi gravada (a tela só grava em "Salvar").
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -116,6 +121,15 @@ function AvailabilityForm() {
       setLoaded(true);
     })();
   }, []);
+
+  function replicate(sourceWeekday: number, targets: number[]) {
+    setDays((prev) => replicateDay(prev, sourceWeekday, targets));
+    setDirty(true);
+    setSaved(false);
+    toast.success(`Copiado para ${describeWeekdays(targets)}.`, {
+      description: 'Clique em Salvar para aplicar.',
+    });
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -150,6 +164,7 @@ function AvailabilityForm() {
     }
 
     setSaved(true);
+    setDirty(false);
     if (isOnboarding) {
       router.push('/dashboard');
       router.refresh();
@@ -183,7 +198,10 @@ function AvailabilityForm() {
               max={240}
               step={5}
               value={slotDuration}
-              onChange={(e) => setSlotDuration(Number(e.target.value))}
+              onChange={(e) => {
+                setSlotDuration(Number(e.target.value));
+                setDirty(true);
+              }}
               className="max-w-[120px]"
             />
           </FormField>
@@ -195,13 +213,16 @@ function AvailabilityForm() {
           <WeekdayRow
             key={day.weekday}
             day={day}
-            onChange={(next) =>
+            onChange={(next) => {
               setDays((prev) => {
                 const copy = [...prev];
                 copy[i] = next;
                 return copy;
-              })
-            }
+              });
+              setDirty(true);
+              setSaved(false);
+            }}
+            onReplicate={(targets) => replicate(day.weekday, targets)}
           />
         ))}
       </div>
@@ -213,7 +234,21 @@ function AvailabilityForm() {
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-3">
+      <div
+        className={cn(
+          'flex items-center justify-end gap-3',
+          dirty && 'sticky bottom-4 z-10 rounded-2xl bg-card p-3 ring-1 ring-ring/40',
+        )}
+      >
+        {dirty && (
+          <span
+            role="status"
+            className="mr-auto flex items-center gap-2 text-sm font-medium text-foreground"
+          >
+            <span aria-hidden className="size-2 rounded-full bg-primary" />
+            Alterações não salvas
+          </span>
+        )}
         {!isOnboarding && (
           <Link href="/dashboard" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
             Voltar

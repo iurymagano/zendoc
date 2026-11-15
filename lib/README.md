@@ -51,6 +51,60 @@ no client e no server).
 ser internacional ou `@lid`; prefixar 55 corromperia o identificador. Testes em
 `phone.test.ts` (rodar com `npm test`).
 
+## masks.ts
+
+**O que faz:** máscaras de campo (telefone, CPF, CEP, valor em R$) e conversões
+de volta para o valor limpo. Funções puras, usáveis no client e no server.
+
+**Exporta:**
+
+- `onlyDigits(raw): string` — só os dígitos.
+- `maskPhone(raw, prev?): string` — `(48) 98506-9930` (celular) / `(48) 3333-4444`
+  (fixo), progressiva, sem DDI. Aceita o formato salvo (`5548985069930`); o `55` só
+  é DDI quando sobram mais de 11 dígitos (DDD 55 do RS segue valendo). Número
+  internacional vira `+<dígitos>` sem adulterar. `prev` evita um 12º dígito
+  digitado virar DDI.
+- `maskCpf(raw)` — `000.000.000-00` (delega a `maskCpfInput`).
+- `maskCep(raw)` — `00000-000`.
+- `maskCurrency(raw, prev?)` — reais digitando pelos centavos: `R$ 1.234,56`;
+  vazio continua vazio (campo opcional); apagar até zerar limpa o campo.
+- `formatCentsBRL(cents)` — `15000` → `R$ 150,00` (valor inicial vindo do banco).
+- `parseCurrencyToCents(raw): number | null` — `R$ 1.234,56` (ou `150`, `150,5`)
+  → centavos; vazio → `null`.
+- `caretAfterDigits(masked, n): number` — posição do cursor depois do n-ésimo
+  dígito (usado pelo `MaskedInput`).
+
+**Depende de:** `lib/patients/cpf.ts`.
+
+**Usado por:** `components/ui/masked-input.tsx` e as telas de onboarding,
+`/clientes`, `/agenda`, `/configuracoes/servicos`.
+
+**Notas:** o texto mascarado é só exibição. Para enviar, limpar com
+`normalizePhoneBR` (aceita o texto mascarado), `normalizeCpf` ou
+`parseCurrencyToCents`. Testes em `masks.test.ts`.
+
+## address.ts
+
+**O que faz:** endereço de atendimento — monta/lê o texto único de
+`professionals.address` e consulta o CEP no ViaCEP.
+
+**Exporta:**
+
+- `AddressParts`, `EMPTY_ADDRESS` — partes do formulário (cep, rua, número,
+  complemento, bairro, cidade, UF).
+- `buildAddress(parts): string` — `Rua X, 123, complemento - Bairro, Cidade/UF, CEP 00000-000`,
+  omitindo partes vazias.
+- `parseAddress(text): AddressParts | null` — separa um endereço salvo só quando
+  o formato é reconhecido com segurança (rua, número, bairro, cidade/UF e CEP, sem
+  complemento); senão `null` (o chamador mostra texto livre).
+- `lookupCep(cep, { signal?, fetchImpl? }): Promise<CepLookup>` — `GET
+  https://viacep.com.br/ws/<cep>/json/`; nunca lança: `{ ok: false, reason:
+  'invalid' | 'not_found' | 'network' }` ou `{ ok: true, street, neighborhood, city, state }`.
+
+**Depende de:** `lib/masks.ts`.
+
+**Usado por:** `components/onboarding/AddressFields.tsx`. Testes em `address.test.ts`.
+
 ## name.ts
 
 **O que faz:** extrai o primeiro nome "de verdade" para saudações.
