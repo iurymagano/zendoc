@@ -2,6 +2,7 @@ import { createServerClient } from '@/lib/supabase';
 import { hasAppointmentConflict } from '@/lib/appointments/conflicts';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
 import { notifyRecurrenceStopped } from '@/lib/notifications/events';
+import { occurrenceDates } from '@/lib/recurrences/dates';
 import type { Appointment, Recurrence } from '@/types/database';
 
 const TZ = 'America/Sao_Paulo';
@@ -20,13 +21,6 @@ function dayKey(iso: string): string {
   );
 }
 
-/** Soma dias a uma data yyyy-MM-dd sem cair em armadilha de DST. */
-function addDaysKey(dateKey: string, days: number): string {
-  const d = new Date(`${dateKey}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
 /** 'HH:mm' → 'HH:mm:00'; mantém 'HH:mm:ss'. */
 function normTime(t: string): string {
   return t.length === 5 ? `${t}:00` : t;
@@ -37,18 +31,26 @@ function normTime(t: string): string {
  * dentro da janela [hoje, hoje + horizonWeeks] (limitada por `until`). É
  * idempotente: pula dias já materializados e horários em conflito. Cada
  * appointment criado é espelhado no Google (best-effort).
+ *
+ * `includePastStart` (só na criação da série) cria também a 1ª data quando ela
+ * já passou: é o dia escolhido no formulário e não pode sumir da agenda.
  */
 export async function materializeRecurrence(
   recurrence: Recurrence,
   horizonWeeks = DEFAULT_HORIZON_WEEKS,
+  { includePastStart = false }: { includePastStart?: boolean } = {},
 ): Promise<{ created: number; skipped: number }> {
   if (!recurrence.active) return { created: 0, skipped: 0 };
 
   const supabase = createServerClient();
-  const today = todayKey();
-  const horizon = addDaysKey(today, horizonWeeks * 7);
-  const end =
-    recurrence.until && recurrence.until < horizon ? recurrence.until : horizon;
+  const dates = occurrenceDates(
+    {
+      startDate: recurrence.start_date,
+      intervalWeeks: recurrence.interval_weeks,
+      until: recurrence.until,
+    },
+    { today: todayKey(), horizonWeeks, includePastStart, max: MAX_OCCURRENCES },
+  );
 
   // Dias já materializados desta série (evita duplicar).
   const { data: existing } = await supabase
@@ -57,16 +59,13 @@ export async function materializeRecurrence(
     .eq('recurrence_id', recurrence.id);
   const existingDays = new Set((existing ?? []).map((a) => dayKey(a.starts_at)));
 
-  const step = recurrence.interval_weeks * 7;
   const startTime = normTime(recurrence.start_time);
   const endTime = normTime(recurrence.end_time);
 
   let created = 0;
   let skipped = 0;
 
-  let date = recurrence.start_date;
-  for (let i = 0; i < MAX_OCCURRENCES && date <= end; i++, date = addDaysKey(date, step)) {
-    if (date < today) continue; // ocorrência no passado
+  for (const date of dates) {
     if (existingDays.has(date)) continue; // já materializada
 
     const startsAt = `${date}T${startTime}-03:00`;

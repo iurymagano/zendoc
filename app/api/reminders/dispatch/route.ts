@@ -222,6 +222,17 @@ async function handle(req: NextRequest) {
       continue;
     }
 
+    // Atendimento que já começou (ex.: marcado com data passada): o lembrete
+    // de "amanhã"/"daqui a 2h" não faz mais sentido e não vai para o cliente.
+    if (new Date(appt.starts_at).getTime() <= Date.now()) {
+      await supabase
+        .from('reminders')
+        .update({ status: 'cancelled', error_message: 'Atendimento já começou' })
+        .eq('id', reminder.id);
+      skipped++;
+      continue;
+    }
+
     if (!['scheduled', 'confirmed'].includes(appt.status)) {
       await supabase
         .from('reminders')

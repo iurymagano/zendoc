@@ -41,6 +41,9 @@ Os contadores do nível raiz são dos lembretes de atendimento (clientes);
      editado na agenda) → marca `status = 'cancelled'` ("Compromisso sem
      cliente"). Nunca envia mensagem para telefone vazio.
    - Appointment cancelado/no-show → marca `status = 'cancelled'`.
+- Atendimento que já começou (ex.: marcado com data passada) → marca
+  `status = 'cancelled'` ("Atendimento já começou"); o cliente não recebe
+  lembrete de algo que já passou.
    - Plano `past_due`/`cancelled` → marca `status = 'failed'` com motivo.
    - WhatsApp não conectado → marca `status = 'failed'` com motivo e avisa o dono
      no sino (`notifyReminderFailed`).

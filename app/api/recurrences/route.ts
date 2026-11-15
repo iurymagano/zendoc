@@ -121,7 +121,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = await materializeRecurrence(recurrence as Recurrence);
+  // Na criação, a 1ª data entra mesmo se já passou (é o dia escolhido no form).
+  const result = await materializeRecurrence(recurrence as Recurrence, undefined, {
+    includePastStart: true,
+  });
 
   return NextResponse.json({ ok: true, recurrence, ...result });
 }
