@@ -37,6 +37,24 @@ para padronizar os formulários do IAzen.
 **Notas:** não injeta `id` no `children`; o consumidor define `id` no input e
 `htmlFor` no `FormField` para ligar o label.
 
+## masked-input.tsx
+
+**O que faz:** `Input` do shadcn com máscara enquanto digita. Não é componente
+shadcn — é composição interna sobre `input.tsx`.
+
+**Exporta:**
+
+- `MaskedInput({ mask: 'phone' | 'cpf' | 'cep' | 'currency', value, onChangeValue, ...inputProps })`
+  — `value` e `onChangeValue` trabalham com o texto JÁ mascarado; limpe ao enviar
+  (ver `lib/masks.ts`). Define `inputMode` (`tel`/`numeric`), `placeholder` e
+  `autoComplete` padrão por máscara (sobrescrevíveis).
+
+**Depende de:** `components/ui/input.tsx`, `lib/masks.ts`.
+
+**Notas:** mantém o cursor no lugar ao editar/apagar no meio; Backspace/Delete
+sobre um separador remove o dígito vizinho em vez de travar; colar reaplica a
+máscara e leva o cursor ao fim. Valor em R$ sempre edita pelo fim.
+
 ## skeleton.tsx
 
 **O que faz:** placeholder de carregamento (`Skeleton`) — bloco com `animate-pulse`.

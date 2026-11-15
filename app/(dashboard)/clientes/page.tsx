@@ -18,7 +18,9 @@ import { Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { EmptyState } from '@/components/dashboard/EmptyState';
-import { formatCpf, isValidCpf, maskCpfInput, normalizeCpf } from '@/lib/patients/cpf';
+import { formatCpf, isValidCpf, normalizeCpf } from '@/lib/patients/cpf';
+import { maskPhone } from '@/lib/masks';
+import { MaskedInput } from '@/components/ui/masked-input';
 import { formatPhoneBR, isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import type { Patient } from '@/types/database';
 
@@ -90,7 +92,7 @@ export default function PatientsPage() {
     setEditingId(patient.id);
     setForm({
       name: patient.name,
-      phone: patient.phone,
+      phone: maskPhone(patient.phone),
       cpf: patient.cpf ? formatCpf(patient.cpf) : '',
       notes: patient.notes ?? '',
       messaging_opted_out: patient.messaging_opted_out ?? false,
@@ -198,25 +200,20 @@ export default function PatientsPage() {
                     />
                   </FormField>
                   <FormField label="Telefone" htmlFor="pat_phone">
-                    <Input
+                    <MaskedInput
+                      mask="phone"
                       id="pat_phone"
                       value={form.phone}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, phone: e.target.value }))
-                      }
-                      placeholder="5511999998888"
+                      onChangeValue={(v) => setForm((p) => ({ ...p, phone: v }))}
                       required
                     />
                   </FormField>
                   <FormField label="CPF (opcional)" htmlFor="pat_cpf">
-                    <Input
+                    <MaskedInput
+                      mask="cpf"
                       id="pat_cpf"
                       value={form.cpf}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, cpf: maskCpfInput(e.target.value) }))
-                      }
-                      placeholder="000.000.000-00"
-                      inputMode="numeric"
+                      onChangeValue={(v) => setForm((p) => ({ ...p, cpf: v }))}
                     />
                   </FormField>
                 </div>

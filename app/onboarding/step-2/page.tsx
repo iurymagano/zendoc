@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
+import { AddressFields } from '@/components/onboarding/AddressFields';
 import { StepHeader } from '@/components/onboarding/StepHeader';
 import {
   Select,
@@ -149,18 +150,7 @@ export default function OnboardingStep2() {
           </FormField>
         )}
 
-        <FormField
-          label="Endereço de atendimento (opcional)"
-          htmlFor="address"
-        >
-          <Input
-            id="address"
-            name="address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Rua, número, bairro, cidade"
-          />
-        </FormField>
+        <AddressFields onChange={setAddress} />
 
         <FormField label="Tom das respostas da secretária virtual">
           <div className="grid grid-cols-2 gap-2">

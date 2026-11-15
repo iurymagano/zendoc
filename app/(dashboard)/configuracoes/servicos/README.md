@@ -9,11 +9,12 @@ duração, preço) e o **intervalo entre atendimentos** (buffer) do profissional
 
 - Carrega serviços (`GET /api/services`) e o buffer (`GET /api/professionals`).
 - Card "Intervalo entre atendimentos": campo em minutos → `PATCH /api/professionals`.
-- Form de criar/editar serviço → `POST`/`PATCH /api/services`. Preço é digitado
-  em reais e convertido para centavos (`priceToCents`).
+- Form de criar/editar serviço → `POST`/`PATCH /api/services`. Preço usa
+  `MaskedInput` (`R$ 1.234,56`, digitando pelos centavos), vem do banco já
+  formatado (`formatCentsBRL`) e vai como centavos (`parseCurrencyToCents`).
 - Lista com ativar/desativar (`active`), editar e excluir.
 
-**Depende de:** `@/components/ui/{button,input,card,form-field}`,
+**Depende de:** `@/components/ui/{button,input,masked-input,card,form-field}`, `@/lib/masks`,
 `@/components/dashboard/PageHeader`, `/api/services`, `/api/professionals`.
 
 **Notas:** os serviços ativos aparecem no seletor "Serviço" da `/agenda`, onde

@@ -4,6 +4,9 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MaskedInput } from '@/components/ui/masked-input';
+import { maskPhone } from '@/lib/masks';
+import { isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import { FormField } from '@/components/ui/form-field';
 import { StepHeader } from '@/components/onboarding/StepHeader';
 
@@ -23,7 +26,7 @@ export default function OnboardingStep1() {
       const parsed = JSON.parse(saved);
       /* eslint-disable react-hooks/set-state-in-effect -- sincroniza com armazenamento externo após o mount */
       setName(parsed.name ?? '');
-      setPhone(parsed.phone ?? '');
+      setPhone(maskPhone(parsed.phone ?? ''));
       /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, []);
@@ -35,12 +38,13 @@ export default function OnboardingStep1() {
       setError('Informe seu nome completo.');
       return;
     }
-    const digits = phone.replace(/\D/g, '');
-    if (digits.length < 10 || digits.length > 13) {
+    // normalizePhoneBR só prefixa o 55 quando faltar o DDI (10/11 dígitos), então
+    // o DDD 55 (RS) não é confundido com o código do país.
+    const normalized = normalizePhoneBR(phone);
+    if (!isValidPhoneBR(normalized)) {
       setError('Informe um telefone válido com DDD.');
       return;
     }
-    const normalized = digits.startsWith('55') ? digits : `55${digits}`;
     sessionStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ name: name.trim(), phone: normalized }),
@@ -68,13 +72,13 @@ export default function OnboardingStep1() {
           />
         </FormField>
         <FormField label="WhatsApp" htmlFor="phone">
-          <Input
+          <MaskedInput
+            mask="phone"
             id="phone"
             name="phone"
             required
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="(11) 99999-9999"
+            onChangeValue={setPhone}
           />
         </FormField>
         {error && (
