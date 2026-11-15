@@ -18,7 +18,7 @@ function Progress({ pct, gradient }: { pct: number; gradient: boolean }) {
     >
       <div
         className={`h-full rounded-full ${gradient ? GRADIENT : 'bg-primary'}`}
-        style={{ width: `${Math.max(pct, 4)}%` }}
+        style={{ width: `${pct}%` }}
       />
     </div>
   );

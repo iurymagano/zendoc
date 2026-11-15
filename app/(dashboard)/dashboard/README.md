@@ -30,3 +30,5 @@ Página inicial após o login: o dia do profissional, o que precisa de ação e 
 (`SetupHero`). Em telas pequenas a ordem é: alerta do WhatsApp, hoje, atenção, próximos,
 conversas, configuração, semana, vagas. Sem migration: só lê tabelas existentes. A única
 escrita é o `PATCH /api/appointments/[id]` do botão Aprovar/Confirmar.
+
+**Notas (revisão visual):** `Sua semana` troca de coluna no desktop conforme o passo a passo aparece (equilibra a altura das colunas); a ordem no celular é a mesma.

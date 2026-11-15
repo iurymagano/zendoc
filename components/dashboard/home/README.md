@@ -65,3 +65,8 @@ Blocos da página inicial `/dashboard`. Todos são Server Components, menos `App
 **Exporta:** `SetupHero({ setup, firstName })` (conta nova, topo da página, barra em degradê) e `SetupCard({ setup })` (conta em uso, barra sólida).
 
 **Notas gerais:** o WhatsApp pendente é o único item em Void. Vocabulário "cliente"/"atendimento".
+
+## Revisão visual (nov/2026)
+
+- `Hero.tsx`: dia sem rotina e agenda vazia viram uma caixa só (texto + "Ajustar horários" + "Marcar um atendimento"); o aviso separado só aparece se houver compromisso num dia sem rotina.
+- `SetupChecklist.tsx`: a barra de progresso usa a largura real (0% = vazia), sem mínimo.

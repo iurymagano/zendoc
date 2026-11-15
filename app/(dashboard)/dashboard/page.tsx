@@ -31,6 +31,15 @@ export default async function DashboardPage() {
   const firstName = firstNameSkippingTitle(professional.name);
   const { now, setup, trial } = data;
   const trialRunning = !!trial && !trial.ended;
+  // O passo a passo deixa a coluna da direita comprida: nesse caso "Sua semana" vai
+  // para a esquerda e as duas colunas fecham na mesma altura. Sem passo a passo, volta
+  // para a direita (a esquerda já tem próximos e conversas).
+  const setupCardShown = !data.isNew && !setup.complete;
+  const week = (
+    <div className="order-4">
+      <WeekPanel data={data} />
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -59,19 +68,18 @@ export default async function DashboardPage() {
           <div className="order-2">
             <Upcoming groups={data.upcoming} serviceNames={data.serviceNames} />
           </div>
+          {setupCardShown && week}
           <div className="order-6">
             <Conversations items={data.recent} now={now} />
           </div>
         </div>
         <div className="contents lg:flex lg:flex-col lg:gap-5">
-          {!data.isNew && !setup.complete && (
+          {setupCardShown && (
             <div className="order-3">
               <SetupCard setup={setup} />
             </div>
           )}
-          <div className="order-4">
-            <WeekPanel data={data} />
-          </div>
+          {!setupCardShown && week}
           <div className="order-5">
             <FreeSlots slots={data.slots} availabilityConfigured={data.availabilityConfigured} now={now} />
           </div>

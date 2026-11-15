@@ -86,7 +86,19 @@ export function Hero({ data, firstName }: { data: DashboardData; firstName: stri
         ) : (
           <div className="flex flex-col gap-3 rounded-2xl bg-background px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm">
-              {today.clientCount > 0 ? 'Nada mais por hoje.' : 'Agenda de hoje vazia.'}
+              {today.clientCount > 0
+                ? 'Nada mais por hoje.'
+                : ruler
+                  ? 'Agenda de hoje vazia.'
+                  : 'Hoje não é um dia de atendimento na sua rotina.'}
+              {!ruler && (
+                <>
+                  {' '}
+                  <Link href="/configuracoes/disponibilidade" className="font-medium text-[var(--ia-violet-ink)] underline underline-offset-4">
+                    Ajustar horários
+                  </Link>
+                </>
+              )}
             </p>
             <Link
               href="/agenda"
@@ -101,14 +113,14 @@ export function Hero({ data, firstName }: { data: DashboardData; firstName: stri
 
       {ruler ? (
         <DayRulerView ruler={ruler} items={today.items} now={now} summary={rulerSummary} />
-      ) : (
+      ) : focus ? (
         <p className="rounded-2xl bg-background px-4 py-3 text-sm text-muted-foreground">
           Hoje não é um dia de atendimento na sua rotina.{' '}
           <Link href="/configuracoes/disponibilidade" className="font-medium text-[var(--ia-violet-ink)] underline underline-offset-4">
             Ajustar horários
           </Link>
         </p>
-      )}
+      ) : null}
     </section>
   );
 }
