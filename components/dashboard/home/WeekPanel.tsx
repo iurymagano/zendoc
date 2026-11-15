@@ -23,8 +23,10 @@ function Stat({ value, label, hint }: { value: string | number; label: string; h
 export function WeekPanel({ data }: { data: DashboardData }) {
   const { metrics, occupancy, attendance, timeSaved, newClients } = data;
   const hasCapacity = occupancy.capacityMin > 0;
-  const chartSummary = `Ocupação da semana por dia: ${occupancy.days
-    .map((d) => `${d.weekday} ${d.count} ${d.count === 1 ? 'atendimento' : 'atendimentos'}`)
+  // O gráfico é de horas ocupadas (atendimentos e compromissos pessoais), não de contagem.
+  const occupiedLabel = (min: number) => (min > 0 ? formatDuration(min).replace(' min', 'm') : '–');
+  const chartSummary = `Horas ocupadas por dia: ${occupancy.days
+    .map((d) => `${d.weekday} ${d.bookedMin > 0 ? formatDuration(d.bookedMin) : 'nada'}`)
     .join(', ')}.`;
 
   if (metrics.total === 0 && !hasCapacity && newClients.week === 0) {
@@ -94,7 +96,7 @@ export function WeekPanel({ data }: { data: DashboardData }) {
               >
                 {d.weekday}
                 <br />
-                <span className="tabular-nums">{d.count}</span>
+                <span className="tabular-nums">{occupiedLabel(d.bookedMin)}</span>
               </span>
             ))}
           </div>

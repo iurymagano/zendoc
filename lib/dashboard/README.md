@@ -12,7 +12,7 @@ Contas e carregamento de dados da página inicial `/dashboard`. As contas são p
 
 - `weekOf(now): WeekInfo` — segunda a domingo que contém hoje.
 - `dayWindows(date, weekly, exceptions): [ms, ms][]` — janelas em que o profissional atende.
-- `weekOccupancy({ now, weekly, exceptions, appointments, busy }): WeekOccupancy` — por dia: capacidade, minutos ocupados, bloqueados (Google), livres, contagem; total e `occupancyPct` (null sem horário).
+- `weekOccupancy({ now, weekly, exceptions, appointments, busy }): WeekOccupancy` — por dia: capacidade, minutos ocupados, bloqueados (Google), livres e `count` (atendimentos e compromissos pessoais ativos que começam no dia; só serve de altura mínima da barra, o gráfico mostra horas ocupadas, não contagem); total e `occupancyPct` (null sem horário).
 - `dayRuler({ now, date, weekly, exceptions, appointments }): DayRuler | null` — ticks, janelas, segmentos, posição de "agora" e quanto já passou.
 
 **Depende de:** `lib/availability/compute.ts` (`buildBlocks`), `lib/assistant/datetime.ts`.
@@ -23,7 +23,7 @@ Contas e carregamento de dados da página inicial `/dashboard`. As contas são p
 
 **Exporta:** `todaySummary`, `upcomingGroups`, `dayLabel`, `weekMetrics`, `attendanceStats`, `timeSavedEstimate`, `formatDuration`, `latestByPhone`, `snippet`, `relativeTime`, `isActiveStatus` e os tipos `DashAppointment`, `TodaySummary`, `WeekMetrics`, `Attendance`, `TimeSaved`.
 
-**Notas:** compromisso pessoal (sem telefone) fica fora das contas de clientes. `attendanceStats` considera "compareceu" tudo que passou sem ser marcado `no_show` (o sistema não registra presença) e só devolve taxa com base mínima (5 atendimentos). `timeSavedEstimate` é estimativa (5 min por agendamento da IA) e devolve a fórmula para a tela mostrar.
+**Notas:** regra única da semana: `weekMetrics` (`total`, `byAi`, `remaining`) conta só clientes, sem compromisso pessoal (sem telefone), sem `cancelled` e sem `no_show`; `cancelled` conta só os cancelados. A ocupação (`weekOccupancy`) é outra medida: compromisso pessoal ocupa horário, e o gráfico fala em horas, não em atendimentos. `attendanceStats` considera "compareceu" tudo que passou sem ser marcado `no_show` (o sistema não registra presença) e só devolve taxa com base mínima (5 atendimentos). `timeSavedEstimate` é estimativa (5 min por agendamento da IA) e devolve a fórmula para a tela mostrar.
 
 ## setup.ts
 

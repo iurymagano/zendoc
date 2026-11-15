@@ -112,12 +112,13 @@ export function weekMetrics(appts: DashAppointment[], now: Date): WeekMetrics {
     const d = dateOf(a.starts_at);
     return d >= week.start && d <= week.end && !isPersonalCommitment(a.patient_phone);
   });
-  const kept = inWeek.filter((a) => a.status !== 'cancelled');
+  // Regra única: cliente (sem pessoal), sem cancelado e sem falta.
+  const kept = inWeek.filter((a) => a.status !== 'cancelled' && a.status !== 'no_show');
   return {
     total: kept.length,
     byAi: kept.filter((a) => a.booked_via === 'whatsapp_ai').length,
-    remaining: kept.filter((a) => startMs(a) > nowMs && a.status !== 'no_show').length,
-    cancelled: inWeek.length - kept.length,
+    remaining: kept.filter((a) => startMs(a) > nowMs).length,
+    cancelled: inWeek.filter((a) => a.status === 'cancelled').length,
   };
 }
 

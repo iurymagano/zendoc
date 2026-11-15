@@ -46,7 +46,7 @@ Blocos da página inicial `/dashboard`. Todos são Server Components, menos `App
 
 ## WeekPanel.tsx
 
-**O que faz:** números da semana, gráfico de ocupação por dia (CSS), comparecimento (só com base) e tempo poupado (estimativa com a conta à mostra).
+**O que faz:** números da semana, gráfico de ocupação por dia (CSS; sob cada barra, as horas ocupadas, incluindo compromissos pessoais), comparecimento (só com base) e tempo poupado (estimativa com a conta à mostra).
 **Exporta:** `WeekPanel({ data })`.
 
 ## FreeSlots.tsx

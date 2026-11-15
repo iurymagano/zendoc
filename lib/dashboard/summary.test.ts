@@ -75,13 +75,14 @@ test('upcomingGroups: agrupa por dia, ignora cancelados e passados, respeita o l
   assert.deepEqual(g.map((x) => x.items.length), [1, 2, 1]);
 });
 
-test('weekMetrics: semana de segunda a domingo, sem pessoais nem cancelados, conta a IA', () => {
+test('weekMetrics: semana de segunda a domingo, sem pessoais, cancelados nem faltas, conta a IA', () => {
   const list = [
     appt({ at: '2026-11-08T10:00:00' }), // domingo anterior: fora
     appt({ at: '2026-11-09T10:00:00', booked_via: 'whatsapp_ai' }),
     appt({ at: '2026-11-10T10:00:00', booked_via: 'whatsapp_ai', status: 'confirmed' }),
     appt({ at: '2026-11-11T10:00:00', status: 'cancelled', booked_via: 'whatsapp_ai' }),
     appt({ at: '2026-11-12T10:00:00', patient_phone: '' }),
+    appt({ at: '2026-11-13T10:00:00', status: 'no_show', booked_via: 'whatsapp_ai' }), // falta: fora de tudo
     appt({ at: '2026-11-15T10:00:00', booked_via: 'whatsapp_ai' }), // domingo: dentro, por vir
     appt({ at: '2026-11-16T10:00:00' }), // segunda seguinte: fora
   ];
