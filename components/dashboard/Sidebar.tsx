@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { cn } from '@/lib/utils';
 
 type Item = { href: string; label: string; icon: ComponentType<{ className?: string }> };
@@ -189,22 +190,27 @@ export function Sidebar() {
       {/* Topo mobile */}
       <div className="sticky top-0 z-20 flex items-center justify-between bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
         <Logo size="sm" href="/dashboard" />
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label="Abrir menu"
-          className="relative flex size-11 items-center justify-center rounded-xl text-[var(--ia-on-void-muted)] hover:bg-[var(--ia-void-2)] hover:text-white"
-        >
-          <Menu className="size-5" />
-          {attention > 0 && (
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-[var(--ia-void)]" />
-          )}
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationBell variant="sheet" />
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Abrir menu"
+            className="relative flex size-11 items-center justify-center rounded-xl text-[var(--ia-on-void-muted)] hover:bg-[var(--ia-void-2)] hover:text-white"
+          >
+            <Menu className="size-5" />
+            {attention > 0 && (
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-[var(--ia-void)]" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar desktop (fixa) */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 md:block">
         {nav}
+        {/* Sino na linha do logo (abre a lista ao lado da sidebar). */}
+        <NotificationBell variant="popover" className="absolute right-3 top-2.5" />
       </aside>
 
       {/* Drawer mobile */}

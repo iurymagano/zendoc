@@ -36,6 +36,8 @@ Regras:
   recalculados para o novo horário (`rescheduleAppointmentReminders`); o trigger
   do banco só cria lembretes no insert/mudança de status. Compromisso pessoal
   não tem lembrete de cliente. Lembrete já enviado não é reenviado.
+- **Sino:** quando `starts_at` muda, cria o aviso "remarcou" (de/para, `actor =
+  'professional'`, nasce lido: foi o próprio dono). Compromisso pessoal não avisa.
 - Depois do update o evento é sincronizado com o Google Agenda (best-effort).
 - Para **cancelar** um appointment use
   [POST /api/appointments/:id/cancel](./cancel/README.md) — cancelamento

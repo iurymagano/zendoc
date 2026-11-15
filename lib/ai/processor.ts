@@ -3,6 +3,7 @@ import { saoPauloParts } from '@/lib/assistant/datetime';
 import { buildSystemPrompt } from './prompt-builder';
 import { executeAction } from './executor';
 import { setNeedsAttention } from '@/lib/conversations/state';
+import { notifyConversationAttention } from '@/lib/notifications/events';
 import { createServerClient } from '@/lib/supabase';
 import { getAvailableSlots } from '@/lib/availability/slots';
 import type {
@@ -231,8 +232,31 @@ export async function processWhatsAppMessage(
 
   // Sinaliza que a conversa precisa de resposta humana quando a IA escalou
   // (action "handoff") ou caiu no fallback genérico (não entendeu).
-  if (aiResponse === FALLBACK_REPLY || aiResponse.action === 'handoff') {
+  const isFallback = aiResponse === FALLBACK_REPLY;
+  if (isFallback || aiResponse.action === 'handoff') {
     await setNeedsAttention(supabase, professional.id, patientPhone, true);
+  }
+
+  // Avisa o dono no sino quando a conversa precisa dele. O fallback só avisa na
+  // SEGUNDA falha seguida (uma falha isolada é ruído, ex.: instabilidade da API).
+  const previousWasFallback =
+    messages.length > 0 &&
+    messages[messages.length - 1].role === 'assistant' &&
+    messages[messages.length - 1].content === FALLBACK_REPLY.message_to_patient;
+  const attentionReason =
+    aiResponse.action === 'handoff'
+      ? 'handoff'
+      : aiResponse.action === 'approval_needed'
+        ? 'approval_needed'
+        : isFallback && previousWasFallback
+          ? 'fallback'
+          : null;
+  if (attentionReason) {
+    await notifyConversationAttention(professional.id, {
+      reason: attentionReason,
+      patientPhone,
+      lastMessage: patientMessage,
+    });
   }
 
   await supabase.from('conversation_history').insert([

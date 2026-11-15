@@ -20,6 +20,9 @@ pausar a IA num contato para o profissional assumir.
 **Depende de:** `@/components/ui/{button,textarea,card}`, `@/lib/phone`,
 `@/components/dashboard/PageHeader`, `/api/conversations/*`.
 
+**Link de notificação:** `?phone=<telefone>` (vindo do sino) seleciona a conversa do
+contato (`UrlParamEffect` dentro de `<Suspense>`).
+
 **Layout:** altura fixa (`h-[72vh]`) com as duas colunas rolando internamente
 (`min-h-0` + `overflow-auto`); auto-scroll para a última mensagem.
 

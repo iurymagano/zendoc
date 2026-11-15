@@ -24,6 +24,10 @@ Testar IA, Assinatura). Rodapé com "Sair".
   ponto vermelho aparece no ícone do menu (hambúrguer).
 - **Mobile:** barra superior com logo + hambúrguer abre o drawer; fecha ao clicar
   fora, no X, ou ao escolher um item.
+- **Sino de notificações** ([components/notifications](../notifications/README.md)):
+  `NotificationBell variant="sheet"` na barra superior do mobile e
+  `variant="popover"` no canto superior direito da sidebar no desktop. Ambos leem
+  o mesmo `NotificationsProvider` (um polling só).
 
 **Depende de:** `next/link`, `next/navigation`, `next-auth/react` (`signOut`),
 `lucide-react` (ícones), `@/components/brand/Logo`, `@/lib/utils`.
@@ -62,3 +66,14 @@ serviços, …).
 ## home/
 
 Blocos da página inicial `/dashboard`. Ver [home/README.md](./home/README.md).
+---
+
+## UrlParamEffect.tsx
+
+**O que faz:** efeito sem UI que reage a um parâmetro da URL, usado pelos links das notificações para abrir a agenda num dia (`?date=`) ou a caixa de conversas num contato (`?phone=`) mesmo com a página já aberta.
+
+**Exporta:**
+
+- `UrlParamEffect({ name, onChange })` — chama `onChange(valor)` quando o parâmetro `name` aparece ou muda.
+
+**Notas:** o parâmetro `n` (id da notificação) conta como mudança, então clicar na mesma notificação de novo dispara de novo. Usa `useSearchParams`: precisa estar dentro de um `<Suspense>`. Usado em `app/(dashboard)/agenda/page.tsx` e `app/(dashboard)/conversas/page.tsx`.

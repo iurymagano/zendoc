@@ -365,6 +365,27 @@ Legenda:
   `professionals.address` (`lib/address.ts`, `components/onboarding/AddressFields.tsx`)
 - [x] Botão "Replicar" por dia em `/configuracoes/disponibilidade` (copiar a rotina de um dia
   para outros; atalhos úteis/fim de semana/todos; só persiste no Salvar)
+### Notificações no app (sino do painel)
+
+- [x] Migration `0010_notifications.sql` + `supabase/schema.sql` (tabela `notifications`, RLS, dedupe)
+  - [x] Aplicar `0010` no Supabase de produção (SQL Editor) — aplicada em 14/11/2026; sem a tabela os avisos só geram `console.error`
+- [x] `lib/notifications/`: `createNotification` (nunca derruba o fluxo), builders puros testados, dedupe, datas em São Paulo
+- [x] Cancelou/remarcou em todos os caminhos, com quem fez: cliente via IA, profissional (agenda), Assistente, série recorrente encerrada
+- [x] IA agendou pelo WhatsApp / pedido aguardando aprovação / cliente confirmou presença
+- [x] Conversa que precisa do dono (handoff, aprovação, IA perdida 2x seguidas, IA pausada)
+- [x] WhatsApp desconectado (`connection.update` da Evolution, com confirmação antes de avisar)
+- [x] Falhas: lembrete ao cliente que não saiu, resposta da IA que não foi enviada
+- [x] Conflito com evento do Google Agenda (detectado no sync; o sync nunca cancela nem move nada)
+- [x] API: `GET /api/notifications` (`?since=`), `POST /api/notifications/[id]/read`, `POST /api/notifications/read-all`
+- [x] UI: sino no painel (popover no desktop, sheet no celular), selo, lista, "marcar todas", estado vazio, toast nas novas, polling 20 s
+- [x] Link de cada aviso abre o assunto (agenda no dia / conversa do contato / tela do WhatsApp)
+- [x] Testar no navegador com a tabela aplicada (gerar eventos reais, prints 1440 px e iPhone)
+- [ ] Sugestão: aviso "atendimento daqui a 2 h" para o dono (precisa de cron próprio, não há gatilho hoje)
+- [ ] Sugestão: aviso de "não compareceu" (hoje o dono marca à mão; sem gatilho automático)
+- [ ] Sugestão: aviso quando a agenda do Google muda/cancela um atendimento do IAzen (hoje o sync só lê eventos de fora)
+- [ ] Sugestão: aviso de lembrete pessoal que falhou (hoje só aparece o `failed` no histórico do Assistente)
+- [ ] Sugestão: limpeza de notificações antigas (retenção, ex.: 90 dias) e usar `?since=` no polling
+- [ ] Sugestão: preferências por tipo de aviso (silenciar tipos)
 
 ---
 

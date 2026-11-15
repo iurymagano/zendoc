@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   addDays,
   addMonths,
@@ -30,6 +30,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { UrlParamEffect } from '@/components/dashboard/UrlParamEffect';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CalendarMonth } from '@/components/agenda/CalendarMonth';
 import { CalendarWeek } from '@/components/agenda/CalendarWeek';
@@ -508,8 +509,19 @@ export default function AgendaPage() {
           return label.charAt(0).toUpperCase() + label.slice(1);
         })();
 
+  // Vai para o dia (yyyy-MM-dd) pedido pela URL, ignorando valor malformado.
+  function openDay(dateKey: string) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateKey);
+    if (!m) return;
+    setCursor(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12));
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Link de notificação: /agenda?date=AAAA-MM-DD abre a agenda nesse dia. */}
+      <Suspense fallback={null}>
+        <UrlParamEffect name="date" onChange={openDay} />
+      </Suspense>
       <PageHeader
         eyebrow="Agenda"
         title="Calendário"

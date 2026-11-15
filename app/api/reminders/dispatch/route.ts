@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { sendWhatsAppMessage } from '@/lib/zapi/client';
 import { isPersonalCommitment } from '@/lib/appointments/personal';
+import { notifyReminderFailed } from '@/lib/notifications/events';
 import {
   buildPersonalReminderMessage,
   checkPersonalReminderDelivery,
@@ -21,6 +22,7 @@ type ReminderRow = {
     patient_name: string;
     starts_at: string;
     status: string;
+    service_id: string | null;
   } | null;
   professional: {
     zapi_instance_id: string | null;
@@ -171,7 +173,7 @@ async function handle(req: NextRequest) {
     .select(
       `
       id, type, scheduled_for, professional_id, appointment_id,
-      appointment:appointments ( patient_phone, patient_name, starts_at, status ),
+      appointment:appointments ( patient_phone, patient_name, starts_at, status, service_id ),
       professional:professionals ( zapi_instance_id, zapi_token, name, whatsapp_connected, plan_status )
     `,
     )
@@ -252,6 +254,12 @@ async function handle(req: NextRequest) {
           error_message: 'WhatsApp não conectado',
         })
         .eq('id', reminder.id);
+      await notifyReminderFailed(reminder.professional_id, {
+        reminderId: reminder.id,
+        reminderType: reminder.type,
+        appointment: { id: reminder.appointment_id, ...appt },
+        reason: 'o WhatsApp está desconectado',
+      });
       skipped++;
       continue;
     }
@@ -304,6 +312,12 @@ async function handle(req: NextRequest) {
         .from('reminders')
         .update({ status: 'failed', error_message: message })
         .eq('id', reminder.id);
+      await notifyReminderFailed(reminder.professional_id, {
+        reminderId: reminder.id,
+        reminderType: reminder.type,
+        appointment: { id: reminder.appointment_id, ...appt },
+        reason: 'o envio pelo WhatsApp falhou',
+      });
       failed++;
     }
   }

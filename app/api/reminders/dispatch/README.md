@@ -42,10 +42,12 @@ Os contadores do nível raiz são dos lembretes de atendimento (clientes);
      cliente"). Nunca envia mensagem para telefone vazio.
    - Appointment cancelado/no-show → marca `status = 'cancelled'`.
    - Plano `past_due`/`cancelled` → marca `status = 'failed'` com motivo.
-   - WhatsApp não conectado → marca `status = 'failed'` com motivo.
+   - WhatsApp não conectado → marca `status = 'failed'` com motivo e avisa o dono
+     no sino (`notifyReminderFailed`).
    - Caso feliz → envia via `sendWhatsAppMessage` e marca `sent` com
      `sent_at = now()`. Se o envio lançar, marca `failed` com a mensagem do
-     erro em `error_message`.
+     erro em `error_message` e avisa o dono no sino (`notifyReminderFailed`, um
+     aviso por lembrete).
 3. Depois, `dispatchPersonalReminders` busca até 50 `personal_reminders`
    `pending` com `remind_at <= now` e, para cada um, usa
    `checkPersonalReminderDelivery` ([lib/assistant/reminders.ts](../../../../lib/assistant/reminders.ts)):
@@ -68,7 +70,8 @@ independentemente do fuso da runtime (Vercel gru1 é UTC por padrão).
 
 **Depende de:**
 
-- `@/lib/supabase`, `@/lib/zapi/client`, `@/lib/assistant/reminders`
+- `@/lib/supabase`, `@/lib/zapi/client`, `@/lib/assistant/reminders`,
+  `@/lib/notifications/events`
 - env vars: `CRON_SECRET`. Credenciais Z-API (`zapi_instance_id` e
   `zapi_token`) vêm da tabela `professionals` por cliente — não são env.
 

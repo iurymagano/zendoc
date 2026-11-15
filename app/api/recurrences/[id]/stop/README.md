@@ -8,4 +8,6 @@ Os atendimentos passados e os já editados individualmente permanecem.
 
 **Resposta:** `{ ok: true, cancelled }`. 401 sem sessão; 404 sem perfil.
 
+**Sino:** `stopRecurrence` cria UM aviso para a série (não um por ocorrência), já lido.
+
 **Depende de:** `auth`, `lib/recurrences/service` (`stopRecurrence`).

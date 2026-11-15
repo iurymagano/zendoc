@@ -18,6 +18,10 @@ Rota dedicada de cancelamento pelo profissional.
 `cancellation_note`. O trigger `appointments_create_reminders` cancela
 automaticamente os lembretes pendentes associados.
 
+**Sino:** depois de cancelar, cria o aviso "cancelou" (`actor = 'professional'`,
+com a `cancellation_note`; nasce lido porque foi o próprio dono). Compromisso
+pessoal (sem cliente) não gera aviso.
+
 **Por que não usar PATCH?**
 
 - Garante `cancelled_by = 'professional'` no servidor (não pode ser spoofado).

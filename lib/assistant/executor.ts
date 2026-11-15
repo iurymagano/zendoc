@@ -15,6 +15,10 @@ import {
   rescheduleAppointmentReminders,
 } from '@/lib/appointments/reminders';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
+import {
+  notifyAppointmentCancelled,
+  notifyAppointmentRescheduled,
+} from '@/lib/notifications/events';
 import { formatPhoneBR, isValidPhoneBR, normalizePhoneBR } from '@/lib/phone';
 import type {
   Appointment,
@@ -644,6 +648,12 @@ async function executeCancel(
   }
 
   await syncAppointmentToGoogle(data as Appointment);
+  await notifyAppointmentCancelled(
+    profId,
+    data as Appointment,
+    'assistant',
+    pending.reason,
+  );
 
   const label = describeItem(loaded.appt, ctx.now);
   return {
@@ -693,6 +703,7 @@ async function executeReschedule(
 
   if (!isPersonal(old)) await rescheduleAppointmentReminders(old.id, startIso);
   await syncAppointmentToGoogle(data as Appointment);
+  await notifyAppointmentRescheduled(profId, data as Appointment, old.starts_at, 'assistant');
 
   const label = `${old.patient_name}: ${formatBrDateTime(old.starts_at, now)} → ${formatBrDateTime(startIso, now)}`;
   return {

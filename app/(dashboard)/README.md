@@ -11,7 +11,12 @@ a [`<Sidebar>`](../../components/dashboard/README.md) (fixa à esquerda no deskt
 drawer no mobile) e o conteúdo num container `max-w-5xl` deslocado com `md:pl-64`.
 Fundo `bg-muted/40` (contraste com a sidebar branca).
 
-**Depende de:** `@/components/dashboard/Sidebar`, `@/components/ui/sonner` (`<Toaster />`, toasts do painel).
+**Depende de:** `@/components/dashboard/Sidebar`,
+`@/components/notifications/NotificationsProvider`, `@/components/ui/sonner`.
+
+**Notificações:** o layout envolve tudo em `<NotificationsProvider>` (polling único
+das notificações do sino) e renderiza o `<Toaster>` (toasts de notificações novas,
+canto superior direito). O sino em si fica na `Sidebar`.
 
 **Notas:** cada `page.tsx` dentro de `(dashboard)/` renderiza só o conteúdo —
 não precisa repetir wrapper de `min-h-screen` nem padding. A navegação ficou na

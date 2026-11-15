@@ -19,6 +19,10 @@ sincronizados do Google Calendar (read-only).
    guardados em estado.
 3. Renderiza `<CalendarMonth>` ou `<CalendarWeek>` (em `components/agenda/`).
 
+**Link de notificação:** `?date=YYYY-MM-DD` (vindo do sino) leva o calendário
+para o dia indicado, mantendo a vista atual (`UrlParamEffect` dentro de `<Suspense>`; valor malformado é ignorado); o `n=<id>` extra faz o mesmo
+clique funcionar de novo com a página já aberta.
+
 **Navegação:** seletor Mês/Semana, setas ← →（passo de 1 mês ou 7 dias conforme
 a vista) e botão "Hoje".
 

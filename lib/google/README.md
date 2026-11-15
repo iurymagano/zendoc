@@ -49,12 +49,17 @@ espelhando appointments e pull incremental dos compromissos pessoais.
 - `deleteAppointmentEvent(professional, eventId): Promise<void>` — remove o evento (410/404 = ok)
 - `syncBusyEvents(professional): Promise<{upserted, removed}>` — pull incremental
   via `syncToken` (sync inicial = janela de 45 dias); upsert/delete em
-  `google_busy_events`; persiste o `nextSyncToken`; reseta em 410 Gone
+  `google_busy_events`; persiste o `nextSyncToken`; reseta em 410 Gone. A cada
+  evento de horário marcado (não dia inteiro) de OUTRO calendário, procura
+  atendimentos de cliente futuros e ativos que se sobreponham (até 3 por evento) e
+  chama `notifyScheduleConflict` (aviso "conflito" no sino). No máximo 5 avisos por
+  rodada de sync, para o primeiro sync não virar enxurrada. O sync nunca cancela nem
+  move nada sozinho.
 - `setupWatch(professional): Promise<void>` — registra canal de push apontando
   pro webhook (só quando `NEXT_PUBLIC_URL` é https; em dev usa sync manual/cron)
 - `stopWatch(professional): Promise<void>` — encerra o canal
 
-**Depende de:** `lib/google/auth` (access token), `lib/supabase`, `types/database`.
+**Depende de:** `lib/google/auth` (access token), `lib/supabase`, `lib/notifications/events`, `types/database`.
 
 **Notas:** fuso fixo `America/Sao_Paulo` nos eventos. `getAccessToken` recebe o
 profissional com as colunas de token — passe sempre a linha fresca do banco.

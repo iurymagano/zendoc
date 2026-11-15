@@ -19,10 +19,13 @@ conflito e o sync do Google sem tratamento especial.
   espelhado no Google (best-effort). Backstop de 60 ocorrências por execução.
 - `stopRecurrence(recurrenceId, professionalId): Promise<{cancelled}>` — desativa
   a recorrência e cancela as ocorrências **futuras** ainda ativas (remove os
-  eventos no Google). Passadas e editadas individualmente ficam intactas.
+  eventos no Google). Passadas e editadas individualmente ficam intactas. Gera UM
+  aviso no sino para a série inteira (`notifyRecurrenceStopped`, nasce lido) e não
+  gera nada se não havia ocorrência futura.
 
 **Depende de:** `@/lib/supabase`, `@/lib/appointments/conflicts`
-(`hasAppointmentConflict`), `@/lib/google/appointment-sync`, `@/types/database`.
+(`hasAppointmentConflict`), `@/lib/google/appointment-sync`,
+`@/lib/notifications/events`, `@/types/database`.
 
 **Notas:** cadência ancorada em `recurrence.start_date` (paridade do quinzenal).
 Datas calculadas em yyyy-MM-dd no fuso `America/Sao_Paulo`, sem armadilha de DST

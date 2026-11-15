@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { createServerClient } from '@/lib/supabase';
 import { getAccessToken } from '@/lib/google/auth';
 import { calendarValueToIso } from '@/lib/assistant/datetime';
+import { notifyScheduleConflict } from '@/lib/notifications/events';
 import type { Appointment, Professional } from '@/types/database';
 
 const CAL_BASE = 'https://www.googleapis.com/calendar/v3';
@@ -137,6 +138,44 @@ async function persistEventId(
     .eq('professional_id', professionalId);
 }
 
+/** Máximo de avisos de conflito por rodada de sync (evita enxurrada no 1º sync). */
+const MAX_CONFLICT_NOTICES_PER_SYNC = 5;
+
+/**
+ * Evento de OUTRO calendário que invade um atendimento de cliente já marcado:
+ * avisa o dono no sino (o sync nunca cancela nem move nada sozinho). Eventos
+ * de dia inteiro e do passado não contam. Devolve quantos avisos tentou criar.
+ */
+async function notifyConflictsForEvent(
+  professionalId: string,
+  ev: GoogleEvent,
+  startIso: string,
+  endIso: string,
+): Promise<number> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from('appointments')
+    .select('id, patient_name, patient_phone, starts_at, status, service_id')
+    .eq('professional_id', professionalId)
+    .in('status', ['scheduled', 'confirmed', 'pending_approval'])
+    .gte('starts_at', new Date().toISOString())
+    .lt('starts_at', endIso)
+    .gt('ends_at', startIso)
+    .limit(3);
+
+  let notified = 0;
+  for (const appt of data ?? []) {
+    if (!appt.patient_phone || String(appt.patient_phone).trim() === '') continue;
+    await notifyScheduleConflict(professionalId, {
+      appointment: appt,
+      googleEventId: ev.id,
+      googleSummary: ev.summary ?? null,
+    });
+    notified += 1;
+  }
+  return notified;
+}
+
 /**
  * Pull incremental do Google → IAzen. Usa syncToken quando disponível; senão
  * faz sync inicial na janela [agora, agora+45d]. Eventos com a tag do IAzen
@@ -155,6 +194,7 @@ export async function syncBusyEvents(
   let nextSyncToken: string | undefined;
   let upserted = 0;
   let removed = 0;
+  let conflictNotices = 0;
 
   do {
     const params = new URLSearchParams({
@@ -230,6 +270,19 @@ export async function syncBusyEvents(
         { onConflict: 'professional_id,google_event_id' },
       );
       upserted += 1;
+
+      if (!allDay && conflictNotices < MAX_CONFLICT_NOTICES_PER_SYNC) {
+        try {
+          conflictNotices += await notifyConflictsForEvent(
+            professional.id,
+            ev,
+            calendarValueToIso(startsAt),
+            calendarValueToIso(endsAt),
+          );
+        } catch (err) {
+          console.error('sync: erro ao checar conflito com atendimento:', err);
+        }
+      }
     }
 
     pageToken = body.nextPageToken;

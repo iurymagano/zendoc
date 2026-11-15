@@ -24,9 +24,10 @@ deve reaplicar esses ajustes.
 | `switch.tsx`      | `npx shadcn@latest add switch`                 |
 | `accordion.tsx`   | `npx shadcn@latest add accordion` (import ajustado para `@/lib/utils`; usado no FAQ da landing) |
 | `separator.tsx`   | `npx shadcn@latest add separator`              |
-| `popover.tsx`     | `npx shadcn@latest add popover`                |
+| `popover.tsx`     | `npx shadcn@latest add popover` (Replicar da disponibilidade; lista do sino no desktop) |
 | `checkbox.tsx`    | `npx shadcn@latest add checkbox`               |
-| `sonner.tsx`      | `npx shadcn@latest add sonner`                 |
+| `sheet.tsx`       | `npx shadcn@latest add sheet` (lista do sino no celular)   |
+| `sonner.tsx`      | `npx shadcn@latest add sonner` (toasts; dependência `sonner`) |
 
 ## form-field.tsx
 

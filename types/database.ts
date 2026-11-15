@@ -224,6 +224,49 @@ export interface AssistantPendingAction {
   expires_at: string;
 }
 
+export type NotificationType =
+  | 'appointment_cancelled'
+  | 'appointment_rescheduled'
+  | 'appointment_booked'
+  | 'appointment_pending_approval'
+  | 'appointment_confirmed'
+  | 'appointment_conflict'
+  | 'conversation_attention'
+  | 'whatsapp_disconnected'
+  | 'message_failed';
+
+/**
+ * Dados usados para navegar a partir da notificação (todos opcionais). Só
+ * ids/datas/telefone: o texto já está em `title`/`body`.
+ */
+export interface NotificationData {
+  appointment_id?: string;
+  /** Início do atendimento (ISO) que a notificação cita; abre a agenda nesse dia. */
+  starts_at?: string;
+  /** Início anterior (só em remarcação). */
+  previous_starts_at?: string;
+  /** Telefone do cliente (abre a conversa). */
+  patient_phone?: string;
+  /** Quem causou o evento. */
+  actor?: 'patient' | 'professional' | 'assistant' | 'system';
+}
+
+/** Aviso dentro do app para o dono da conta (tabela notifications; sino do painel). */
+export interface AppNotification {
+  id: string;
+  professional_id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  data: NotificationData;
+  dedupe_key: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+/** O que a API `GET /api/notifications` devolve por aviso (sem professional_id nem dedupe_key). */
+export type AppNotificationItem = Omit<AppNotification, 'professional_id' | 'dedupe_key'>;
+
 export interface AIResponse {
   action: AIAction;
   message_to_patient: string;

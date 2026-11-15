@@ -9,6 +9,7 @@ import {
 } from '@/lib/appointments/personal';
 import { rescheduleAppointmentReminders } from '@/lib/appointments/reminders';
 import { syncAppointmentToGoogle } from '@/lib/google/appointment-sync';
+import { notifyAppointmentRescheduled } from '@/lib/notifications/events';
 
 const patchSchema = z
   .object({
@@ -203,17 +204,26 @@ export async function PATCH(
   // O trigger do banco só cria lembretes no insert/mudança de status: ao mudar o
   // horário, os pendentes precisam ser reagendados, senão disparam no horário
   // antigo. Compromisso pessoal não tem lembrete de cliente.
-  if (
+  const startsAtChanged =
     parsed.data.starts_at !== undefined &&
     new Date(parsed.data.starts_at).getTime() !==
-      new Date(existing.starts_at).getTime() &&
-    !isPersonalCommitment(data.patient_phone)
-  ) {
+      new Date(existing.starts_at).getTime();
+  if (startsAtChanged && !isPersonalCommitment(data.patient_phone)) {
     await rescheduleAppointmentReminders(id, data.starts_at);
   }
 
   // Reflete a alteração no Google (atualiza horário/cliente ou remove se no_show).
   await syncAppointmentToGoogle(data);
+
+  // Aviso no sino (já nasce lido: foi o próprio profissional que remarcou).
+  if (startsAtChanged) {
+    await notifyAppointmentRescheduled(
+      professionalId,
+      data,
+      existing.starts_at,
+      'professional',
+    );
+  }
 
   return NextResponse.json({ ok: true, appointment: data });
 }

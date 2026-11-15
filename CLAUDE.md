@@ -499,6 +499,31 @@ create policy "personal_reminders: own data"
   on personal_reminders for all using (professional_id = my_professional_id());
 create policy "assistant_messages: own data"
   on assistant_messages for all using (professional_id = my_professional_id());
+
+-- NOTIFICAÇÕES NO APP (migration 0010 — sino do painel, só para o dono da conta)
+create table notifications (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  type              text not null check (type in (
+                      'appointment_cancelled','appointment_rescheduled','appointment_booked',
+                      'appointment_pending_approval','appointment_confirmed','appointment_conflict',
+                      'conversation_attention','whatsapp_disconnected','message_failed'
+                    )),
+  title             text not null check (char_length(title) between 1 and 200),
+  body              text not null default '' check (char_length(body) <= 1000),
+  data              jsonb not null default '{}'::jsonb,  -- ids/datas para navegar
+  dedupe_key        text,             -- um aviso por evento real (nulo = sem dedupe)
+  read_at           timestamptz,      -- nulo = não lida; ação do próprio dono já nasce lida
+  created_at        timestamptz not null default now(),
+  unique (professional_id, dedupe_key)
+);
+create index notifications_feed_idx
+  on notifications(professional_id, created_at desc);
+create index notifications_unread_idx
+  on notifications(professional_id, created_at desc) where read_at is null;
+alter table notifications enable row level security;
+create policy "notifications: own data"
+  on notifications for all using (professional_id = my_professional_id());
 ```
 
 > As demais tabelas do projeto (`services`, `recurrences`, `google_*`...) vivem em
@@ -1259,6 +1284,24 @@ o webhook do WhatsApp já ignora mensagens fora de `['trialing','active']`.
 - `GET /api/assistant/reminders` — `{ pending, recent }` (lembretes pessoais).
 - `POST /api/assistant/reminders/[id]/cancel` — cancela um lembrete pendente.
 - Código em `lib/assistant/` (README com o fluxo completo); UI em `/assistente`.
+
+**Notificações no app (sino do painel):**
+
+- Avisos para o DONO da conta sobre a agenda, as conversas e o WhatsApp
+  (`notifications`, código em `lib/notifications/`, UI em `components/notifications/`).
+  Nunca mandam mensagem de WhatsApp; só aparecem para o dono, filtrados por
+  `professional_id` (sessão), com RLS `my_professional_id()`.
+- Eventos com gatilho real: atendimento cancelado/remarcado (pelo cliente via IA,
+  pelo profissional na agenda, pelo Assistente, série recorrente encerrada), IA
+  agendou, pedido aguardando aprovação, cliente confirmou presença, conversa que
+  precisa do dono (handoff, aprovação, IA perdida 2x, IA pausada), WhatsApp
+  desconectado (`connection.update`), lembrete/resposta que não saiu, conflito com
+  evento do Google Agenda. O que o próprio dono faz nasce lido (histórico, sem selo).
+- `createNotification` nunca derruba o fluxo principal (erro vira `console.error`);
+  `dedupe_key` + `unique (professional_id, dedupe_key)` evitam duplicata.
+- Endpoints (todos com `auth()`): `GET /api/notifications` (últimas 30 + `unreadCount`,
+  `?since=`), `POST /api/notifications/[id]/read`, `POST /api/notifications/read-all`.
+  A UI faz polling a cada 20 s (e ao voltar para a aba) e mostra toast nas novas.
 
 **Plano:**
 

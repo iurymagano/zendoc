@@ -274,9 +274,39 @@ create index assistant_pending_actions_lookup_idx
   on assistant_pending_actions(professional_id, created_at desc)
   where status = 'pending';
 
+-- Notificações dentro do app (sino do painel) para o dono da conta.
+create table notifications (
+  id                uuid primary key default gen_random_uuid(),
+  professional_id   uuid references professionals on delete cascade not null,
+  type              text not null check (type in (
+                      'appointment_cancelled',
+                      'appointment_rescheduled',
+                      'appointment_booked',
+                      'appointment_pending_approval',
+                      'appointment_confirmed',
+                      'appointment_conflict',
+                      'conversation_attention',
+                      'whatsapp_disconnected',
+                      'message_failed'
+                    )),
+  title             text not null check (char_length(title) between 1 and 200),
+  body              text not null default '' check (char_length(body) <= 1000),
+  data              jsonb not null default '{}'::jsonb,
+  dedupe_key        text,
+  read_at           timestamptz,
+  created_at        timestamptz not null default now(),
+  unique (professional_id, dedupe_key)
+);
+create index notifications_feed_idx
+  on notifications(professional_id, created_at desc);
+create index notifications_unread_idx
+  on notifications(professional_id, created_at desc)
+  where read_at is null;
+
 alter table personal_reminders enable row level security;
 alter table assistant_messages enable row level security;
 alter table assistant_pending_actions enable row level security;
+alter table notifications enable row level security;
 
 create policy "personal_reminders: own data"
   on personal_reminders for all using (professional_id = my_professional_id());
@@ -284,3 +314,5 @@ create policy "assistant_messages: own data"
   on assistant_messages for all using (professional_id = my_professional_id());
 create policy "assistant_pending_actions: own data"
   on assistant_pending_actions for all using (professional_id = my_professional_id());
+create policy "notifications: own data"
+  on notifications for all using (professional_id = my_professional_id());

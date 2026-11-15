@@ -79,6 +79,16 @@ do appointment, então `findUpcomingAppointment` resolve o **próximo atendiment
 do cliente pelo telefone** (ou pelo `cancel.appointment_id`, se informado). Isso
 conserta o loop do lembrete "podemos confirmar?", que antes ficava sem efeito.
 
+**Notificações no sino** ([lib/notifications](../notifications/README.md)): depois
+de cada ação o executor avisa o dono, sem nunca quebrar o fluxo —
+`book` → "agendou pelo WhatsApp" (ou "pediu um horário" se o status é
+`pending_approval`); `confirm` → "confirmou presença"; `cancel` → "cancelou"
+(`actor = 'patient'`); `reschedule` → UM aviso "remarcou" (de/para) em vez de
+cancelou + agendou (se o novo horário não foi criado, avisa só o cancelamento;
+se foi criado sem cancelar o antigo, avisa só o agendamento). A criação e o
+cancelamento do cliente foram extraídos para `bookAppointment` /
+`cancelForPatient` (mesma lógica de antes).
+
 Após cada escrita, reflete o appointment no Google Calendar via
 `syncAppointmentToGoogle` (best-effort) — `book` cria o evento, `cancel`/`no_show`
 removem. Por isso `book`/`cancel` agora fazem `.select()` da linha afetada.
@@ -138,6 +148,11 @@ removem. Por isso `book`/`cancel` agora fazem `.select()` da linha afetada.
   etc.
 - `executor` e `processor` usam `createServerClient` (service key) — chamar só
   do server.
+- **Aviso de conversa no sino:** depois de `setNeedsAttention`, o `processor` chama
+  `notifyConversationAttention` quando a IA respondeu `handoff` ou
+  `approval_needed`, ou quando o fallback genérico aparece **duas vezes seguidas**
+  (a resposta anterior da IA já era o `FALLBACK_REPLY`; uma falha isolada é ruído e
+  não avisa). Leva a última mensagem do cliente, cortada em 100 caracteres.
 
 ## Testando sem WhatsApp
 
