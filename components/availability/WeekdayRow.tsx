@@ -3,30 +3,10 @@
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { ReplicateDayButton } from '@/components/availability/ReplicateDayButton';
+import { WEEKDAY_NAMES, type BlockState, type DayState } from '@/lib/availability/replicate';
 
-export type BlockState = {
-  enabled: boolean;
-  start: string;
-  end: string;
-};
-
-export type DayState = {
-  weekday: number;
-  active: boolean;
-  morning: BlockState;
-  lunch: BlockState;
-  afternoon: BlockState;
-};
-
-const WEEKDAY_LABELS = [
-  'Domingo',
-  'Segunda',
-  'Terça',
-  'Quarta',
-  'Quinta',
-  'Sexta',
-  'Sábado',
-];
+export type { BlockState, DayState };
 
 interface BlockEditorProps {
   label: string;
@@ -68,16 +48,23 @@ function BlockEditor({ label, state, onChange, disabled }: BlockEditorProps) {
 interface Props {
   day: DayState;
   onChange: (next: DayState) => void;
+  /** Se informado, mostra o botão "Replicar" com os dias de destino escolhidos. */
+  onReplicate?: (targets: number[]) => void;
 }
 
-export function WeekdayRow({ day, onChange }: Props) {
-  const label = WEEKDAY_LABELS[day.weekday];
+export function WeekdayRow({ day, onChange, onReplicate }: Props) {
+  const label = WEEKDAY_NAMES[day.weekday];
   const update = (patch: Partial<DayState>) => onChange({ ...day, ...patch });
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 ring-1 ring-border">
       <div className="flex items-center justify-between">
-        <Label className="text-base font-medium">{label}</Label>
+        <div className="flex items-center gap-3">
+          <Label className="text-base font-medium">{label}</Label>
+          {onReplicate && (
+            <ReplicateDayButton sourceWeekday={day.weekday} onApply={onReplicate} />
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
             {day.active ? 'Atendo' : 'Não atendo'}

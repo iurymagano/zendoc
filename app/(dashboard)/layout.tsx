@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Sidebar } from '@/components/dashboard/Sidebar';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function DashboardLayout({
   children,
@@ -15,6 +16,7 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }

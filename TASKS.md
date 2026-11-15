@@ -363,6 +363,8 @@ Legenda:
 - [x] Endereço de atendimento por CEP (ViaCEP): CEP com máscara, preenche rua,
   bairro, cidade/UF; número e complemento manuais; salvo como texto único em
   `professionals.address` (`lib/address.ts`, `components/onboarding/AddressFields.tsx`)
+- [x] Botão "Replicar" por dia em `/configuracoes/disponibilidade` (copiar a rotina de um dia
+  para outros; atalhos úteis/fim de semana/todos; só persiste no Salvar)
 
 ---
 

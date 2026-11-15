@@ -14,9 +14,14 @@ Tela de configuração da rotina semanal de atendimento.
 **Default:** seg-sex das 08:00-12:00 (manhã), 12:00-13:00 (almoço/pausa) e
 13:00-18:00 (tarde), com `slot_duration = 50`.
 
+**Replicar:** cada dia tem o botão "Replicar" (copia o dia para outros). A cópia só altera o
+estado local: mostra um toast "Copiado para seg, ter. Clique em Salvar para aplicar.", marca
+`dirty` e exibe a barra fixa "Alterações não salvas" com o botão Salvar; nada vai ao servidor
+antes do Salvar.
+
 **Depende de:**
 
-- `@/components/availability/WeekdayRow`
+- `@/components/availability/WeekdayRow`, `@/lib/availability/replicate`, `sonner` (toast)
 - `@/components/ui/{button,input,card,form-field}`
 - `GET|POST /api/availability/weekly`
 

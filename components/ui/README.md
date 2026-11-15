@@ -23,6 +23,9 @@ deve reaplicar esses ajustes.
 | `card.tsx`        | `npx shadcn@latest add card`                   |
 | `switch.tsx`      | `npx shadcn@latest add switch`                 |
 | `separator.tsx`   | `npx shadcn@latest add separator`              |
+| `popover.tsx`     | `npx shadcn@latest add popover`                |
+| `checkbox.tsx`    | `npx shadcn@latest add checkbox`               |
+| `sonner.tsx`      | `npx shadcn@latest add sonner`                 |
 
 ## form-field.tsx
 
@@ -61,6 +64,17 @@ máscara e leva o cursor ao fim. Valor em R$ sempre edita pelo fim.
 Usado nos estados de carregando (agenda, conversas).
 
 **Exporta:** `Skeleton({ className })` — dimensione via className (ex.: `h-4 w-2/3`).
+
+## sonner.tsx
+
+**O que faz:** `<Toaster />` (toast do shadcn sobre a lib `sonner`). Montado uma vez no
+`app/(dashboard)/layout.tsx` (`position="top-center"`); qualquer tela do painel dispara
+`toast.success(...)` importando `toast` de `sonner`.
+
+**Notas:** o CLI gerou `import { cn } from "cn"` e dependia de `next-themes`; foi
+ajustado para `@/lib/utils` e `theme="light"` (o painel é sempre claro). Reaplique isso
+se reinstalar. `popover.tsx` e `checkbox.tsx` são o shadcn puro (base-ui), ajustando só
+o import do `cn`; usados por `components/availability/ReplicateDayButton.tsx`.
 
 ## Convenção
 
