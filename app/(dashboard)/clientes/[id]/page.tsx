@@ -12,32 +12,14 @@ import {
 } from '@/components/ui/card';
 import { formatPhoneBR } from '@/lib/phone';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { StatusBadge } from '@/components/appointments/StatusBadge';
 import type {
   Appointment,
-  AppointmentStatus,
   BookedVia,
   Patient,
 } from '@/types/database';
 
 const TZ = 'America/Sao_Paulo';
-
-const STATUS_LABEL: Record<AppointmentStatus, string> = {
-  scheduled: 'Agendado',
-  confirmed: 'Confirmado',
-  pending_approval: 'Aguardando aprovação',
-  cancelled: 'Cancelado',
-  no_show: 'Não compareceu',
-};
-
-const STATUS_STYLE: Record<AppointmentStatus, string> = {
-  scheduled: 'bg-primary/10 text-primary ring-1 ring-primary/20',
-  confirmed:
-    'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:ring-emerald-900/60',
-  pending_approval:
-    'bg-amber-100 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:ring-amber-900/60',
-  cancelled: 'bg-muted text-muted-foreground ring-1 ring-border',
-  no_show: 'bg-destructive/10 text-destructive ring-1 ring-destructive/20',
-};
 
 const SOURCE_LABEL: Record<BookedVia, string> = {
   whatsapp_ai: 'IA no WhatsApp',
@@ -75,11 +57,7 @@ function AppointmentItem({ appointment }: { appointment: Appointment }) {
         <div className="text-sm font-medium tabular-nums">
           {formatDateTime(appointment.starts_at)} – {formatTime(appointment.ends_at)}
         </div>
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[appointment.status]}`}
-        >
-          {STATUS_LABEL[appointment.status]}
-        </span>
+        <StatusBadge status={appointment.status} />
       </div>
       <div className="text-xs text-muted-foreground">
         {SOURCE_LABEL[appointment.booked_via]}
@@ -155,7 +133,6 @@ export default async function PatientDetailPage({
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <PageHeader
-        eyebrow="Cliente"
         title={patient.name}
         description={`${formatPhoneBR(patient.phone)} · cadastrado em ${registered}`}
         actions={

@@ -1,30 +1,49 @@
 # app/(dashboard)/agenda/
 
-Calendário visual de agendamentos — vistas **Mês** e **Semana** (estilo Google
-Calendar). Mostra os appointments do IAzen e os compromissos pessoais
-sincronizados do Google Calendar (read-only).
+Calendário visual de agendamentos — vistas **Dia**, **Semana** e **Mês**. Mostra os
+appointments do IAzen e os compromissos pessoais sincronizados do Google Calendar
+(read-only). Os componentes ficam em `components/agenda/`.
+
+## loading.tsx
+
+**O que faz:** esqueleto da rota enquanto a página carrega (título, botão e
+`AgendaSkeleton` com a barra de período e a grade).
+
+**Depende de:** `components/agenda/AgendaSkeleton`, `components/layout/PageContainer`, `components/ui/skeleton`.
 
 ## page.tsx
 
-**O que faz:** client component que orquestra dados, navegação, troca de vista
-(Mês/Semana) e o formulário de criar/editar.
+**O que faz:** client component que só orquestra: carrega dados, controla a
+navegação/visão e abre os detalhes e o formulário. A tela em si é composta por
+`AgendaToolbar`, `DayStrip`, `CalendarTimeGrid`/`CalendarMonth`, `AgendaLegend` e
+duas sobreposições (`ResponsiveOverlay`: Dialog no desktop, Sheet no celular).
 
 **Fluxo:**
 
-1. Estado `view` (`'month' | 'week'`, default semana) + `cursor` (data de
-   referência). `rangeFor(view, cursor)` define a janela buscada:
-   - semana → segunda a domingo da semana do cursor;
-   - mês → grade completa (segunda antes do dia 1 até o fim da última semana).
-2. `GET /api/appointments?from&to` devolve `{ appointments, googleBusy }`,
-   guardados em estado.
-3. Renderiza `<CalendarMonth>` ou `<CalendarWeek>` (em `components/agenda/`).
+1. `view` (`'day' | 'week' | 'month'`): no celular (<768px) o padrão é **Dia**
+   (com a faixa de 7 dias para trocar o dia); no desktop é **Semana**. A escolha
+   manual do usuário vale depois. `cursor` é a data de referência.
+   `rangeFor(view, cursor)` define a janela buscada (Dia e Semana: segunda a
+   domingo da semana do cursor; Mês: grade completa).
+2. `GET /api/appointments?from&to` devolve `{ appointments, googleBusy }`. Só a
+   resposta da última busca vale (navegar rápido não mistura períodos). Erro →
+   alerta com "Tentar de novo". Depois de uma ação, a recarga é silenciosa
+   (sem piscar o esqueleto).
+3. Só leitura, para hachurar o que está **fora da rotina**:
+   `GET /api/availability/weekly` e `GET /api/availability/exceptions?from&to`
+   (`buildAvailability`). Sem rotina cadastrada, nada é hachurado.
+4. Estado vazio discreto (uma linha) quando o período não tem atendimentos.
 
 **Link de notificação:** `?date=YYYY-MM-DD` (vindo do sino) leva o calendário
-para o dia indicado, mantendo a vista atual (`UrlParamEffect` dentro de `<Suspense>`; valor malformado é ignorado); o `n=<id>` extra faz o mesmo
-clique funcionar de novo com a página já aberta.
+para o dia indicado, mantendo a visão atual (`UrlParamEffect` dentro de
+`<Suspense>`; valor malformado é ignorado); o `n=<id>` extra faz o mesmo
+clique funcionar de novo com a página já aberta. No Mês, o número do dia e o
+"+N" abrem a visão Dia daquela data.
 
-**Navegação:** seletor Mês/Semana, setas ← →（passo de 1 mês ou 7 dias conforme
-a vista) e botão "Hoje".
+**Atalho de criação:** `/agenda?novo=1` abre o formulário de novo agendamento direto (usado pelo botão do painel); o parâmetro é removido da URL depois de aberto.
+
+**Navegação:** abas Dia/Semana/Mês, setas ← → (passo de 1 dia, 7 dias ou 1 mês
+conforme a visão) e botão "Hoje".
 
 **Auto-sync do Google:** ao montar, ao a aba voltar ao foco e a cada 60s, a
 página dispara `POST /api/google/calendar/sync` (throttle de 30s) e recarrega os
@@ -34,57 +53,32 @@ responde 200 silencioso (`{ connected: false }`) e o auto-sync não faz nada.
 
 **Criação e edição:**
 
-- "Novo agendamento" abre o formulário inline. Clicar num **dia** (mês) ou numa
-  **faixa de hora** (semana) abre o form já com a data/hora pré-preenchida.
-- Clicar num **bloco de agendamento** abre o form em modo edição, com as ações
-  de status no topo (Aprovar/Confirmar/Não compareceu/Cancelar conforme o status).
-- Autocomplete de clientes (nome OU telefone), telefone e CPF com máscara (`MaskedInput`; ao escolher um cliente ou editar, o telefone vem formatado; a sugestão mostra `formatPhoneBR`), fim
-  auto-preenchido em `+50min`. Salva via `POST`/`PATCH /api/appointments`.
-  O telefone é normalizado (`normalizePhoneBR`: `55` + DDD + número) antes do
-  envio — o mesmo número digitado com/sem DDI cai no mesmo cliente.
-
-**Compromisso pessoal (sem cliente):** ao editar um item com `patient_phone`
-vazio (`isPersonalCommitment`), o form esconde telefone/CPF e a lista de
-clientes, rotula o nome como "Título do compromisso" e envia `patient_phone`
-vazio — o `PATCH` aceita (não exige telefone) e nenhum lembrete é enviado a
-cliente. O painel se chama "Editar compromisso", não mostra "Declaração" nem
-"Confirmar"/"Aprovar"/aviso de cliente com o mesmo telefone, e a única ação de
-status é "Cancelar compromisso". Ao mudar o horário de um atendimento, o servidor reagenda os lembretes
-24h/2h pendentes.
+- "Novo agendamento" e o clique numa **faixa de hora** (Dia/Semana) ou num **dia**
+  (Mês) abrem o formulário numa sobreposição, já com data/hora pré-preenchida
+  (o botão arredonda "agora" para os próximos 15 min).
+- Clicar num **bloco** abre os **detalhes** (sobreposição) com as ações de status
+  (Aprovar/Rejeitar, Confirmar, Não compareceu, Cancelar conforme o status),
+  Editar, Declaração e Encerrar série. Editar abre o formulário em modo edição.
+- Regras do formulário (telefone `normalizePhoneBR`, serviço calcula o Fim,
+  compromisso pessoal sem cliente, série via `POST /api/recurrences` com o aviso
+  de quantos foram marcados) estão em `components/agenda/AppointmentForm.tsx`.
 
 **Cancelamento:** `window.confirm` + `window.prompt` (motivo) →
-`POST /api/appointments/:id/cancel`.
-
-**Declaração de comparecimento:** no form de edição (atendimento de cliente não
-cancelado; não aparece em compromisso pessoal) o botão "Declaração" abre
-`/documentos/declaracao/[id]` em nova aba (documento imprimível). Ver `app/documentos/`.
-
-**Serviço:** o seletor "Serviço (opcional)" lista os serviços ativos
-(`GET /api/services`); ao escolher, o **Fim** é calculado pela duração do serviço
-e o `service_id` vai no payload do appointment. Cadastro em
-`/configuracoes/servicos`.
-
-**Atendimentos recorrentes:** no form de criação, o campo "Repetir" (Não repete /
-Toda semana / A cada 2 semanas) + "Repetir até" opcional cria uma série via
-`POST /api/recurrences` (materializa as ocorrências) em vez de um único
-appointment. Ocorrências recorrentes mostram 🔁 no calendário; no form de edição
-de uma delas há o aviso da série e o botão "Encerrar série"
-(`POST /api/recurrences/:id/stop`). Editar/cancelar uma ocorrência afeta só ela.
-A 1ª data da série é o dia escolhido no form e entra mesmo se já passou. Depois
-de criar, um aviso (sonner) diz quantos atendimentos foram marcados e quantas
-datas ficaram de fora por conflito.
+`POST /api/appointments/:id/cancel`. **Encerrar série:** `window.confirm` →
+`POST /api/recurrences/:id/stop`. Mudança de status: `PATCH /api/appointments/:id`.
 
 **Depende de:**
 
-- `@/components/agenda/{CalendarMonth,CalendarWeek,calendar-utils}`
-- `@/components/ui/{button,input,masked-input,textarea,card,form-field}`, `@/lib/masks`
-- `GET /api/appointments`, `POST/PATCH /api/appointments`, `POST /api/appointments/:id/cancel`
-- `@/lib/patients/cpf`, `@/lib/appointments/personal`, `date-fns`
+- `@/components/agenda/*` (toolbar, grade, mês, faixa de dias, legenda, esqueleto, formulário, detalhes, overlay, `agenda-utils`, `calendar-utils`)
+- `@/components/layout/PageContainer`, `@/components/dashboard/{PageHeader,UrlParamEffect}`, `@/components/ui/button`
+- `GET /api/appointments`, `POST/PATCH /api/appointments`, `POST /api/appointments/:id/cancel`, `GET /api/patients`, `GET /api/services`, `GET /api/availability/{weekly,exceptions}`, `POST /api/google/calendar/sync`
+- `@/lib/appointments/personal`, `date-fns`
 
 **Notas:**
 
 - Horários em ISO com offset `-03:00`; o `datetime-local` recebe `:00-03:00`.
 - Posicionamento/agrupamento dos blocos usa helpers de fuso (`tzDateKey`,
   `tzMinutes`) fixados em `America/Sao_Paulo` (ver `calendar-utils.ts`).
-- Os compromissos do Google aparecem read-only (cinza/tracejado) e também
+- Os compromissos do Google aparecem read-only (tracejados, com cadeado) e também
   bloqueiam a disponibilidade oferecida pela IA (ver `lib/availability/slots.ts`).
+- Cores e rótulos de status vêm só de `components/appointments/status.ts`.
