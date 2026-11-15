@@ -70,6 +70,9 @@ Toda semana / A cada 2 semanas) + "Repetir até" opcional cria uma série via
 appointment. Ocorrências recorrentes mostram 🔁 no calendário; no form de edição
 de uma delas há o aviso da série e o botão "Encerrar série"
 (`POST /api/recurrences/:id/stop`). Editar/cancelar uma ocorrência afeta só ela.
+A 1ª data da série é o dia escolhido no form e entra mesmo se já passou. Depois
+de criar, um aviso (sonner) diz quantos atendimentos foram marcados e quantas
+datas ficaram de fora por conflito.
 
 **Depende de:**
 

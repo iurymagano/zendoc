@@ -28,6 +28,9 @@ Séries de atendimentos recorrentes (semanal/quinzenal). A regra fica em
 - `patient_phone` é normalizado no servidor (`normalizePhoneBR`, `55` + DDD +
   número), igual ao booking.
 - Reaproveita/cria o cliente por telefone (igual ao booking).
+- A 1ª data (a do `starts_at`) é criada **mesmo se já passou** (`includePastStart`),
+  como no agendamento único; as demais datas passadas não. A tela da agenda mostra
+  um aviso com `created`/`skipped` (datas fora por conflito).
 
 **Retorno:** `{ ok, recurrence, created, skipped }`. 401/404/400 nos casos usuais.
 

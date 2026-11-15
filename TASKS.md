@@ -105,6 +105,7 @@ Legenda:
   diário): lembretes a cada 1 min e sync do Google a cada 10 min pelo cron-job.org
 - [x] Dispatch reserva o lembrete antes de enviar (sem envio em dobro com cron de 1 min)
 - [x] **Operacional:** criar os jobs no cron-job.org com o header `Authorization: Bearer`
+- [x] Bug: série recorrente com 1ª data já passada não aparecia na agenda (a 1ª data agora é criada; lembrete de atendimento que já começou é cancelado; aviso na tela com quantos foram marcados)
 
 ---
 

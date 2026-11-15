@@ -11,6 +11,7 @@ import {
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -362,6 +363,19 @@ export default function AgendaPage() {
       }
       await Promise.all([loadData(), loadPatients()]);
       closeForm();
+      const created = Number(body.created ?? 0);
+      const skipped = Number(body.skipped ?? 0);
+      const clash =
+        skipped > 0
+          ? ` ${skipped} ${skipped === 1 ? 'data ficou' : 'datas ficaram'} de fora por conflito de horário.`
+          : '';
+      if (created > 0) {
+        toast.success(
+          `Série criada: ${created} ${created === 1 ? 'atendimento marcado' : 'atendimentos marcados'}.${clash}`,
+        );
+      } else {
+        toast.warning(`Série criada, mas nenhum atendimento foi marcado.${clash}`);
+      }
       return;
     }
 
