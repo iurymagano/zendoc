@@ -170,6 +170,18 @@ assinatura) e sincroniza `plan_status`/`ai_enabled`. Detalhes em
 [billing/README.md](./billing/README.md) e
 [webhooks/README.md](./webhooks/README.md).
 
+### Notificações — `/api/notifications/*`
+
+Arquivos: [notifications/route.ts](./notifications/route.ts),
+[notifications/[id]/read/route.ts](./notifications/[id]/read/route.ts),
+[notifications/read-all/route.ts](./notifications/read-all/route.ts)
+
+`GET /api/notifications` lista as últimas 30 notificações do sino + total de não
+lidas (`?since=<ISO>` filtra as novas); `POST /api/notifications/:id/read` marca uma
+como lida; `POST /api/notifications/read-all` marca todas. Todas exigem sessão e
+filtram pelo profissional da sessão. Detalhes em
+[notifications/README.md](./notifications/README.md).
+
 ## Autenticação
 
 Todas as rotas (exceto o catch-all do NextAuth) começam com
