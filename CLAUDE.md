@@ -58,7 +58,7 @@ estão mapeados para estas cores (tema claro no painel, `.dark` na landing e no 
 - **Botão primário:** pílula, fundo Violeta Ação `#7A47F5`, texto branco. Campos 44px, raio 12.
 - **Landing e auth:** seções Void (`.dark`) alternando com Névoa. **Painel:** claro, com sidebar Void.
 - Superfícies separam por degrau de tom, não por linha nem sombra. Mono só em dado.
-- **Sem gradiente decorativo, brilho ou sombra pesada. Única exceção: o degradê do símbolo do logo.**
+- **Sem gradiente decorativo, brilho ou sombra pesada. Exceções: o degradê do símbolo do logo e a landing pública (`app/page.tsx`), escura, com texto em degradê e brilho sutil no hero (decisão do Iury em 14/11/2026, ver DESIGN.md).**
 - Cores fora da paleta do DESIGN.md nunca.
 - **shadcn/ui** continua sendo a base de todos os componentes, customizada por `className`/tokens.
 - Logo: `components/brand/Logo.tsx` (`Logo`, `LogoMark`); nunca recriar o desenho à mão.

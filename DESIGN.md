@@ -24,7 +24,7 @@ fora.
 
 | Tela | Tipo | Tema | Motivo |
 | --- | --- | --- | --- |
-| Landing | convencer | Void (escuro) alternando com Névoa e uma faixa Violeta | a conversa de WhatsApp precisa brilhar; o contraste de seções dá ritmo |
+| Landing | convencer | Void (escuro) do começo ao fim, cartões `#0B0C14` | pedido do Iury: modelo escuro com degradê; o produto brilha sobre o escuro |
 | Login e cadastro | convencer, depois operar | lado esquerdo Void, formulário em card branco sobre Névoa | impacto de marca sem sacrificar a legibilidade do formulário |
 | Dashboard e onboarding | operar | **claro (Névoa) com sidebar Void** | ver abaixo |
 
@@ -114,19 +114,27 @@ Dado numérico usa `.tabular` (alinha em coluna).
 
 ## A ideia de cada tela
 
-**Landing (convencer).** "Você atende. Ela agenda." Uma conversa de WhatsApp acontecendo
-no hero como prova do produto (22:47, a cabeleireira já fechou o salão). Cada seção é uma afirmação
-com a prova ao lado:
+**Landing (convencer), redesenhada em 14/11/2026.** "A secretária que nunca dorme." Modelo escuro
+(export Fountible) refeito na nossa stack. **Exceção deliberada às regras de degradê e brilho, a pedido do Iury, valendo só
+na landing**: texto em degradê (95deg `#A78BFF` > `#7FD8F0` > `#5EEAD4`, contínuo entre palavras), brilho radial sutil no hero,
+cartões `#0B0C14` com borda `#ffffff12` e cantos de 32px, rótulos mono em caixa-alta ("// 01 — O produto"). O painel
+(claro) e o auth seguem as regras sem degradê. Cada seção é uma afirmação com a prova ao lado:
 
-1. Você atende. Ela agenda. — a conversa.
-2. Ela só oferece o que está livre. — a semana com blocos, almoço em degrau de tom liso (sem hachura nem degradê), horários ocupados
-   riscados.
-3. Ninguém esquece o horário. — linha do tempo de um atendimento (lembrete 24h, 2h, o atendimento).
-4. Responde do jeito que você responderia. — o mesmo pedido nos tons amigável e formal.
-5. E ela também organiza o seu dia. — o Assistente pessoal (`/assistente`, só o dono vê): chat
-   que marca na agenda, cria lembrete e devolve o resumo do dia (`components/landing/AssistantDemo.tsx`).
-   Seção Void, janela de chat como prova, com o resumo do dia em cartão claro dentro da conversa.
-6. R$297/mês. — o preço gigante sobre violeta, 7 dias sem cartão.
+1. Hero: promessa e dois botões, "Testar grátis por 7 dias" e "Ver em ação".
+2. 01 O produto: painel em 3D com conversa e agenda (exemplo ilustrativo), dois cartões flutuantes.
+3. Faixa de números reais do produto: 24/7, lembretes 24h+2h, 7 dias, R$0.
+4. Demo ao vivo: quatro passos (tempos de exemplo) e um celular com a conversa.
+5. 02 Treinamento, 03 Recursos (3 cartões), 04 Painel (números de exemplo, avisado na página), 05 Antes e depois.
+6. 06 Preço: "IAzen Pro" R$297/mês, 7 dias grátis, sem cartão.
+7. 07 FAQ (shadcn Accordion) e rodapé com CTA e o link "Privacidade".
+
+Movimento: animejs v4 em `LandingMotion` (H1 palavra a palavra, subtítulo de borrado a nítido, painel 3D entrando no scroll,
+cartões flutuando em loop, revelações por IntersectionObserver). Só `transform` e `opacity`; sem `prefers-reduced-motion` e com JS.
+Sem JS tudo aparece. Sem Three.js (fundo leve em CSS).
+
+Decisões de verdade do produto: sem depoimento nem logo de cliente; sem "v2.0"; sem "Hospedado no Brasil" (servidor
+do WhatsApp nos EUA); tom é "Amigável ↔ Formal"; FAQ com os caminhos reais da interface; nenhum link para Termos/Contato
+(não existem); rodapé sem o "IAzen" gigante.
 
 **Login e cadastro.** Lado esquerdo Void com o símbolo gigante cortado pela borda, a promessa
 e uma conversa curta; à direita só o formulário. Sem depoimento falso, sem promessa numérica
@@ -155,7 +163,7 @@ Regras para a fase 2:
 
 ## Movimento
 
-Um momento orquestrado: o balão a balão da conversa do hero entra em sequência (`ia-rise`,
+Um momento orquestrado. Na landing, a entrada do hero e do painel 3D (animejs); no auth, o balão a balão (`ia-rise`,
 520ms) e a faísca respira (`ia-spark`). Só `transform` e `opacity`. Quem pede menos movimento
 vê tudo já no lugar. Interações respondem a uma ação (abrir, confirmar), nada solto.
 
@@ -188,14 +196,11 @@ Descartadas:
 - **Dashboards escuros inteiros** (kits "AI SaaS Dashboard UI-Dark"): cansam em uso longo e
   prejudicam leitura de agenda e impressão de declaração.
 - **Fileira de cards com ícone, etiqueta mono em caixa-alta, depoimento genérico**: o padrão
-  de landing que já tínhamos; trocado por prova real (conversa, semana, linha do tempo).
+  de landing que já tínhamos; trocado por prova real; a landing agora usa cartões de produto, e a seção do Assistente pessoal, a semana e o seletor de tom saíram da página.
 
 ## O que ainda está provisório
 
-- Conversa do hero, da linha do tempo e do tom são exemplos (nomes Marina, Diego, Camila e Rafael,
-  horários fictícios, várias profissões). Trocar por conversas reais autorizadas quando houver beta testers.
-- A conversa do Assistente pessoal na landing é demonstração; o recurso real (`/assistente`) já tem a
-  cara da marca (fase 2).
+- Conversas do mock, da demo e dos recursos são exemplos (Mariana, Diego, Camila e Rafael, horários fictícios); os números do painel (196, 94%) também. Trocar por conversas reais autorizadas quando houver beta testers.
 - Fase 2 aplicada: painel, agenda, clientes, conversas, configurações, onboarding, privacidade e declaração.
   Telas ainda sem print logado: `/clientes/[id]`, `/documentos/declaracao/[id]` (conferir no papel).
 

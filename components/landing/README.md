@@ -1,6 +1,9 @@
 # components/landing/
 
-Peças visuais da landing (`app/page.tsx`) e do lado de marca das telas de auth.
+Peças visuais da landing (`app/page.tsx`) e o balão usado no lado de marca das telas de auth.
+
+A landing é escura (Void `#05060A`), com cartões `#0B0C14`, borda `#ffffff12` e cantos de 32px. Cada seção é um
+componente server; só `LandingMotion` e `Faq` rodam no cliente.
 
 ---
 
@@ -11,48 +14,40 @@ como o logo); `side="out"` é a secretária (violeta, ponta embaixo à direita).
 
 **Exporta:** `Bubble({ side, time?, children, className?, style? })`
 
-**Notas:** use dentro de um contêiner `.dark`. O horário vai em mono tabular dentro do balão.
+**Notas:** use dentro de um contêiner `.dark`. Usado pelo layout de auth, pela demo e pelo mock.
 
-## HeroChat.tsx
+## primitives.tsx
 
-**O que faz:** janela de conversa do hero ("Secretária da Bia", 22:47, cliente Marina), com os balões
-entrando em sequência (`ia-rise`) e a faísca "online agora".
+**O que faz:** blocos de layout compartilhados pela landing.
 
-**Exporta:** `HeroChat()`
+**Exporta:** `WRAP` (largura e margem), `WHITE_BTN` (botão branco), `SectionLabel` (rótulo mono "// 01 — O produto"),
+`Panel` (cartão 32px), `Grad` (texto em degradê), `H2` (título de seção), `ArrowCircle` (seta em círculo).
 
-**Notas:** conteúdo fictício. A animação respeita `prefers-reduced-motion`.
+## LandingMotion.tsx
 
-## WeekGrid.tsx
+**O que faz:** cliente que não renderiza nada; carrega o `animejs` (v4) e anima a entrada do hero, os `data-reveal`
+(IntersectionObserver), o `data-tilt` do mock e os `data-float` em loop.
 
-**O que faz:** semana de segunda a sexta com os blocos de manhã e tarde, atendimentos de 50 minutos,
-horários ocupados riscados, almoço em degrau de tom liso ("a secretária não oferece") e um horário marcado.
+**Notas:** a página marca `data-anim` na raiz por um script inline (exceto com `prefers-reduced-motion`); o CSS só esconde
+elementos sob `[data-anim]`. `LandingMotion` põe `data-ready`; sem ele em 4s, `data-anim` sai e tudo aparece. Sem JS, tudo visível.
 
-**Exporta:** `WeekGrid()`
+## LandingHeader.tsx / Hero.tsx / ProductMock.tsx / Stats.tsx
 
-**Notas:** dados de exemplo no próprio arquivo.
+Cabeçalho em pílula flutuante (Produto, Recursos, Como funciona, Preço, Entrar, Começar grátis); hero ("A secretária que nunca
+dorme.", palavra a palavra, pontos de fundo em CSS); painel em 3D com dois cartões flutuantes; faixa de quatro números
+(24/7, 24h+2h, 7 dias, R$0).
 
-## ReminderTimeline.tsx
+## LiveDemo.tsx / Training.tsx / Features.tsx
 
-**O que faz:** linha do tempo de um atendimento: lembrete 24h antes (com a confirmação), 2h antes e o atendimento (cliente Diego).
+Demo ao vivo (quatro passos com tempos de exemplo e um celular com a conversa); treinamento ("Treinar minha IA", como a tela
+real); três recursos (agenda 24/7, lembretes 24h e 2h, tom amigável ou formal).
 
-**Exporta:** `ReminderTimeline()`
+## DashboardSection.tsx / BeforeAfter.tsx / Pricing.tsx / Faq.tsx / LandingFooter.tsx
 
-**Depende de:** `./Bubble`.
+Painel com números de **exemplo** (declarado na página); antes e depois; cartão "IAzen Pro" R$297/mês com 7 dias grátis;
+perguntas frequentes (shadcn `Accordion`, caminhos reais da interface); rodapé com CTA e o único link, "Privacidade".
 
-## ToneDemo.tsx
+**Notas gerais:** nenhum depoimento nem logo de cliente; números do painel e tempos da demo são ilustração; nada de
+"hospedado no Brasil" (o servidor do WhatsApp fica fora).
 
-**O que faz:** o mesmo pedido de remarcação nos tons amigável e formal, alternados por abas.
-
-**Exporta:** `ToneDemo()` (`'use client'`, guarda o tom escolhido em estado)
-
-**Depende de:** `./Bubble`.
-
-## AssistantDemo.tsx
-
-**O que faz:** janela de chat do Assistente pessoal (`/assistente`) para a seção "E ela também organiza o seu dia.": o dono pede para marcar o dentista e lembrar de cobrar um cliente, a IA confirma e devolve o resumo do dia em cartão claro (horário em mono, etiqueta Lembrete/Cliente/Pessoal).
-
-**Exporta:** `AssistantDemo()`
-
-**Depende de:** `./Bubble`, `@/components/brand/Logo` (`LogoMark`).
-
-**Notas:** conteúdo fictício. Use dentro de contêiner `.dark`. O recurso real vive em `app/(dashboard)/assistente` (feito por outra frente).
+**Notas (revisão do QA):** os cards flutuantes do `ProductMock` ficam dentro da borda em 390/768/1024/1280/1440 (a perspectiva 3D alarga o mock, então o recuo é por breakpoint); a faixa "Conecta com o que você já usa" lista só WhatsApp e Google Agenda (o Stripe só cobra a assinatura do IAzen); a demo do `LiveDemo` diz "Confere sua agenda" e trata o Google Agenda como opcional.

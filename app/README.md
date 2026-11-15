@@ -62,23 +62,17 @@ para o corpo, JetBrains Mono só para dado) via `next/font/google` e metadata do
 
 ## page.tsx
 
-**O que faz:** landing pública (tipo "convencer") da identidade v1. A ideia é
-"Você atende. Ela agenda.", com uma conversa de WhatsApp como prova do produto.
-Texto aberto a qualquer profissional com hora marcada ("clientes", "atendimentos").
+**O que faz:** landing pública (tipo "convencer"), escura, "A secretária que nunca dorme." Server component; as
+animações (animejs) ficam em `LandingMotion`, e um script inline só liga o estado inicial escondido quando não há
+`prefers-reduced-motion`.
 
-**Estrutura** (cada seção é uma afirmação com a prova ao lado):
+**Estrutura:** header flutuante, hero, painel em 3D (01 O produto), faixa de números, demo ao vivo, 02 Treinamento,
+03 Recursos, 04 Painel, 05 Antes e depois, 06 Preço, 07 Dúvidas e rodapé com CTA
+([`components/landing`](../components/landing/README.md)).
 
-- Hero Void (`.dark`) com o título e a conversa ([`HeroChat`](../components/landing/README.md))
-- "Ela só oferece o que está livre." em Névoa, com a semana (`WeekGrid`)
-- "Ninguém esquece o horário." em Void, com a linha do tempo (`ReminderTimeline`)
-- "Responde do jeito que você responderia." em Névoa, com `ToneDemo` (amigável x formal)
-- "E ela também organiza o seu dia." em Void, com `AssistantDemo` (Assistente pessoal)
-- Preço R$297/mês em faixa Violeta, com o símbolo gigante e o CTA
-- Footer Void
+**Depende de:** `@/components/ui/button`, `@/components/ui/accordion`, `@/components/brand/Logo`, `@/components/landing/*`.
 
-**Depende de:** `@/components/ui/button`, `@/components/brand/Logo`, `@/components/landing/*`.
-
-**Notas:** os textos de exemplo (Marina, Dra. Helena, horários) são fictícios.
+**Notas:** nomes, horários e números do painel são fictícios e a página diz isso.
 
 ## globals.css
 
