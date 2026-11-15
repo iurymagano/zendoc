@@ -15,7 +15,11 @@ agendamentos existentes.
   `busy` junta atendimentos ativos + eventos ocupados do Google; devolve os
   `Slot` (`start`/`end` como instantes) em ordem. Datas/horas usam
   `lib/assistant/datetime.ts` (nada de `getHours()` local).
+- `buildBlocks(date, weekly, exception): Block[]` — blocos de atendimento de um dia
+  (exceção vence a rotina semanal; `day_off` não chega aqui). Também usado por
+  `lib/dashboard/schedule.ts` para medir a ocupação.
 - `type Slot = { start: Date; end: Date }`
+- `type Block = { start: string; end: string; duration: number }`
 
 **Notas:** coberto por `compute.test.ts`, que roda com vários `TZ` (UTC,
 America/Sao_Paulo, Asia/Tokyo, America/Los_Angeles) e confere que o bloco

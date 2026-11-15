@@ -209,3 +209,13 @@ Descartadas:
 `/assistente` é o único painel escuro dentro do painel claro: um bloco Void com o logo, a faísca
 "online" pulsando e, ao pensar, três pontos de faísca. É o ponto de personalidade do produto; o resto
 do painel segue claro e calmo (degraus de tom em vez de bordas e sombras).
+
+## Página inicial do painel (`/dashboard`)
+
+Decisão do TL (nov/2026), exceção às regras "mono só em dado" e "sem etiqueta de seção" **somente nesta página**:
+
+- Rótulos de seção em JetBrains Mono, caixa alta, tracking 0.14em, precedidos de `//` ("// HOJE").
+- Números grandes em Sora 700 (contagem do dia, métricas da semana).
+- Cards brancos de 28 a 32px sobre a Névoa; separam por tom, sem linha nem sombra.
+- Um único degradê (`95deg #A78BFF, #7FD8F0, #5EEAD4`): o trecho já vivido da régua do dia (e a barra de progresso do passo a passo da conta nova). O resto é violeta sólido.
+- O que precisa de ação (WhatsApp desligado, passo pendente de WhatsApp) usa Void sobre o claro.

@@ -6,6 +6,7 @@ Componentes React. Organizado por domínio:
 - [brand/](./brand/) — logo (símbolo e wordmark em SVG) e geometria da marca IAzen
 - [landing/](./landing/) — seções da landing escura (hero, mock, demo, treinamento, recursos, painel, preço, FAQ) e o balão do auth
 - [dashboard/](./dashboard/) — shell do dashboard (navbar, cabeçalho de página)
+- [dashboard/home/](./dashboard/home/) — blocos da página inicial `/dashboard` (dia, próximos, atenção, semana, vagas, conversas, configuração)
 - [onboarding/](./onboarding/) — componentes do fluxo de onboarding
 - [availability/](./availability/) — componentes da tela de disponibilidade
 - [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) da página /agenda

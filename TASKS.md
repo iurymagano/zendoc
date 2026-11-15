@@ -182,6 +182,7 @@ Legenda:
 - [x] Fase 2: onboarding (tirar o halo radial) e `app/privacidade`
 - [x] Fase 2: `/assistente` com a cara da marca (painel Void, faísca como "pensando")
 - [x] Landing reconstruída no padrão escuro com degradê, animejs e FAQ (`iris/landing-nova`)
+- [x] Página inicial `/dashboard` nova: dia, régua, próximos, atenção, semana, vagas, conversas e checklist de configuração (`lib/dashboard/`, `components/dashboard/home/`)
 - [ ] Trocar as conversas de exemplo da landing por conversas reais autorizadas
 
 ### Identidade visual

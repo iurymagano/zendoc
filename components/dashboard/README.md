@@ -58,3 +58,7 @@ serviços, …).
 **Depende de:** nada além de React.
 
 **Notas:** usar em toda página dentro de `(dashboard)/` para manter o layout consistente. O título aplica `letter-spacing: -0.03em` conforme o design system.
+
+## home/
+
+Blocos da página inicial `/dashboard`. Ver [home/README.md](./home/README.md).
