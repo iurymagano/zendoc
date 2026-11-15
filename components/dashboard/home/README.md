@@ -70,3 +70,7 @@ Blocos da página inicial `/dashboard`. Todos são Server Components, menos `App
 
 - `Hero.tsx`: dia sem rotina e agenda vazia viram uma caixa só (texto + "Ajustar horários" + "Marcar um atendimento"); o aviso separado só aparece se houver compromisso num dia sem rotina.
 - `SetupChecklist.tsx`: a barra de progresso usa a largura real (0% = vazia), sem mínimo.
+- `Panel.tsx`: novo `EmptyState({ title, children, href, cta })`, o estado vazio padrão dos cards (texto na cor da tinta, botão primário para a rota que resolve). Usado em `Upcoming` (/agenda), `Conversations` (/configuracoes/whatsapp ou /configuracoes/testar-ia, conforme `whatsappConnected`), `WeekPanel` e `FreeSlots` (/configuracoes/disponibilidade).
+- `Conversations({ items, now, whatsappConnected })`: nova prop.
+- `SetupChecklist.tsx`: o título da conta nova usa `text-wrap: balance` e `&nbsp;` antes de "secretária" (sem palavra sozinha na linha).
+

@@ -32,3 +32,5 @@ conversas, configuração, semana, vagas. Sem migration: só lê tabelas existen
 escrita é o `PATCH /api/appointments/[id]` do botão Aprovar/Confirmar.
 
 **Notas (revisão visual):** `Sua semana` troca de coluna no desktop conforme o passo a passo aparece (equilibra a altura das colunas); a ordem no celular é a mesma.
+
+**Notas:** o alerta preto do WhatsApp só aparece quando o passo a passo não está na tela (ele já traz o passo do WhatsApp); com o WhatsApp desligado o card de configuração sobe para o topo no celular (`order-first`).

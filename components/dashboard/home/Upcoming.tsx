@@ -4,7 +4,7 @@ import { isPersonalCommitment } from '@/lib/appointments/personal';
 import type { UpcomingGroup } from '@/lib/dashboard/summary';
 import { ApproveButton } from './ApproveButton';
 import { OriginChip, StatusChip } from './chips';
-import { Panel } from './Panel';
+import { EmptyState, Panel } from './Panel';
 
 /** Próximos atendimentos, agrupados por dia, com a origem e o status de cada um. */
 export function Upcoming({
@@ -25,13 +25,10 @@ export function Upcoming({
       }
     >
       {groups.length === 0 ? (
-        <div className="rounded-2xl bg-background p-5 text-sm leading-relaxed">
-          <p className="font-medium">Nenhum atendimento por vir.</p>
-          <p className="mt-1 text-muted-foreground">
-            Assim que a IA marcar alguém pelo WhatsApp, ou você marcar na agenda, o horário
+        <EmptyState title="Nenhum atendimento por vir." href="/agenda" cta="Marcar um atendimento">
+          Assim que a IA marcar alguém pelo WhatsApp, ou você marcar na agenda, o horário
             aparece aqui.
-          </p>
-        </div>
+        </EmptyState>
       ) : (
         groups.map((g) => (
           <div key={g.date} className="flex flex-col gap-2">

@@ -88,9 +88,9 @@ export function SetupHero({ setup, firstName }: { setup: Setup; firstName: strin
         <SectionLabel>Primeiros passos</SectionLabel>
         <h1
           id="titulo-comecar"
-          className="font-display text-3xl font-bold leading-[1.05] tracking-[-0.04em] sm:text-5xl"
+          className="font-display text-3xl font-bold leading-[1.05] tracking-[-0.04em] [text-wrap:balance] sm:text-5xl"
         >
-          Bem-vindo, {firstName}. Vamos ligar sua secretária.
+          Bem-vindo, {firstName}. Vamos ligar sua&nbsp;secretária.
         </h1>
         <p className="max-w-xl text-base leading-relaxed">
           Faltam {setup.total - setup.doneCount} passos para a IA começar a agendar, confirmar e

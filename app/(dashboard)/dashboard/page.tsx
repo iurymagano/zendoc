@@ -45,7 +45,8 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-5">
       {/* Cobrança e conexão primeiro: é o que mais atrapalha o resto. */}
       {!trialRunning && <PlanStatusBanner professional={professional} />}
-      {!professional.whatsapp_connected && !data.isNew && <WhatsAppAlert />}
+      {/* Com o passo a passo na tela o WhatsApp já é o primeiro passo: o alerta só repetiria. */}
+      {!professional.whatsapp_connected && !data.isNew && !setupCardShown && <WhatsAppAlert />}
 
       {data.isNew ? <SetupHero setup={setup} firstName={firstName} /> : <Hero data={data} firstName={firstName} />}
 
@@ -70,12 +71,12 @@ export default async function DashboardPage() {
           </div>
           {setupCardShown && week}
           <div className="order-6">
-            <Conversations items={data.recent} now={now} />
+            <Conversations items={data.recent} now={now} whatsappConnected={professional.whatsapp_connected} />
           </div>
         </div>
         <div className="contents lg:flex lg:flex-col lg:gap-5">
           {setupCardShown && (
-            <div className="order-3">
+            <div className={professional.whatsapp_connected ? 'order-3' : 'order-first'}>
               <SetupCard setup={setup} />
             </div>
           )}

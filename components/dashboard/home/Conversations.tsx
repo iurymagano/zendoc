@@ -2,10 +2,18 @@ import Link from 'next/link';
 import { formatPhoneBR } from '@/lib/phone';
 import type { ConversationItem } from '@/lib/dashboard/load';
 import { relativeTime, snippet } from '@/lib/dashboard/summary';
-import { Panel } from './Panel';
+import { EmptyState, Panel } from './Panel';
 
 /** Últimas conversas do WhatsApp, uma linha por cliente. */
-export function Conversations({ items, now }: { items: ConversationItem[]; now: Date }) {
+export function Conversations({
+  items,
+  now,
+  whatsappConnected,
+}: {
+  items: ConversationItem[];
+  now: Date;
+  whatsappConnected: boolean;
+}) {
   return (
     <Panel
       label="WhatsApp"
@@ -17,12 +25,15 @@ export function Conversations({ items, now }: { items: ConversationItem[]; now: 
       }
     >
       {items.length === 0 ? (
-        <div className="rounded-2xl bg-background p-5 text-sm leading-relaxed">
-          <p className="font-medium">Nenhuma conversa ainda.</p>
-          <p className="mt-1 text-muted-foreground">
+        whatsappConnected ? (
+          <EmptyState title="Nenhuma conversa ainda." href="/configuracoes/testar-ia" cta="Testar a IA">
             Quando um cliente escrever no seu WhatsApp, a conversa com a IA aparece aqui.
-          </p>
-        </div>
+          </EmptyState>
+        ) : (
+          <EmptyState title="Nenhuma conversa ainda." href="/configuracoes/whatsapp" cta="Conectar WhatsApp">
+            Conecte o WhatsApp e, quando um cliente escrever, a conversa com a IA aparece aqui.
+          </EmptyState>
+        )
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((c) => (

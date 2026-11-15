@@ -221,4 +221,5 @@ Decisão do TL (nov/2026), exceção às regras "mono só em dado" e "sem etique
 - O que precisa de ação (WhatsApp desligado, passo pendente de WhatsApp) usa Void sobre o claro.
 - Revisão do designer (nov/2026): a exceção do mono **fica**, porque é o mesmo rótulo `// SEÇÃO` da landing nova (`SectionLabel`); tirar quebraria a continuidade que o Iury pediu.
 - Só dado real: a barra de progresso não tem largura mínima (0% = vazia); estados vazios não repetem a mesma mensagem em caixas empilhadas (dia sem rotina e agenda vazia viram uma caixa só).
+- Estados vazios usam `EmptyState`: título em 600, explicação a 80% da tinta (nunca cinza sobre cinza) e um botão primário para a rota que resolve.
 - Desktop: as duas colunas fecham na mesma altura. Com o passo a passo na direita, "Sua semana" vai para a esquerda; sem ele, volta para a direita. No celular a ordem não muda.

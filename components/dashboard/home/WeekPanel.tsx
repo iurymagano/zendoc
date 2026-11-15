@@ -1,6 +1,6 @@
 import { formatDuration } from '@/lib/dashboard/summary';
 import type { DashboardData } from '@/lib/dashboard/load';
-import { Panel } from './Panel';
+import { EmptyState, Panel } from './Panel';
 
 /** Número grande em Sora com legenda; é o que se lê primeiro em cada métrica. */
 function Stat({ value, label, hint }: { value: string | number; label: string; hint?: string }) {
@@ -30,13 +30,10 @@ export function WeekPanel({ data }: { data: DashboardData }) {
   if (metrics.total === 0 && !hasCapacity && newClients.week === 0) {
     return (
       <Panel label="Semana" title="Sua semana">
-        <div className="rounded-2xl bg-background p-5 text-sm leading-relaxed">
-          <p className="font-medium">Ainda sem números.</p>
-          <p className="mt-1 text-muted-foreground">
-            Depois que você definir seus horários e os primeiros atendimentos entrarem, aqui
+        <EmptyState title="Ainda sem números." href="/configuracoes/disponibilidade" cta="Definir horários">
+          Depois que você definir seus horários e os primeiros atendimentos entrarem, aqui
             aparecem a ocupação, quantos a IA marcou e o tempo que ela poupou.
-          </p>
-        </div>
+        </EmptyState>
       </Panel>
     );
   }

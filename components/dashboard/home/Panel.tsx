@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -50,5 +52,36 @@ export function Panel({
       </div>
       <div className="flex flex-col gap-4 px-5 sm:px-6">{children}</div>
     </Card>
+  );
+}
+
+/**
+ * Estado vazio de um card: o que falta, por que importa e um botão para a rota que resolve.
+ * Texto na cor cheia da tinta (a explicação a 80%), nunca cinza sobre cinza.
+ */
+export function EmptyState({
+  title,
+  children,
+  href,
+  cta,
+}: {
+  title: string;
+  children: ReactNode;
+  href: string;
+  cta: string;
+}) {
+  return (
+    <div className="flex flex-col items-start gap-3 rounded-2xl bg-background p-5 text-sm leading-relaxed">
+      <div>
+        <p className="font-semibold">{title}</p>
+        <p className="mt-1 text-foreground/80">{children}</p>
+      </div>
+      <Link
+        href={href}
+        className={buttonVariants({ variant: 'default', size: 'sm', className: 'min-h-11 rounded-full sm:min-h-9' })}
+      >
+        {cta}
+      </Link>
+    </div>
   );
 }
