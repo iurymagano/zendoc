@@ -17,7 +17,7 @@ sincronizados do Google (`google_busy_events`, read-only).
 - `tzDateKey(iso): string` — chave de dia `yyyy-MM-dd` no fuso da agenda
 - `tzMinutes(iso): number` — minutos desde a meia-noite no fuso (posicionamento)
 - `formatTime(iso): string` — `HH:mm`
-- `STATUS_LABEL` / `STATUS_BLOCK` — rótulo e classes de cor do bloco por status
+- `STATUS_LABEL` / `STATUS_DOT` / `STATUS_BLOCK` — rótulo, quadradinho da legenda e classes do bloco por status; **derivados de `components/appointments/status.ts`** (fonte única, tokens `--status-*`)
 - `groupByDay(appointments)` / `groupBusyByDay(busy)` — agrupam por dia
 
 **Notas:** as chaves de dia das células são geradas em hora local (date-fns) e

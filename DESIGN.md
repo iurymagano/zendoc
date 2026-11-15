@@ -212,14 +212,59 @@ do painel segue claro e calmo (degraus de tom em vez de bordas e sombras).
 
 ## Página inicial do painel (`/dashboard`)
 
-Decisão do TL (nov/2026), exceção às regras "mono só em dado" e "sem etiqueta de seção" **somente nesta página**:
+Decisão do TL (nov/2026). **Exceção removida no redesign premium (14/11/2026):** o rótulo mono `// SEÇÃO`
+não vale mais no painel; títulos de seção usam `SectionHeader` (ver "Painel: redesign premium"). Os blocos
+de `components/dashboard/home/` ainda usam `SectionLabel` até a etapa 2 migrar a página; não copie o padrão.
 
-- Rótulos de seção em JetBrains Mono, caixa alta, tracking 0.14em, precedidos de `//` ("// HOJE").
+- ~~Rótulos de seção em JetBrains Mono, caixa alta, precedidos de `//`~~ (removido).
 - Números grandes em Sora 700 (contagem do dia, métricas da semana).
-- Cards brancos de 28 a 32px sobre a Névoa; separam por tom, sem linha nem sombra.
+- Cards brancos sobre a Névoa; separam por tom, sem linha nem sombra. Raio 16 (era 28 a 32; a etapa 2 ajusta).
 - Um único degradê (`95deg #A78BFF, #7FD8F0, #5EEAD4`): o trecho já vivido da régua do dia (e a barra de progresso do passo a passo da conta nova). O resto é violeta sólido.
 - O que precisa de ação (WhatsApp desligado, passo pendente de WhatsApp) usa Void sobre o claro.
-- Revisão do designer (nov/2026): a exceção do mono **fica**, porque é o mesmo rótulo `// SEÇÃO` da landing nova (`SectionLabel`); tirar quebraria a continuidade que o Iury pediu.
+- ~~Revisão do designer (nov/2026): a exceção do mono fica~~ (superada pela decisão do TL de 14/11/2026: sai do painel; a landing escura segue com o rótulo).
 - Só dado real: a barra de progresso não tem largura mínima (0% = vazia); estados vazios não repetem a mesma mensagem em caixas empilhadas (dia sem rotina e agenda vazia viram uma caixa só).
 - Estados vazios usam `EmptyState`: título em 600, explicação a 80% da tinta (nunca cinza sobre cinza) e um botão primário para a rota que resolve.
 - Desktop: as duas colunas fecham na mesma altura. Com o passo a passo na direita, "Sua semana" vai para a esquerda; sem ele, volta para a direita. No celular a ordem não muda.
+
+## Painel: redesign premium (14/11/2026)
+
+Decisões do TL para o painel claro (`app/(dashboard)`). A landing e o auth não mudam.
+
+**Tipo e rótulo.** Sem eyebrow no `PageHeader`. Título de seção = `SectionHeader`: Inter 15px semibold
+na tinta cheia, sem caixa-alta, sem mono. Mono continua só em dado (horário, telefone, contagem).
+
+**Raios do painel.** Card 16 (`--radius-card`), campo 12 (`--radius-field`), pílula para botão, chip e
+badge. Dialog usa o raio de card. Sombra só em quem flutua: menu, dialog e tooltip usam `--shadow-pop`
+(`0 8px 24px rgb(5 6 10 / .12)`); card e linha nunca.
+
+**Movimento.** 150ms em hover e foco, 200ms ao abrir/fechar (dialog, menu), curva `--ease-panel`.
+`prefers-reduced-motion` zera transição e animação de todo `[data-slot]`.
+
+**Status do atendimento** (fonte única `components/appointments/status.ts`; tokens `--status-*` em
+`app/globals.css`). A cor nunca é a única pista: todo status tem texto e ícone, e pendente e cancelado
+mudam a forma.
+
+| Status | Rótulo | Fundo | Texto | Ícone | Forma |
+| --- | --- | --- | --- | --- | --- |
+| `scheduled` | Agendado | `#EDE7FF` | `#3D2399` | relógio | |
+| `confirmed` | Confirmado | `#D9F4EE` | `#0B5F58` | check em círculo | |
+| `pending_approval` | Pendente | `#FDF0D0` | `#8A5A00` | ampulheta | borda tracejada |
+| `cancelled` | Cancelado | `#F4F3F8` | `#5A5D72` | x em círculo | riscado |
+| `no_show` | Faltou | `#FBE3E4` | `#B02A34` | usuário com x | |
+
+O mesmo rótulo vale em chip, legenda, bloco do calendário e detalhe (antes: "Aguarda aprovação",
+"Aguardando aprovação", "Não compareceu"). A descrição longa ("Aguardando a sua aprovação") fica no
+tooltip nativo (`title`). Ação continua com o verbo ("Não compareceu" no botão).
+
+**Outros tokens novos.** `--destructive-ink #B02A34` (texto de erro sobre claro, AA; `--destructive`
+`#C62F3A` segue para botão e borda), `--surface-2 #FAF9FD` (degrau entre o card branco e a Névoa, usado no
+hover de linha). Todos derivam da paleta; nenhuma cor nova de marca.
+
+**"Agora".** Na agenda e na régua, o agora é uma linha em Violeta Ação; a faísca aparece só no ponto
+da linha (a IA online), nunca na linha inteira.
+
+**Componentes da fundação.** `components/layout/` (`PageContainer`, `SectionHeader`, `MetricCard`,
+`LoadingSkeleton`, `SearchInput`, `FilterBar`/`FilterChip`), `components/appointments/` (`status.ts`,
+`StatusBadge`, `AppointmentCard`) e, em `components/ui/`, `dialog`, `tabs`, `dropdown-menu`, `tooltip`,
+`badge` (variante `plain`) e `table`. Tabs em pílula (ativa = card branco sobre `--muted`); tabela com
+cabeçalho `text-xs` cinza e linha separada por `border-border`.

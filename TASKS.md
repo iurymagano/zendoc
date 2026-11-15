@@ -388,6 +388,18 @@ Legenda:
 - [ ] Sugestão: limpeza de notificações antigas (retenção, ex.: 90 dias) e usar `?since=` no polling
 - [ ] Sugestão: preferências por tipo de aviso (silenciar tipos)
 
+### Redesign premium do painel
+
+> Pedido do Iury (14/11/2026). Decisões em [DESIGN.md](DESIGN.md), seção "Painel: redesign premium".
+
+- [x] Etapa 1 — Fundação: tokens (status, movimento, raios, sombra), `components/appointments/status.ts`,
+  `PageContainer`, `PageHeader` sem eyebrow, `SectionHeader`, `MetricCard`, `StatusBadge`,
+  `AppointmentCard`, `LoadingSkeleton`, `SearchInput`, `FilterBar`, shadcn `dialog`/`tabs`/`dropdown-menu`/`tooltip`/`badge`/`table`
+- [ ] Etapa 2 — Início (`/dashboard`): trocar `SectionLabel`/`Panel` por `SectionHeader`/`MetricCard`, raio 16, limpar `eyebrow` das páginas
+- [ ] Etapa 3 — Agenda: calendário, linha de "agora" (violeta, faísca só no ponto), formulário em `Dialog`
+- [ ] Etapa 4 — Listas (clientes, conversas) com `FilterBar`, `SearchInput` e `LoadingSkeleton`
+- [ ] Etapa 5 — Configurações e assistente: `Tabs`, `Table`, estados vazios e revisão final em 390/768/1440
+
 ---
 
 ## Sprint 4 — Pagamentos (em andamento)

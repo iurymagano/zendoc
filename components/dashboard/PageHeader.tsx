@@ -1,28 +1,26 @@
 import type { ReactNode } from 'react';
 
 interface Props {
-  /** Contexto curto acima do título (ex.: o plano). Texto comum, sem caixa-alta. */
-  eyebrow?: string;
   title: string;
   description?: string;
   actions?: ReactNode;
+  /** @deprecated Não é mais exibido (DESIGN.md: sem eyebrow). Remova ao tocar na página. */
+  eyebrow?: string;
 }
 
-/** Cabeçalho de página do painel: título em Sora, descrição em uma frase, ações à direita. */
-export function PageHeader({ eyebrow, title, description, actions }: Props) {
+/**
+ * Cabeçalho de página do painel: título em Sora 700 (uma linha, até duas no
+ * celular), descrição de uma frase em Inter e ações à direita. Sem eyebrow.
+ */
+export function PageHeader({ title, description, actions }: Props) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4">
-      <div className="flex flex-col gap-1.5">
-        {eyebrow && (
-          <span className="text-sm font-semibold text-[var(--ia-violet-ink)]">
-            {eyebrow}
-          </span>
-        )}
-        <h1 className="font-display text-3xl font-bold tracking-[-0.035em] sm:text-4xl">
+    <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+      <div className="flex min-w-0 flex-col gap-1">
+        <h1 className="font-display text-[1.75rem] leading-tight font-bold tracking-[-0.035em] sm:text-3xl">
           {title}
         </h1>
         {description && (
-          <p className="max-w-2xl text-base text-muted-foreground">
+          <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
             {description}
           </p>
         )}

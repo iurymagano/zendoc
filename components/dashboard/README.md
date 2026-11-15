@@ -53,11 +53,11 @@ serviços, …).
 
 ## PageHeader.tsx
 
-**O que faz:** cabeçalho padronizado das páginas internas — eyebrow (texto simples em violeta tinta, sem caixa-alta), título em Sora e descrição + área opcional de ações.
+**O que faz:** cabeçalho padronizado das páginas internas — título em Sora 700, descrição de uma frase e área opcional de ações. Sem eyebrow (redesign premium).
 
 **Exporta:**
 
-- `<PageHeader eyebrow? title description? actions? />` — server-friendly, sem client hooks.
+- `<PageHeader title description? actions? eyebrow? />` — server-friendly, sem client hooks. `eyebrow` é `@deprecated`: aceito para as páginas que ainda o passam, mas **não é mais exibido**; remover das chamadas ao tocar em cada página.
 
 **Depende de:** nada além de React.
 

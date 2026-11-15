@@ -11,7 +11,7 @@ Blocos da página inicial `/dashboard`. Todos são Server Components, menos `App
 
 ## chips.tsx
 
-**O que faz:** chips de status (sempre com texto) e de origem do atendimento (IA no WhatsApp, Manual, Pessoal).
+**O que faz:** chips de status (sempre com texto; rótulo e cores vêm de `components/appointments/status.ts`) e de origem do atendimento (IA no WhatsApp, Manual, Pessoal).
 **Exporta:** `StatusChip({ status })`, `OriginChip({ via, personal })`.
 
 ## ApproveButton.tsx

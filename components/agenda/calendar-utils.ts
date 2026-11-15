@@ -1,4 +1,5 @@
 import type { Appointment, AppointmentStatus } from '@/types/database';
+import { STATUS, STATUS_ORDER } from '@/components/appointments/status';
 
 export const TZ = 'America/Sao_Paulo';
 
@@ -43,35 +44,18 @@ export function formatTime(iso: string): string {
   }).format(new Date(iso));
 }
 
-export const STATUS_LABEL: Record<AppointmentStatus, string> = {
-  scheduled: 'Agendado',
-  confirmed: 'Confirmado',
-  pending_approval: 'Aguardando aprovação',
-  cancelled: 'Cancelado',
-  no_show: 'Não compareceu',
-};
+/** Rótulo, swatch da legenda e bloco do calendário por status: vêm de components/appointments/status.ts. */
+export const STATUS_LABEL = Object.fromEntries(
+  STATUS_ORDER.map((s) => [s, STATUS[s].label]),
+) as Record<AppointmentStatus, string>;
 
-/** Swatch (quadradinho) de cor por status — usado na legenda. */
-export const STATUS_DOT: Record<AppointmentStatus, string> = {
-  scheduled: 'bg-primary/30 ring-1 ring-primary/40',
-  confirmed: 'bg-emerald-300 ring-1 ring-emerald-400',
-  pending_approval: 'bg-amber-300 ring-1 ring-amber-400',
-  cancelled: 'bg-muted ring-1 ring-border',
-  no_show: 'bg-destructive/30 ring-1 ring-destructive/40',
-};
+export const STATUS_DOT = Object.fromEntries(
+  STATUS_ORDER.map((s) => [s, STATUS[s].swatch]),
+) as Record<AppointmentStatus, string>;
 
-/** Cor do bloco no calendário por status (preenchido, legível). */
-export const STATUS_BLOCK: Record<AppointmentStatus, string> = {
-  scheduled: 'bg-primary/15 text-primary ring-1 ring-primary/30 hover:bg-primary/25',
-  confirmed:
-    'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-300 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-100 dark:ring-emerald-800',
-  pending_approval:
-    'bg-amber-100 text-amber-900 ring-1 ring-amber-300 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-100 dark:ring-amber-800',
-  cancelled:
-    'bg-muted text-muted-foreground line-through ring-1 ring-border hover:bg-muted',
-  no_show:
-    'bg-destructive/10 text-destructive ring-1 ring-destructive/30 hover:bg-destructive/20',
-};
+export const STATUS_BLOCK = Object.fromEntries(
+  STATUS_ORDER.map((s) => [s, STATUS[s].block]),
+) as Record<AppointmentStatus, string>;
 
 /** Agrupa appointments por dia (chave yyyy-MM-dd no fuso da agenda). */
 export function groupByDay(appointments: Appointment[]): Map<string, Appointment[]> {

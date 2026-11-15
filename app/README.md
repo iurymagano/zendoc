@@ -83,5 +83,9 @@ mapeia nos tokens shadcn (`--primary`, `--muted`, etc.) para `:root` (tema claro
 Inter com `line-height: 1.6`. Também define `.tabular` e os keyframes `ia-rise` e
 `ia-spark` (com alternativa para `prefers-reduced-motion`).
 
+Redesign premium do painel: tokens `--status-*` (cores do status do atendimento), `--destructive-ink`,
+`--surface-2`, `--radius-card`/`--radius-field`, `--shadow-pop`, `--ease-panel` e `--duration-fast/base`, mais uma
+regra de `prefers-reduced-motion` para `[data-slot]`. Valores e uso em DESIGN.md, "Painel: redesign premium".
+
 **Notas:** a paleta e a tipografia seguem o [DESIGN.md](../DESIGN.md). Editar os tokens
 aqui propaga para todos os componentes de [components/ui/](../components/ui/).

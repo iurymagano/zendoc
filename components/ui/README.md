@@ -28,6 +28,16 @@ deve reaplicar esses ajustes.
 | `checkbox.tsx`    | `npx shadcn@latest add checkbox`               |
 | `sheet.tsx`       | `npx shadcn@latest add sheet` (lista do sino no celular)   |
 | `sonner.tsx`      | `npx shadcn@latest add sonner` (toasts; dependência `sonner`) |
+| `dialog.tsx`      | composto à mão sobre `@base-ui/react/dialog` (mesma base do `sheet.tsx`; o registro do CLI travou no prompt de sobrescrever). Raio de card, `--shadow-pop`, título em Sora |
+| `tabs.tsx`        | `npx shadcn@latest add tabs` (lista e aba em pílula; ativa = card branco sobre `--muted`; variante `line` com traço violeta) |
+| `dropdown-menu.tsx` | `npx shadcn@latest add dropdown-menu` (raio 12, `--shadow-pop`, anel `border`) |
+| `tooltip.tsx`     | `npx shadcn@latest add tooltip` (Void `bg-foreground`, raio 8, `--shadow-pop`) |
+| `badge.tsx`       | `npx shadcn@latest add badge` (pílula de 24px; destrutivo usa `destructive-soft`/`destructive-ink`; variante `plain` sem cor para o `StatusBadge`) |
+| `table.tsx`       | `npx shadcn@latest add table` (cabeçalho `text-xs` cinza, linha com `border-border`, hover `surface-2`) |
+
+> Os cinco gerados pelo CLI (`tabs`, `dropdown-menu`, `tooltip`, `badge`, `table`) vieram com `import { cn } from "cn"`
+> (pacote falso que o CLI injeta); foi trocado para `@/lib/utils` e a dependência não entrou no `package.json`.
+> Redesign premium (14/11/2026): ver DESIGN.md, "Painel: redesign premium". `button.tsx`, `input.tsx`, `card.tsx` e `skeleton.tsx` ficaram como estavam.
 
 ## form-field.tsx
 
