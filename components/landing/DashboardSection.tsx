@@ -1,4 +1,4 @@
-import { CalendarClock, CreditCard, MessageCircle } from 'lucide-react';
+import { CalendarClock, MessageCircle } from 'lucide-react';
 import { Grad, H2, Panel, SectionLabel, WRAP } from './primitives';
 
 const PEAK = [
@@ -15,7 +15,6 @@ const PEAK = [
 const TOOLS = [
   { n: 'Google Agenda', i: CalendarClock },
   { n: 'WhatsApp', i: MessageCircle },
-  { n: 'Stripe', i: CreditCard },
 ];
 
 const RING_R = 52;

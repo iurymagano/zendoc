@@ -49,3 +49,5 @@ perguntas frequentes (shadcn `Accordion`, caminhos reais da interface); rodapé 
 
 **Notas gerais:** nenhum depoimento nem logo de cliente; números do painel e tempos da demo são ilustração; nada de
 "hospedado no Brasil" (o servidor do WhatsApp fica fora).
+
+**Notas (revisão do QA):** os cards flutuantes do `ProductMock` ficam dentro da borda em 390/768/1024/1280/1440 (a perspectiva 3D alarga o mock, então o recuo é por breakpoint); a faixa "Conecta com o que você já usa" lista só WhatsApp e Google Agenda (o Stripe só cobra a assinatura do IAzen); a demo do `LiveDemo` diz "Confere sua agenda" e trata o Google Agenda como opcional.

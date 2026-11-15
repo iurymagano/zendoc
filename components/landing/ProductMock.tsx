@@ -134,7 +134,7 @@ export function ProductMock() {
             {/* Cards flutuantes: sobem e descem em loop */}
             <div
               data-float
-              className="absolute -top-6 left-3 z-10 flex items-center gap-3 rounded-2xl border border-[#ffffff12] bg-[#12151f] px-4 py-3 [transform:translateZ(60px)] md:-left-8 md:top-[14%]"
+              className="absolute -top-6 left-3 z-10 flex items-center gap-3 rounded-2xl border border-[#ffffff12] bg-[#12151f] px-4 py-3 [transform:translateZ(60px)] md:left-2 md:top-[14%] lg:-top-6 xl:top-[14%] lg:-left-2 xl:-left-8"
             >
               <span className="grid size-9 place-items-center rounded-full bg-[#5eead4]/15 text-[#5eead4]">
                 <CalendarCheck className="size-4" aria-hidden />
@@ -146,7 +146,7 @@ export function ProductMock() {
             </div>
             <div
               data-float
-              className="absolute -bottom-14 right-3 z-10 flex items-center gap-3 rounded-2xl border border-[#ffffff12] bg-[#12151f] px-4 py-3 [transform:translateZ(60px)] md:-right-10 md:-bottom-14"
+              className="absolute -bottom-14 right-3 z-10 flex items-center gap-3 rounded-2xl border border-[#ffffff12] bg-[#12151f] px-4 py-3 [transform:translateZ(60px)] md:right-2 md:-bottom-14 lg:right-6 xl:-right-10"
             >
               <span className="grid size-9 place-items-center rounded-full bg-[#8b5cff]/20 text-[#c4b5fd]">
                 <BellRing className="size-4" aria-hidden />

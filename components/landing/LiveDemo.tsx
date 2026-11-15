@@ -7,8 +7,8 @@ const STEPS = [
   { t: '0.0s', title: 'Recebe no WhatsApp', body: 'A mensagem do cliente chega no seu número.' },
   {
     t: '0.8s',
-    title: 'Consulta o Google Agenda',
-    body: 'Vê o que está livre, descontando o que já está marcado.',
+    title: 'Confere sua agenda',
+    body: 'Vê o que está livre, descontando o que já está marcado (e o Google Agenda, se você conectar).',
   },
   {
     t: '1.6s',
