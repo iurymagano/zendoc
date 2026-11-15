@@ -22,6 +22,7 @@ deve reaplicar esses ajustes.
 | `textarea.tsx`    | `npx shadcn@latest add textarea`               |
 | `card.tsx`        | `npx shadcn@latest add card`                   |
 | `switch.tsx`      | `npx shadcn@latest add switch`                 |
+| `accordion.tsx`   | `npx shadcn@latest add accordion` (import ajustado para `@/lib/utils`; usado no FAQ da landing) |
 | `separator.tsx`   | `npx shadcn@latest add separator`              |
 | `popover.tsx`     | `npx shadcn@latest add popover`                |
 | `checkbox.tsx`    | `npx shadcn@latest add checkbox`               |

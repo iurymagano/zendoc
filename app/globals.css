@@ -223,3 +223,42 @@
     animation: none;
   }
 }
+/* Landing (DESIGN.md, "Landing nova"): destaque em gradiente de texto, fundo leve do hero
+   e estados de entrada. Tudo visível por padrão; só some quando o script inline da página
+   marca `data-anim` (sem prefers-reduced-motion) e o JS de animação está a caminho. */
+.ia-grad-text {
+  background-image: linear-gradient(95deg, #a78bff 0%, #7fd8f0 50%, #5eead4 100%);
+  background-size: var(--gs, 100%) 100%;
+  background-position: var(--gp, 0%) 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+[data-anim] [data-reveal],
+[data-anim] [data-hero],
+[data-anim] [data-tilt] {
+  opacity: 0;
+}
+@keyframes ia-dot {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-10px);
+  }
+}
+.ia-dot {
+  animation: ia-dot 7s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ia-dot {
+    animation: none;
+    opacity: 0.4;
+  }
+}

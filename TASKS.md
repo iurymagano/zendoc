@@ -181,6 +181,7 @@ Legenda:
 - [x] Fase 2: dashboard (Sidebar, PageHeader, cards de métrica, tabelas, agenda, estados vazios)
 - [x] Fase 2: onboarding (tirar o halo radial) e `app/privacidade`
 - [x] Fase 2: `/assistente` com a cara da marca (painel Void, faísca como "pensando")
+- [x] Landing reconstruída no padrão escuro com degradê, animejs e FAQ (`iris/landing-nova`)
 - [ ] Trocar as conversas de exemplo da landing por conversas reais autorizadas
 
 ### Identidade visual
@@ -246,8 +247,6 @@ Legenda:
   saúde; privacidade passa a citar o Assistente pessoal e os lembretes pessoais
 - [x] Eventos do Google Agenda de compromissos pessoais (sem cliente) usam o
   título em vez de "paciente — consulta"
-- [ ] Landing: `components/landing/ReminderTimeline.tsx` e `HeroChat.tsx` ainda
-  têm texto de saúde (área da designer — alinhar com ela)
 - [ ] Renomear `patients`/`patient_*` no banco e nas rotas `/api/patients`
   (decisão adiada: só vale a pena se o custo de manter o nome antigo atrapalhar)
 
