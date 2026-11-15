@@ -1,12 +1,13 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { FormEvent, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MessagesSquare } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { UrlParamEffect } from '@/components/dashboard/UrlParamEffect';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import { formatPhoneBR } from '@/lib/phone';
 
@@ -136,6 +137,10 @@ export default function ConversasPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Link de notificação: /conversas?phone=... abre a conversa desse contato. */}
+      <Suspense fallback={null}>
+        <UrlParamEffect name="phone" onChange={setSelected} />
+      </Suspense>
       <PageHeader
         eyebrow="Atendimento"
         title="Conversas"

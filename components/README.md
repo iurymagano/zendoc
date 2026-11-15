@@ -7,6 +7,7 @@ Componentes React. Organizado por domínio:
 - [landing/](./landing/) — seções da landing escura (hero, mock, demo, treinamento, recursos, painel, preço, FAQ) e o balão do auth
 - [dashboard/](./dashboard/) — shell do dashboard (navbar, cabeçalho de página)
 - [dashboard/home/](./dashboard/home/) — blocos da página inicial `/dashboard` (dia, próximos, atenção, semana, vagas, conversas, configuração)
+- [notifications/](./notifications/) — sino de notificações do painel (provider com polling, lista, popover/sheet)
 - [onboarding/](./onboarding/) — componentes do fluxo de onboarding
 - [availability/](./availability/) — componentes da tela de disponibilidade
 - [agenda/](./agenda/) — calendário visual (vistas Mês e Semana) da página /agenda
