@@ -11,6 +11,7 @@ import { BeforeAfter } from '@/components/landing/BeforeAfter';
 import { Pricing } from '@/components/landing/Pricing';
 import { Faq } from '@/components/landing/Faq';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import { VisitBeacon } from '@/components/landing/VisitBeacon';
 
 // Roda antes da primeira pintura: marca a raiz para o CSS esconder os blocos que o animejs
 // vai revelar (só sem prefers-reduced-motion). Se a animação não assumir em 4s, libera tudo.
@@ -21,6 +22,7 @@ export default function Home() {
     <div data-landing suppressHydrationWarning className="dark overflow-x-clip bg-[#05060a] text-white">
       <script dangerouslySetInnerHTML={{ __html: ANIM_GATE }} />
       <LandingMotion />
+      <VisitBeacon path="/" />
       <LandingHeader />
       <main>
         <Hero />

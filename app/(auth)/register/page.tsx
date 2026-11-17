@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
 import { Separator } from '@/components/ui/separator';
+import { VisitBeacon } from '@/components/landing/VisitBeacon';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -62,6 +63,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <VisitBeacon path="/register" />
       <div>
         <h1 className="text-3xl font-bold tracking-[-0.035em]">
           Criar sua conta

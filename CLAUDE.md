@@ -255,6 +255,10 @@ EVOLUTION_WEBHOOK_URL=                       # opcional; URL que a Evolution usa
 # grátis da Vercel só aceita cron diário. Ver README raiz, seção "Crons".
 CRON_SECRET=
 
+# Painel admin (/admin) — só quem estiver aqui entra; os demais veem 404.
+# E-mails separados por vírgula (sem diferenciar maiúsculas). Vazia = ninguém.
+ADMIN_EMAILS=voce@exemplo.com
+
 # App
 NEXT_PUBLIC_URL=http://localhost:3000   # em produção, https público: além do
                                         # Stripe, habilita o push (watch) do

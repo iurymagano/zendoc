@@ -86,6 +86,8 @@ Os dados legais da `/privacidade` vêm das envs opcionais `PRIVACY_CONTROLLER_NA
 (`/api/auth/callback/google` e `/api/google/calendar/callback`) já estão
 cadastrados; o app está em modo "Testando", então só entra com Google quem for
 usuário de teste.
+O painel `/admin` (métricas do dono) só abre para os e-mails em `ADMIN_EMAILS`
+(lista separada por vírgula; vazia = ninguém); quem não é admin vê 404.
 
 ### Crons (cron-job.org)
 

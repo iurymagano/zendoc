@@ -42,6 +42,7 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 | `/api/whatsapp/status`                  | API    | `api/whatsapp/status/route.ts`                             |
 | `/api/whatsapp/disconnect`              | API    | `api/whatsapp/disconnect/route.ts`                         |
 | `/api/whatsapp/webhook`                 | API    | `api/whatsapp/webhook/route.ts`                            |
+| `/api/track/visit`                      | API    | `api/track/visit/route.ts` (pública; contador de visitas)  |
 
 ## layout.tsx
 

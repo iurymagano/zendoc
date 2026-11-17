@@ -182,9 +182,19 @@ como lida; `POST /api/notifications/read-all` marca todas. Todas exigem sessão 
 filtram pelo profissional da sessão. Detalhes em
 [notifications/README.md](./notifications/README.md).
 
+### Rastreio de visitas — `POST /api/track/visit`
+
+Arquivo: [track/visit/route.ts](./track/visit/route.ts)
+
+Rota **pública** (exceção à regra do `auth()`, como os webhooks): quem visita a
+landing, o login e o cadastro ainda não tem sessão. Corpo `{ path }` (só `/`,
+`/register`, `/login`, `/privacidade`); soma 1 num contador anônimo por dia e
+caminho. Ignora robôs e responde sempre `204`. Detalhes em
+[track/README.md](./track/README.md).
+
 ## Autenticação
 
-Todas as rotas (exceto o catch-all do NextAuth) começam com
+Todas as rotas (exceto o catch-all do NextAuth, os webhooks e `POST /api/track/visit`) começam com
 `const session = await auth()` → 401 se não autenticado. Rotas que precisam do
 perfil do profissional também checam existência em `professionals` → 404 se
 não encontrado.
