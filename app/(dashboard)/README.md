@@ -13,7 +13,10 @@ respiro; quem decide a largura de cada tela é o `PageContainer` (padrão 1024, 
 Fundo `bg-muted/40`.
 
 **Depende de:** `@/components/dashboard/Sidebar`,
-`@/components/notifications/NotificationsProvider`, `@/components/ui/sonner`.
+`@/components/notifications/NotificationsProvider`, `@/components/ui/sonner`,
+`@/lib/admin/activity`.
+
+**Rastreio de uso:** o layout é `async`, lê a sessão e, havendo `user.id`, agenda `touchActivity(userId)` em `after()` (depois da resposta; nunca atrasa nem quebra a página). Marca o dia em que a conta abriu o painel em `activity_days`, para o `/admin`.
 
 **Notificações:** o layout envolve tudo em `<NotificationsProvider>` (polling único
 das notificações do sino) e renderiza o `<Toaster>` (toasts de notificações novas,

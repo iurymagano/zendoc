@@ -433,6 +433,22 @@ Legenda:
 
 ## Sprint 5 — Crescimento (pendente)
 
+### Painel admin do dono (`/admin`)
+
+> Pedido do Iury (17/11/2026): uma página só para ele ver acessos, usuários, pagantes e uso.
+
+- [x] `lib/admin/types.ts` — contrato `AdminOverview` entre dados e tela
+- [x] `lib/admin/access.ts` — `isAdminEmail` (env `ADMIN_EMAILS`) + `requireAdmin()` (404 para quem não é admin) + teste
+- [x] Migration `0011_admin_metrics.sql` (`activity_days`, `site_visits`, `touch_activity`, `increment_site_visit`, RLS sem policy) + `schema.sql` + README (aplicada em produção em 17/11/2026, aditiva)
+- [x] Rastreio de uso do painel: `touchActivity` em `app/(dashboard)/layout.tsx` via `after()`
+- [x] Contador de visitas públicas: `POST /api/track/visit` + `components/landing/VisitBeacon.tsx` (`/`, `/register`, `/login`, `/privacidade`)
+- [x] `lib/admin/compute.ts` (puro, testado) + `lib/admin/metrics.ts` (`getAdminOverview`)
+- [x] `proxy.ts` exige login em `/admin`; `ADMIN_EMAILS` documentada no `CLAUDE.md` e no README raiz
+- [x] `/privacidade` menciona os registros de acesso e uso
+- [x] Setar `ADMIN_EMAILS` na Vercel (produção) para o `/admin` abrir lá
+- [x] Tela `/admin` (`app/admin/**`, `components/admin/**`) e link na Sidebar (designer)
+- [ ] Sugestões: retenção por coorte, origem do cadastro (UTM), MRR real via Stripe
+
 - [ ] Landing page pública com conversão (aplicar identidade IAzen)
 - [ ] Relatório semanal por email (agendamentos, cancelamentos, no-show)
 - [x] Integração com Google Calendar (sync bidirecional)

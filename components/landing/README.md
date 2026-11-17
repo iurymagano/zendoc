@@ -31,6 +31,14 @@ como o logo); `side="out"` é a secretária (violeta, ponta embaixo à direita).
 **Notas:** a página marca `data-anim` na raiz por um script inline (exceto com `prefers-reduced-motion`); o CSS só esconde
 elementos sob `[data-anim]`. `LandingMotion` põe `data-ready`; sem ele em 4s, `data-anim` sai e tudo aparece. Sem JS, tudo visível.
 
+## VisitBeacon.tsx
+
+**O que faz:** cliente que não renderiza nada; conta a visita à página pública (`POST /api/track/visit`) uma vez por sessão do navegador por caminho.
+
+**Exporta:** `VisitBeacon({ path })` — `path` é um de `/`, `/register`, `/login`, `/privacidade`.
+
+**Notas:** usa `navigator.sendBeacon` (fallback `fetch` com `keepalive`); `sessionStorage` e rede ficam em try/catch, então nunca quebra a página. Usado em `app/page.tsx`, `app/(auth)/login`, `app/(auth)/register` e `app/privacidade`.
+
 ## LandingHeader.tsx / Hero.tsx / ProductMock.tsx / Stats.tsx
 
 Cabeçalho em pílula flutuante (Produto, Recursos, Como funciona, Preço, Entrar, Começar grátis); hero ("A secretária que nunca

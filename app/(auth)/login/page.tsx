@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
 import { Separator } from '@/components/ui/separator';
+import { VisitBeacon } from '@/components/landing/VisitBeacon';
 
 function LoginForm() {
   const router = useRouter();
@@ -105,6 +106,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={<div className="h-32" />}>
+      <VisitBeacon path="/login" />
       <LoginForm />
     </Suspense>
   );

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Logo } from '@/components/brand/Logo';
+import { VisitBeacon } from '@/components/landing/VisitBeacon';
 import { formatOperatorLine, getPrivacyContact } from '@/lib/legal';
 
 export const metadata: Metadata = {
@@ -13,11 +14,12 @@ export const metadata: Metadata = {
 // Os dados legais (responsável, documento, e-mail) vêm de lib/legal.ts (envs
 // PRIVACY_*). Sem eles a página omite as linhas: nada provisório vai ao ar.
 export default function PrivacidadePage() {
-  const updated = '14/11/2026';
+  const updated = '17/11/2026';
   const contact = getPrivacyContact();
   const operatorLine = formatOperatorLine(contact);
   return (
     <div className="min-h-screen bg-background">
+      <VisitBeacon path="/privacidade" />
       <header className="bg-[var(--ia-void)] text-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <Logo size="md" href="/" />
@@ -74,6 +76,13 @@ export default function PrivacidadePage() {
                 <strong>Dos clientes:</strong> nome, telefone, CPF (opcional),
                 anotações do profissional, histórico de agendamentos e o conteúdo
                 das conversas trocadas com a secretária virtual.
+              </li>
+              <li>
+                <strong>Registros de acesso e uso:</strong> os dias em que a conta
+                do profissional abriu o painel e, de forma anônima, a contagem de
+                visitas às páginas públicas (início, cadastro, login e esta
+                política), sem cookies de terceiros. Usamos isso para entender
+                como o IAzen é usado e melhorá-lo.
               </li>
             </ul>
           </Section>

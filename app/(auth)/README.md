@@ -22,11 +22,11 @@ próprio centralizado com o branding do IAzen.
 **O que faz:** página `'use client'` com login por credenciais (email/senha) via
 `signIn('credentials', …)` e botão de login com Google (`signIn('google', …)`).
 
-**Notas:** redireciona para `?callbackUrl=` após sucesso, ou `/dashboard` por padrão.
+**Notas:** redireciona para `?callbackUrl=` após sucesso, ou `/dashboard` por padrão. Renderiza `<VisitBeacon path="/login" />` (contador de visitas).
 
 ## register/page.tsx
 
 **O que faz:** página `'use client'` que cria a conta via `POST /api/auth/register`,
 faz login automático com as mesmas credenciais e redireciona para `/onboarding/step-1`.
 
-**Notas:** valida senha mínima (8 chars) e confirmação de senha no cliente.
+**Notas:** valida senha mínima (8 chars) e confirmação de senha no cliente. Renderiza `<VisitBeacon path="/register" />` (contador de visitas).

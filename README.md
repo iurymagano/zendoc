@@ -95,6 +95,9 @@ gravaram o webhook nesse endereço (`/api/whatsapp/webhook`), e instâncias nova
 já nascem com o domínio novo. O webhook do Stripe e os jobs do cron-job.org
 apontam para o domínio novo.
 
+**Admin.** O painel `/admin` (métricas do dono) só abre para os e-mails em
+`ADMIN_EMAILS` (lista separada por vírgula; vazia = ninguém); quem não é admin vê 404.
+
 ### Crons (cron-job.org)
 
 O plano grátis da Vercel (Hobby) só roda cron 1 vez por dia, então os crons

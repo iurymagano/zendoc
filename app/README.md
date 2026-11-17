@@ -20,6 +20,7 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 | `/clientes/[id]`                        | página | `(dashboard)/clientes/[id]/page.tsx`                       |
 | `/assistente`                           | página | `(dashboard)/assistente/page.tsx`                          |
 | `/agenda`                               | página | `(dashboard)/agenda/page.tsx`                              |
+| `/admin`                                | página | `admin/page.tsx` (só o dono; ver `admin/README.md`)        |
 | `/privacidade`                          | página | `privacidade/page.tsx` (pública; ver `privacidade/README.md`) |
 | `/api/auth/*`                           | API    | `api/auth/[...nextauth]/route.ts`                          |
 | `/api/auth/register`                    | API    | `api/auth/register/route.ts`                               |
@@ -42,6 +43,7 @@ Rotas do Next.js App Router — páginas e endpoints de API.
 | `/api/whatsapp/status`                  | API    | `api/whatsapp/status/route.ts`                             |
 | `/api/whatsapp/disconnect`              | API    | `api/whatsapp/disconnect/route.ts`                         |
 | `/api/whatsapp/webhook`                 | API    | `api/whatsapp/webhook/route.ts`                            |
+| `/api/track/visit`                      | API    | `api/track/visit/route.ts` (pública; contador de visitas)  |
 
 ## layout.tsx
 
