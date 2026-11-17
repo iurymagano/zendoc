@@ -24,7 +24,9 @@ export function AdminCharts({ series }: { series: AdminOverview['series'] }) {
         <BarChart
           title="Usuários ativos por dia"
           data={series.activeUsers}
-          summaryValue={avgActive.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}
+          summaryValue={avgActive.toLocaleString('pt-BR', {
+          maximumFractionDigits: avgActive > 0 && avgActive < 0.1 ? 2 : 1,
+        })}
           summaryLabel="por dia, em média"
           unit={['usuário ativo', 'usuários ativos']}
           emptyText="Ninguém abriu o painel nos últimos 30 dias."

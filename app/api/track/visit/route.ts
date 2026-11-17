@@ -12,7 +12,10 @@ export async function POST(req: Request) {
       return new NextResponse(null, { status: 204 });
     }
     // sendBeacon pode mandar text/plain; por isso lemos o texto e fazemos o parse.
-    const body = JSON.parse(await req.text()) as { path?: unknown };
+    // O corpo esperado é minúsculo ({"path":"/register"}): acima de 1 KB, descarta.
+    const raw = await req.text();
+    if (raw.length > 1024) return new NextResponse(null, { status: 204 });
+    const body = JSON.parse(raw) as { path?: unknown };
     if (!isTrackedPath(body?.path)) return new NextResponse(null, { status: 204 });
 
     const { error } = await createServerClient().rpc('increment_site_visit', {

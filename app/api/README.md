@@ -189,7 +189,7 @@ Arquivo: [track/visit/route.ts](./track/visit/route.ts)
 Rota **pública** (exceção à regra do `auth()`, como os webhooks): quem visita a
 landing, o login e o cadastro ainda não tem sessão. Corpo `{ path }` (só `/`,
 `/register`, `/login`, `/privacidade`); soma 1 num contador anônimo por dia e
-caminho. Ignora robôs e responde sempre `204`. Detalhes em
+caminho. Ignora robôs e corpo acima de 1 KB, e responde sempre `204`. Detalhes em
 [track/README.md](./track/README.md).
 
 ## Autenticação

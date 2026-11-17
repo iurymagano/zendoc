@@ -10,7 +10,7 @@ Contador anônimo de visitas às páginas públicas (alimenta o funil do painel 
 
 **Payload:** `{ "path": "/" }`. Só aceita `/`, `/register`, `/login` e `/privacidade` (`lib/admin/visits.ts`); qualquer outro valor é descartado.
 
-**Resposta:** sempre `204`. Robôs, prévias de link e user-agent vazio são ignorados; erros viram `console.error` e também `204` (nunca 500 para o visitante).
+**Resposta:** sempre `204`. Corpo acima de 1 KB, robôs, prévias de link e user-agent vazio são ignorados; erros viram `console.error` e também `204` (nunca 500 para o visitante).
 
 **Público de propósito (exceção à regra do `auth()`):** quem visita a landing, o login e o cadastro ainda não tem sessão. A rota só incrementa um contador por dia e caminho, de uma lista fixa; não grava IP, cookie nem identificador do visitante.
 
