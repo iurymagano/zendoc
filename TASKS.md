@@ -441,7 +441,7 @@ Legenda:
 - [x] `proxy.ts` exige login em `/admin`; `ADMIN_EMAILS` documentada no `CLAUDE.md` e no README raiz
 - [x] `/privacidade` menciona os registros de acesso e uso
 - [ ] Setar `ADMIN_EMAILS` na Vercel (produção) para o `/admin` abrir lá
-- [ ] Tela `/admin` (`app/admin/**`, `components/admin/**`) e link na Sidebar (designer)
+- [x] Tela `/admin` (`app/admin/**`, `components/admin/**`) e link na Sidebar (designer)
 - [ ] Sugestões: retenção por coorte, origem do cadastro (UTM), MRR real via Stripe
 
 - [ ] Landing page pública com conversão (aplicar identidade IAzen)

@@ -9,6 +9,7 @@ Componentes React. Organizado por domínio:
 - [appointments/](./appointments/) — status do atendimento (fonte única), `StatusBadge` e `AppointmentCard`
 - [dashboard/](./dashboard/) — shell do painel (sidebar com drawer, cabeçalho de página)
 - [dashboard/home/](./dashboard/home/) — blocos da página inicial `/dashboard` (métricas, próximos, secretária, atenção, dia, semana, vagas, conversas, primeiros passos)
+- [admin/](./admin/) — blocos da página `/admin` do dono (KPIs, funil, gráficos de 30 dias, uso e tabela de usuários)
 - [notifications/](./notifications/) — sino de notificações do painel (provider com polling, lista, popover/sheet)
 - [onboarding/](./onboarding/) — componentes do fluxo de onboarding
 - [availability/](./availability/) — componentes da tela de disponibilidade

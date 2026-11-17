@@ -289,3 +289,23 @@ linha (a linha só cabe horário, nome e status).
 
 **Progresso do passo a passo** é violeta sólido (o único degradê do painel é o trecho vivido da régua).
 `loading.tsx` com `LoadingSkeleton` em todas as rotas do painel.
+
+## Painel do dono: `/admin` (17/11/2026)
+
+**Tipo de tela:** operar. Só o Iury abre. Clareza vence expressão; nenhuma cor nova, nenhum degradê.
+
+**Layout.** Rota fora de `(dashboard)`: barra de topo `bg-card` com Logo, "Admin" (Sora) e "Voltar ao painel"; sem sidebar. Conteúdo em `PageContainer wide`. O link "Admin" na Sidebar fica no fim, discreto, só para quem passa em `isAdminEmail`.
+
+**Ordem e hierarquia.** Dois cartões grandes (Pagantes; Receita mensal estimada, sempre com "Estimativa: pagantes × R$ 297. Não vem do Stripe.") no topo; depois os grupos **Contas** e **Usuários ativos** com cartões menores; funil; três gráficos de 30 dias; uso em 7 dias; usuários.
+
+**Gráficos (sem biblioteca).** Uma série = barras em Violeta Ação, topo arredondado 3px, vão de 2px, linha de base, leitura ao passar o mouse/tocar (dd/mm + valor + máximo), 3 rótulos de data em mono, tabela `sr-only`. Número sempre à vista (nada depende só da cor). O validador de paleta do dataviz acusou o piso de croma; aceito porque a paleta é a do projeto e os valores são sempre escritos.
+
+**Barras divididas (uso).** Dois segmentos com legenda e valor: IA = violeta, manual = `muted-foreground`; enviados = `status-confirmed`, falharam = `destructive`.
+
+**Funil.** Barra relativa ao maior valor sobre trilho `bg-muted`; taxa em texto ao lado do rótulo ("X% de quem viu o cadastro"); sem base = sem taxa (nunca divide por zero).
+
+**Selo de plano** reaproveita os tokens de status: Em teste (agendado), Teste vencido (pendente), Pagante (confirmado), Inadimplente (destrutivo suave), Cancelado (cancelado), Sem onboarding (contorno).
+
+**Usuários.** Busca e filtro por plano em chips com contagem. Celular: um cartão por conta, grade de 3 colunas para os dados (sem rolagem lateral). Desktop: tabela com primeira coluna fixa e rolagem só dentro do cartão. Mono só em data.
+
+**Descartado:** gráfico de pizza para plano (os chips com contagem já respondem), linha do tempo de receita (a receita é estimativa, não série real) e biblioteca de gráficos.

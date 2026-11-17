@@ -8,7 +8,7 @@ Shell compartilhado pelas páginas autenticadas (grupo `app/(dashboard)/`).
 
 **O que faz:** navegação da área interna: sidebar fixa à esquerda de `lg` (1024px) para cima; abaixo disso, barra superior com logo, sino e menu que abre um drawer. Itens com ícone (lucide): áreas do dia a dia (Visão geral, Agenda, Assistente, Conversas, Clientes) e o grupo **Configurações** (Disponibilidade, Serviços, Google Agenda, WhatsApp, Testar IA, Assinatura) num painel um degrau acima do Void, com itens menores.
 
-**Exporta:** `<Sidebar />` — client component; `usePathname()` destaca o item ativo (`aria-current="page"`, fundo `--ia-void-2`, sem sombra nem borda).
+**Exporta:** `<Sidebar isAdmin? />` — client component; com `isAdmin` (calculado no layout por `isAdminEmail`) mostra o link discreto "Admin" (`/admin`) no fim da sidebar e do drawer; `usePathname()` destaca o item ativo (`aria-current="page"`, fundo `--ia-void-2`, sem sombra nem borda).
 
 **Comportamentos:**
 

@@ -15,6 +15,7 @@ import {
   Menu,
   MessageSquare,
   MessagesSquare,
+  ShieldCheck,
   Sparkles,
   Tag,
   Users,
@@ -98,7 +99,8 @@ const SETTINGS: Item[] = [
   { href: '/configuracoes/assinatura', label: 'Assinatura', icon: CreditCard },
 ];
 
-export function Sidebar() {
+/** `isAdmin` vem do servidor (layout do painel): só o dono vê o link para /admin. */
+export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false); // drawer (abaixo de 1024px)
   const [attention, setAttention] = useState(0);
@@ -263,6 +265,17 @@ export function Sidebar() {
             />
           ))}
         </nav>
+
+        {isAdmin && (
+          <nav aria-label="Administração" className="mt-auto flex flex-col gap-0.5">
+            <NavItem
+              item={{ href: '/admin', label: 'Admin', icon: ShieldCheck }}
+              active={isActive('/admin')}
+              quiet
+              onNavigate={close}
+            />
+          </nav>
+        )}
       </div>
 
       <div className="shrink-0 bg-[var(--ia-void-1)] p-3">
