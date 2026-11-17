@@ -440,7 +440,7 @@ Legenda:
 - [x] `lib/admin/compute.ts` (puro, testado) + `lib/admin/metrics.ts` (`getAdminOverview`)
 - [x] `proxy.ts` exige login em `/admin`; `ADMIN_EMAILS` documentada no `CLAUDE.md` e no README raiz
 - [x] `/privacidade` menciona os registros de acesso e uso
-- [ ] Setar `ADMIN_EMAILS` na Vercel (produção) para o `/admin` abrir lá
+- [x] Setar `ADMIN_EMAILS` na Vercel (produção) para o `/admin` abrir lá
 - [x] Tela `/admin` (`app/admin/**`, `components/admin/**`) e link na Sidebar (designer)
 - [ ] Sugestões: retenção por coorte, origem do cadastro (UTM), MRR real via Stripe
 
