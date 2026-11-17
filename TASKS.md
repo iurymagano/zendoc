@@ -38,8 +38,13 @@ Legenda:
 - [x] Deploy na Vercel (primeiro deploy de validação)
   - [x] Produção beta em https://iazen.vercel.app (projeto `zendoc`, scope
     iurymaganos-projects, publicado pela CLI a partir da branch do PR #1)
-  - [ ] Ligar o repositório do GitHub ao projeto da Vercel depois do merge do
+  - [x] Ligar o repositório do GitHub ao projeto da Vercel depois do merge do
     PR #1 (antes disso, push na main falharia pelos crons de 15/30 min)
+  - [x] Domínio próprio `iazenn.com.br` (Registro.br → DNS da Vercel, `www`
+    redireciona para o domínio sem `www`)
+    - [x] `NEXT_PUBLIC_URL` e `NEXTAUTH_URL` de produção no domínio novo
+    - [x] Google OAuth: origem e redirects do domínio novo (mantidos os do vercel.app)
+    - [x] Webhook do Stripe (teste) e jobs do cron-job.org no domínio novo
 
 ---
 

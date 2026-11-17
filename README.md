@@ -72,7 +72,8 @@ Arquivos relevantes:
 
 | Peça | Onde | Custo |
 | --- | --- | --- |
-| App | Vercel Hobby, projeto `zendoc` → https://iazen.vercel.app | grátis |
+| App | Vercel Hobby, projeto `zendoc` → https://iazenn.com.br (`www` redireciona para o domínio sem `www`) | grátis |
+| Domínio | `iazenn.com.br` no Registro.br, com os servidores DNS da Vercel (`ns1`/`ns2.vercel-dns.com`) | anuidade do Registro.br |
 | Banco | Supabase free, projeto `zendoc` (São Paulo) | grátis |
 | WhatsApp | Evolution na VM e2-micro do Google Cloud → ver [infra/evolution/](./infra/evolution/) | grátis (Always Free) |
 | Crons | cron-job.org (lembretes 1 min, sync Google 10 min) | grátis |
@@ -83,11 +84,19 @@ em produção (as variáveis ficam na Vercel; os valores não ficam no repositó
 Os dados legais da `/privacidade` vêm das envs opcionais `PRIVACY_CONTROLLER_NAME`,
 `PRIVACY_CONTROLLER_DOC` e `PRIVACY_CONTACT_EMAIL`; sem elas a página omite a linha
 (nunca mostra campo provisório). No Google OAuth, os redirects de produção
-(`/api/auth/callback/google` e `/api/google/calendar/callback`) já estão
-cadastrados; o app está em modo "Testando", então só entra com Google quem for
-usuário de teste.
-O painel `/admin` (métricas do dono) só abre para os e-mails em `ADMIN_EMAILS`
-(lista separada por vírgula; vazia = ninguém); quem não é admin vê 404.
+(`/api/auth/callback/google` e `/api/google/calendar/callback`) estão
+cadastrados nos dois endereços; o app está em modo "Testando", então só entra
+com Google quem for usuário de teste.
+
+**Domínio.** O endereço oficial é `https://iazenn.com.br` (`NEXT_PUBLIC_URL` e
+`NEXTAUTH_URL` em produção). O `https://iazen.vercel.app` continua no ar e **não
+deve ser redirecionado**: as instâncias da Evolution criadas antes da troca
+gravaram o webhook nesse endereço (`/api/whatsapp/webhook`), e instâncias novas
+já nascem com o domínio novo. O webhook do Stripe e os jobs do cron-job.org
+apontam para o domínio novo.
+
+**Admin.** O painel `/admin` (métricas do dono) só abre para os e-mails em
+`ADMIN_EMAILS` (lista separada por vírgula; vazia = ninguém); quem não é admin vê 404.
 
 ### Crons (cron-job.org)
 
